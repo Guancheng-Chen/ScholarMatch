@@ -1,0 +1,162 @@
+# ==== Maven ====
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# Ignore the Maven Wrapper jar but keep the wrapper config
+.mvn/wrapper/maven-wrapper.jar
+
+# ==== Gradle (Just in case) ====
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+gradle-app.setting
+!gradle-wrapper.properties
+.nb-gradle/
+
+# ==== Java ====
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# ==== IntelliJ IDEA ====
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.idea_modules/
+
+# ==== Eclipse ====
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.classpath
+.project
+.settings/
+.loadpath
+.recommenders
+.apt_generated/
+.apt_generated_test/
+.factorypath
+.buildpath
+.target
+.texlipse
+.springBeans
+.sts4-cache/
+
+# ==== NetBeans ====
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+
+# ==== VS Code ====
+.vscode/
+*.code-workspace
+
+# ==== Vim / Emacs ====
+*.swp
+*.swo
+*.swn
+*~
+\#*\#
+.\#*
+
+# ==== Frontend & Scripts (Safeguard) ====
+node_modules/
+npm-debug.log*
+yarn-error.log*
+__pycache__/
+*.pyc
+
+# ==== macOS ====
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.TemporaryItems
+.fseventsd
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+Icon?
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+__MACOSX/
+
+# ==== Windows ====
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# ==== Linux ====
+.nfs*
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ==== Logs & Runtime Data ====
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# ==== Environment Variables & Secrets ====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+application-local.yml
+application-local.yaml
+application-local.properties
+
+# ==== Databases ====
+*.db
+*.sqlite
+*.sqlite3
+
+# ==== Archives ====
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# ==== Testing, Coverage & Code Quality ====
+coverage/
+*.exec
+jacoco.exec
+checkstyle-cachefile
+
+# ==== Other Temporary Files ====
+*.orig
+*.rej
+.cache/

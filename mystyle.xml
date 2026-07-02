@@ -1,0 +1,267 @@
+<?xml version="1.0"?>
+<!--suppress XmlHighlighting -->
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <metadata name="org.checkstyle.principle" value="Practice What You Preach"/>
+    <metadata name="org.checkstyle.principle.description"
+              value="In our config we should use all Checks that Checkstyle has"/>
+
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java, properties, xml, vm, g, g4, dtd"/>
+
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$" />
+    </module>
+
+    <module name="SeverityMatchFilter">
+        <property name="severity" value="ignore"/>
+        <property name="acceptOnMatch" value="false"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="JavadocMethod"/>
+        <property name="files"
+                  value=".*[\\/]src[\\/](test|it|xdocs-examples)[\\/].*(?&lt;!Support)\.java"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="checks"
+                  value="RightCurly|MagicNumber|RedundantModifier|JavadocMethod|SummaryJavadoc|JavadocContentLocation|LineLength|IllegalCatch|NestedIfDepth|AbbreviationAsWordInName"/>
+        <property name="files" value=".*[\\/]src[\\/].*\.java"/>
+    </module>
+    <module name="SuppressWarningsFilter"/>
+    <module name="SuppressWithPlainTextCommentFilter">
+        <property name="checkFormat" value="IGNORETHIS"/>
+        <property name="offCommentFormat" value="CSOFF\: .*"/>
+        <property name="onCommentFormat" value="CSON\: .*"/>
+    </module>
+
+    <!-- Miscellaneous -->
+    <module name="NewlineAtEndOfFile"/>
+    <module name="UniqueProperties"/>
+
+    <!-- Size Violations -->
+    <module name="FileLength">
+        <property name="fileExtensions" value="java"/>
+    </module>
+    <module name="LineLength">
+        <property name="fileExtensions" value="java"/>
+        <property name="max" value="120"/>
+        <property name="ignorePattern"
+                  value="^( *\* *([^ ]+|\{@code .*|&lt;a href=&quot;[^&quot;]+&quot;&gt;)|(package|import) .*)$"/>
+    </module>
+
+    <!-- Whitespace -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="false"/>
+    </module>
+
+    <module name="TreeWalker">
+        <property name="tabWidth" value="4"/>
+
+        <!-- Annotations -->
+        <module name="AnnotationLocation">
+            <property name="tokens" value="ANNOTATION_DEF"/>
+            <property name="tokens" value="ANNOTATION_FIELD_DEF"/>
+            <property name="tokens" value="PACKAGE_DEF"/>
+            <property name="tokens" value="ENUM_CONSTANT_DEF"/>
+            <property name="tokens" value="VARIABLE_DEF"/>
+            <property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
+        </module>
+        <module name="AnnotationUseStyle"/>
+        <module name="MissingDeprecated"/>
+        <module name="MissingOverride"/>
+        <module name="PackageAnnotation"/>
+        <module name="SuppressWarningsHolder"/>
+
+        <!-- Block Checks -->
+        <module name="AvoidNestedBlocks">
+            <property name="allowInSwitchCase" value="true"/>
+        </module>
+        <module name="EmptyCatchBlock"/>
+        <module name="LeftCurly"/>
+        <module name="NeedBraces"/>
+        <module name="RightCurly">
+            <property name="tokens" value="METHOD_DEF"/>
+            <property name="tokens" value="CTOR_DEF"/>
+            <property name="tokens" value="CLASS_DEF"/>
+            <property name="tokens" value="LITERAL_FOR"/>
+            <property name="tokens" value="LITERAL_WHILE"/>
+            <property name="tokens" value="LITERAL_CATCH"/>
+            <property name="tokens" value="LITERAL_ELSE"/>
+            <property name="tokens" value="LITERAL_FINALLY"/>
+            <property name="tokens" value="LITERAL_IF"/>
+            <property name="tokens" value="LITERAL_TRY"/>
+            <property name="option" value="alone"/>
+        </module>
+
+        <!-- Class Design -->
+        <module name="DesignForExtension">
+            <property name="ignoredAnnotations"
+                      value="Override, Test, Before, After, BeforeClass, AfterClass,
+                             BeforeAll, AfterAll, BeforeEach, AfterEach"/>
+        </module>
+        <module name="FinalClass"/>
+        <module name="InterfaceIsType"/>
+        <module name="MutableException"/>
+        <module name="OneTopLevelClass"/>
+        <module name="VisibilityModifier">
+            <property name="ignoreAnnotationCanonicalNames"
+                      value="org.junit.Rule, org.junit.jupiter.api.io.TempDir"/>
+        </module>
+
+        <!-- Coding -->
+        <module name="AvoidDoubleBraceInitialization"/>
+        <module name="CovariantEquals"/>
+        <module name="DeclarationOrder"/>
+        <module name="DefaultComesLast"/>
+        <module name="EmptyStatement"/>
+        <module name="EqualsAvoidNull"/>
+        <module name="EqualsHashCode"/>
+        <module name="ExplicitInitialization"/>
+        <module name="FallThrough"/>
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+            <property name="setterCanReturnItsClass" value="true"/>
+        </module>
+        <module name="IllegalCatch">
+            <property name="illegalClassNames"
+                      value="java.lang.Exception,
+                             java.lang.Throwable,
+                             java.lang.RuntimeException,
+                             java.lang.NullPointerException"/>
+        </module>
+        <module name="IllegalThrows"/>
+        <module name="InnerAssignment"/>
+        <module name="MagicNumber"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="ModifiedControlVariable"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="NestedForDepth">
+            <property name="max" value="2"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="NoClone"/>
+        <module name="NoFinalizer"/>
+        <module name="OneStatementPerLine"/>
+        <module name="PackageDeclaration"/>
+        <module name="ParameterAssignment"/>
+        <module name="RequireThis"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+        <module name="UnnecessarySemicolonAfterOuterTypeDeclaration"/>
+        <module name="UnnecessarySemicolonInEnumeration"/>
+        <module name="UnnecessarySemicolonInTryWithResources"/>
+
+        <!-- Imports -->
+        <module name="AvoidStarImport"/>
+        <module name="IllegalImport"/>
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+
+        <!-- Javadoc Comments -->
+        <module name="AtclauseOrder"/>
+        <module name="InvalidJavadocPosition"/>
+        <module name="JavadocContentLocation"/>
+        <module name="JavadocMethod">
+            <property name="validateThrows" value="true"/>
+        </module>
+        <module name="JavadocMissingLeadingAsterisk"/>
+        <module name="JavadocMissingWhitespaceAfterAsterisk"/>
+        <module name="JavadocParagraph"/>
+        <module name="JavadocStyle">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="JavadocType">
+            <property name="allowUnknownTags" value="true"/>
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="METHOD_DEF"/>
+            <property name="allowMissingPropertyJavadoc" value="true"/>
+        </module>
+        <module name="NonEmptyAtclauseDescription"/>
+        <module name="SummaryJavadoc"/>
+
+        <!-- Misc -->
+        <module name="ArrayTypeStyle"/>
+        <module name="CommentsIndentation"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="8"/>
+        </module>
+        <module name="OuterTypeFilename"/>
+        <module name="UpperEll"/>
+
+        <!-- Modifiers -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Naming Conventions -->
+        <module name="AbbreviationAsWordInName">
+            <property name="ignoreFinal" value="false"/>
+            <property name="allowedAbbreviationLength" value="0"/>
+            <property name="allowedAbbreviations" value="AST,HTML,ID,JSON,DB,API"/>
+        </module>
+        <module name="AbstractClassName"/>
+        <module name="ClassTypeParameterName"/>
+        <module name="ConstantName"/>
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MethodName"/>
+        <module name="PackageName"/>
+        <module name="TypeName"/>
+
+        <!-- Whitespace -->
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
+        </module>
+        <module name="GenericWhitespace"/>
+        <module name="MethodParamPad"/>
+        <module name="NoWhitespaceAfter">
+            <property name="tokens" value="ARRAY_INIT"/>
+            <property name="tokens" value="AT"/>
+            <property name="tokens" value="BNOT"/>
+            <property name="tokens" value="DEC"/>
+            <property name="tokens" value="DOT"/>
+            <property name="tokens" value="INC"/>
+            <property name="tokens" value="LNOT"/>
+            <property name="tokens" value="UNARY_MINUS"/>
+            <property name="tokens" value="UNARY_PLUS"/>
+            <property name="tokens" value="ARRAY_DECLARATOR"/>
+            <property name="tokens" value="INDEX_OP"/>
+        </module>
+        <module name="NoWhitespaceBefore"/>
+        <module name="ParenPad"/>
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround"/>
+
+        <!-- Filters -->
+        <module name="SuppressWarningsHolder"/>
+        <module name="SuppressionXpathSingleFilter">
+            <property name="files" value=".*[\\/]src[\\/]test[\\/]"/>
+            <property name="checks" value="EmptyBlock"/>
+        </module>
+        <module name="SuppressionXpathSingleFilter">
+            <property name="files" value=".*[\\/]src[\\/](test|it)[\\/]"/>
+            <property name="checks" value="JavadocVariable"/>
+        </module>
+        <module name="SuppressionXpathSingleFilter">
+            <property name="files" value=".*[\\/]src[\\/](test|it)[\\/]"/>
+            <property name="checks" value="JavadocType"/>
+        </module>
+    </module>
+
+</module>
