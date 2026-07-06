@@ -1,0 +1,3 @@
+David sees a recommended researcher's card and clicks Connect.
+Days later, that researcher also clicks Connect on David's card,
+and both are recorded as mutually connected.
