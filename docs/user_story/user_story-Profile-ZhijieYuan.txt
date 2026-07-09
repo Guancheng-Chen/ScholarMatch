@@ -1,3 +1,2 @@
-Alice opens her ScholarMatch profile and updates her research interests, affiliation, and biography.
-After saving the changes, her updated profile information is stored successfully
-and shown to other researchers when she appears in their match recommendations.
+As a researcher, I want to view and update my ScholarMatch profile with my current background, research interests,
+and publications from paper lookup so that potential collaborators can understand my work before deciding whether to connect.
