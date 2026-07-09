@@ -88,6 +88,90 @@ public final class User {
     }
 
     /**
+     * Adds a research interest keyword to this user's profile.
+     *
+     * @param interest the keyword to add (e.g. "machine learning")
+     */
+    public void addResearchInterest(final String interest) {
+        this.researchInterests.add(interest);
+    }
+
+    /**
+     * Removes a research interest keyword from this user's profile.
+     *
+     * @param interest the keyword to remove
+     * @return {@code true} if the interest was present and removed
+     */
+    public boolean removeResearchInterest(final String interest) {
+        return this.researchInterests.remove(interest);
+    }
+
+    /**
+     * Adds an education entry to this user's history.
+     *
+     * @param education the education entry to add
+     */
+    public void addEducation(final Education education) {
+        this.educations.add(education);
+    }
+
+    /**
+     * Returns a copy of the education history list, ordered as added.
+     *
+     * @return the list of education entries
+     */
+    public List<Education> getEducations() {
+        return new ArrayList<>(this.educations);
+    }
+
+    /**
+     * Adds a paper to this user's publication list.
+     *
+     * @param paper the paper to add
+     */
+    public void addPaper(final Paper paper) {
+        this.papers.add(paper);
+    }
+
+    /**
+     * Removes a paper from this user's publication list by DOI.
+     *
+     * @param doi the DOI of the paper to remove
+     * @return {@code true} if the paper was present and removed
+     */
+    public boolean removePaper(final String doi) {
+        return this.papers.removeIf(paper -> paper.getDoi().equals(doi));
+    }
+
+    /**
+     * Adds a publication to this user's output list.
+     *
+     * @param publication the publication to add
+     */
+    public void addPublication(final Publication publication) {
+        this.publications.add(publication);
+    }
+
+    /**
+     * Removes a publication from this user's output list by DOI.
+     *
+     * @param doi the DOI of the publication to remove
+     * @return {@code true} if the publication was present and removed
+     */
+    public boolean removePublication(final String doi) {
+        return this.publications.removeIf(pub -> pub.getDoi().equals(doi));
+    }
+
+    /**
+     * Returns a copy of the publication list.
+     *
+     * @return the list of non-paper outputs on this user's profile
+     */
+    public List<Publication> getPublications() {
+        return new ArrayList<>(this.publications);
+    }
+
+    /**
      * Returns the system-assigned unique identifier for this user.
      *
      * @return the user ID
@@ -238,6 +322,24 @@ public final class User {
      */
     public void setResearchDescription(final String researchDescription) {
         this.researchDescription = researchDescription;
+    }
+
+    /**
+     * Returns a copy of the research interest list.
+     *
+     * @return the list of research interest keywords
+     */
+    public List<String> getResearchInterests() {
+        return new ArrayList<>(this.researchInterests);
+    }
+
+    /**
+     * Returns a copy of the publication list.
+     *
+     * @return the list of papers on this user's profile
+     */
+    public List<Paper> getPapers() {
+        return new ArrayList<>(this.papers);
     }
 
     /**
