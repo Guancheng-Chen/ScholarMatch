@@ -88,6 +88,32 @@ public final class User {
     }
 
     /**
+     * Checks whether every core profile field has been filled in.
+     *
+     * <p>An incomplete profile (e.g. a blank {@code researchDescription}) produces
+     * inaccurate recommendations, so the match use case gates on this before fetching
+     * recommendations. h-index and total citations are intentionally excluded — those
+     * are allowed to stay unknown ({@code null}, displayed as "N/A") and never block matching.
+     *
+     * @return {@code true} if every field below is non-null and non-blank
+     */
+    public boolean isProfileComplete() {
+        return isNotBlank(this.firstName)
+                && isNotBlank(this.lastName)
+                && isNotBlank(this.email)
+                && isNotBlank(this.phoneNumber)
+                && isNotBlank(this.institution)
+                && this.academicLevel != null
+                && this.lookingFor != null
+                && isNotBlank(this.collaborationDescription)
+                && isNotBlank(this.researchDescription);
+    }
+
+    private static boolean isNotBlank(final String value) {
+        return value != null && !value.isBlank();
+    }
+
+    /**
      * Adds a research interest keyword to this user's profile.
      *
      * @param interest the keyword to add (e.g. "machine learning")
