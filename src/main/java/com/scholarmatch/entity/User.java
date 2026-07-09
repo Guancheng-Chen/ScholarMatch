@@ -113,4 +113,184 @@ public final class User {
     public String getLastName() {
         return this.lastName;
     }
+
+    /**
+     * Returns the user's email address.
+     *
+     * @return the email
+     */
+    public String getEmail() {
+        return this.email;
+    }
+
+    /**
+     * Updates the user's email address.
+     *
+     * @param email the new email address
+     */
+    public void setEmail(final String email) {
+        this.email = email;
+    }
+
+    /**
+     * Returns the user's phone number, or {@code null} if not set.
+     *
+     * @return the phone number
+     */
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    }
+
+    /**
+     * Updates the user's phone number.
+     *
+     * @param phoneNumber the new phone number
+     */
+    public void setPhoneNumber(final String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * Returns the institution of this user.
+     *
+     * @return the institution name
+     */
+    public String getInstitution() {
+        return this.institution;
+    }
+
+    /**
+     * Updates the institution of this user.
+     *
+     * @param institution the new institution name
+     */
+    public void setInstitution(final String institution) {
+        this.institution = institution;
+    }
+
+    /**
+     * Returns the academic level of this user.
+     *
+     * @return the {@link AcademicLevel}
+     */
+    public AcademicLevel getAcademicLevel() {
+        return this.academicLevel;
+    }
+
+    /**
+     * Updates the academic level of this user.
+     *
+     * @param academicLevel the new academic level
+     */
+    public void setAcademicLevel(final AcademicLevel academicLevel) {
+        this.academicLevel = academicLevel;
+    }
+
+    /**
+     * Returns the collaboration type this user is looking for.
+     *
+     * @return the {@link CollaborationType}
+     */
+    public CollaborationType getLookingFor() {
+        return this.lookingFor;
+    }
+
+    /**
+     * Updates the collaboration type this user is looking for.
+     *
+     * @param lookingFor the new collaboration preference
+     */
+    public void setLookingFor(final CollaborationType lookingFor) {
+        this.lookingFor = lookingFor;
+    }
+
+    /**
+     * Returns the freeform text describing the ideal collaborator.
+     *
+     * @return the collaboration description
+     */
+    public String getCollaborationDescription() {
+        return this.collaborationDescription;
+    }
+
+    /**
+     * Updates the freeform text describing the ideal collaborator.
+     *
+     * @param collaborationDescription the new description
+     */
+    public void setCollaborationDescription(final String collaborationDescription) {
+        this.collaborationDescription = collaborationDescription;
+    }
+
+    /**
+     * Returns the freeform research domain description used as embedding input.
+     *
+     * @return the research description
+     */
+    public String getResearchDescription() {
+        return this.researchDescription;
+    }
+
+    /**
+     * Updates the research domain description.
+     *
+     * @param researchDescription the new description
+     */
+    public void setResearchDescription(final String researchDescription) {
+        this.researchDescription = researchDescription;
+    }
+
+    /**
+     * Returns the h-index of this user.
+     *
+     * @return the h-index, or {@code null} if unknown (never looked up or entered)
+     */
+    public Integer gethIndex() {
+        return this.hIndex;
+    }
+
+    /**
+     * Sets the h-index.
+     *
+     * @param hIndex the h-index to store, or {@code null} if unknown
+     */
+    public void sethIndex(final Integer hIndex) {
+        this.hIndex = hIndex;
+    }
+
+    /**
+     * Returns the total citation count across all publications.
+     *
+     * @return the total citation count, or {@code null} if unknown (never looked up or entered)
+     */
+    public Integer getTotalCitations() {
+        return this.totalCitations;
+    }
+
+    /**
+     * Sets the total citation count.
+     *
+     * @param totalCitations the total citations to store, or {@code null} if unknown
+     */
+    public void setTotalCitations(final Integer totalCitations) {
+        this.totalCitations = totalCitations;
+    }
+
+    /**
+     * Returns the BCrypt password hash for this user.
+     *
+     * @return the password hash
+     */
+    public String getPasswordHash() {
+        return this.passwordHash;
+    }
+
+    /**
+     * Updates the password hash after a password-change operation.
+     *
+     * @param passwordHash the new BCrypt hash
+     */
+    public void setPasswordHash(final String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 }
