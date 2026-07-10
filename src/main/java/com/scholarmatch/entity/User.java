@@ -276,7 +276,7 @@ public final class User {
     /**
      * Returns the academic level of this user.
      *
-     * @return the {@link AcademicLevel}
+     * @return the AcademicLevel
      */
     public AcademicLevel getAcademicLevel() {
         return this.academicLevel;
@@ -294,7 +294,7 @@ public final class User {
     /**
      * Returns the broad research discipline of this user.
      *
-     * @return the {@link ResearchField}
+     * @return the ResearchField
      */
     public ResearchField getResearchField() {
         return this.researchField;
@@ -312,7 +312,7 @@ public final class User {
     /**
      * Returns the collaboration type this user is looking for.
      *
-     * @return the {@link CollaborationType}
+     * @return the CollaborationType
      */
     public CollaborationType getLookingFor() {
         return this.lookingFor;
@@ -384,7 +384,7 @@ public final class User {
     /**
      * Returns how this user's research is currently funded.
      *
-     * @return the {@link FundingStatus}
+     * @return the FundingStatus
      */
     public FundingStatus getFundingStatus() {
         return this.fundingStatus;

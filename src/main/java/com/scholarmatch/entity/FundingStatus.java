@@ -1,7 +1,7 @@
 package com.scholarmatch.entity;
 
 /**
- * Describes how a {@link User}'s research work is currently financially supported.
+ * Describes how a User's research work is currently financially supported.
  *
  * <p>Shown on the user's profile so a prospective collaborator can gauge whether resources
  * (e.g. funding for joint travel, equipment, or a shared grant application) are already

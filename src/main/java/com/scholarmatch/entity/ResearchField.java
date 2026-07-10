@@ -1,13 +1,13 @@
 package com.scholarmatch.entity;
 
 /**
- * Broad academic or industry discipline that best describes a {@link User}'s primary
+ * Broad academic or industry discipline that best describes a User's primary
  * research focus.
  *
  * <p>This is a coarse, single-select classification meant for filtering and display —
- * distinct from {@link User#getResearchInterests()}, which holds free-form, fine-grained
+ * distinct from User#getResearchInterests(), which holds free-form, fine-grained
  * keywords. Deliberately broad enough to cover the large majority of real-world researchers;
- * anything that doesn't fit cleanly elsewhere is captured by {@link #OTHER}.
+ * anything that doesn't fit cleanly elsewhere is captured by #OTHER.
  */
 public enum ResearchField {
 
