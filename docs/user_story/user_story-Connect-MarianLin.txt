@@ -1,3 +1,6 @@
-David sees a recommended researcher's card and clicks Connect.
-Days later, that researcher also clicks Connect on David's card,
-and both are recorded as mutually connected.
+As a scholar, I want to review another scholar’s profile and
+choose whether to connect with or pass on them,
+so that I can find potential collaborators who match my research interests.
+
+As a scholar, I want to become connected with another scholar after they
+accept my connection request, so that we can begin communicating as confirmed collaborators.
