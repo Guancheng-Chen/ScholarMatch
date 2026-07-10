@@ -7,12 +7,13 @@ import java.util.List;
  * Core domain entity representing a registered user of ScholarMatch.
  *
  * <p>Identity and preference fields are persisted server-side and accessed by
- * the client through {@code ProfileDataAccessInterface} and
- * {@code AuthDataAccessInterface}. The user's research text
- * (interests + paper titles) is separately embedded by the server and stored
+ * the client through ProfileDataAccessInterface and
+ * AuthDataAccessInterface. The user's research text
+ * (interests + publication titles) is separately embedded by the server and stored
  * as a vector column for similarity-based recommendations.
  */
 public final class User {
+
     private final String userId;
     private final String firstName;
     private final String lastName;
@@ -20,32 +21,37 @@ public final class User {
     private String phoneNumber;
     private String institution;
     private AcademicLevel academicLevel;
+    private ResearchField researchField;
     private CollaborationType lookingFor;
     private String collaborationDescription;
     private String researchDescription;
+    private Integer weeklyAvailabilityHours;
+    private FundingStatus fundingStatus;
     private String passwordHash;
     private final List<String> researchInterests;
     private final List<Education> educations;
-    private final List<Paper> papers;
     private final List<Publication> publications;
     private Integer hIndex;
     private Integer totalCitations;
 
     /**
-     * Constructs a new {@code User} with mandatory registration fields.
+     * Constructs a new User with mandatory registration fields.
      *
-     * @param userId the unique identifier assigned by the system
-     * @param firstName the user's given name
-     * @param lastName the user's family name
-     * @param email the user's email address (used for login; must be unique)
-     * @param phoneNumber the user's phone number, or {@code null} if not provided
-     * @param institution the university or research institution
-     * @param academicLevel the user's career stage
-     * @param lookingFor the type of collaboration this user is seeking
+     * @param userId                   the unique identifier assigned by the system
+     * @param firstName                the user's given name
+     * @param lastName                 the user's family name
+     * @param email                    the user's email address (used for login; must be unique)
+     * @param phoneNumber              the user's phone number, or null if not provided
+     * @param institution              the university or research institution
+     * @param academicLevel            the user's career stage
+     * @param researchField            the broad discipline of the user's research
+     * @param lookingFor               the type of collaboration this user is seeking
      * @param collaborationDescription freeform text describing the ideal collaborator
-     * @param researchDescription freeform text describing research domain;
-     *                            used as input to the embedding model
-     * @param passwordHash the BCrypt hash of the user's password
+     * @param researchDescription      freeform text describing research domain;
+     *                                 used as input to the embedding model
+     * @param weeklyAvailabilityHours  hours per week the user can commit to collaboration
+     * @param fundingStatus            how the user's research is currently funded
+     * @param passwordHash             the BCrypt hash of the user's password
      */
     public User(
             final String userId,
@@ -55,9 +61,12 @@ public final class User {
             final String phoneNumber,
             final String institution,
             final AcademicLevel academicLevel,
+            final ResearchField researchField,
             final CollaborationType lookingFor,
             final String collaborationDescription,
             final String researchDescription,
+            final Integer weeklyAvailabilityHours,
+            final FundingStatus fundingStatus,
             final String passwordHash) {
         this.userId = userId;
         this.firstName = firstName;
@@ -66,20 +75,22 @@ public final class User {
         this.phoneNumber = phoneNumber;
         this.institution = institution;
         this.academicLevel = academicLevel;
+        this.researchField = researchField;
         this.lookingFor = lookingFor;
         this.collaborationDescription = collaborationDescription;
         this.researchDescription = researchDescription;
+        this.weeklyAvailabilityHours = weeklyAvailabilityHours;
+        this.fundingStatus = fundingStatus;
         this.passwordHash = passwordHash;
         this.researchInterests = new ArrayList<>();
         this.educations = new ArrayList<>();
-        this.papers = new ArrayList<>();
         this.publications = new ArrayList<>();
         this.hIndex = null;
         this.totalCitations = null;
     }
 
     /**
-     * Returns the full display name ({@code firstName + " " + lastName}).
+     * Returns the full display name (firstName + " " + lastName).
      *
      * @return the user's full name
      */
@@ -90,12 +101,12 @@ public final class User {
     /**
      * Checks whether every core profile field has been filled in.
      *
-     * <p>An incomplete profile (e.g. a blank {@code researchDescription}) produces
+     * <p>An incomplete profile (e.g. a blank researchDescription) produces
      * inaccurate recommendations, so the match use case gates on this before fetching
      * recommendations. h-index and total citations are intentionally excluded — those
-     * are allowed to stay unknown ({@code null}, displayed as "N/A") and never block matching.
+     * are allowed to stay unknown (null, displayed as "N/A") and never block matching.
      *
-     * @return {@code true} if every field below is non-null and non-blank
+     * @return true if every field below is non-null and non-blank
      */
     public boolean isProfileComplete() {
         return isNotBlank(this.firstName)
@@ -104,9 +115,12 @@ public final class User {
                 && isNotBlank(this.phoneNumber)
                 && isNotBlank(this.institution)
                 && this.academicLevel != null
+                && this.researchField != null
                 && this.lookingFor != null
                 && isNotBlank(this.collaborationDescription)
-                && isNotBlank(this.researchDescription);
+                && isNotBlank(this.researchDescription)
+                && this.weeklyAvailabilityHours != null
+                && this.fundingStatus != null;
     }
 
     private static boolean isNotBlank(final String value) {
@@ -126,7 +140,7 @@ public final class User {
      * Removes a research interest keyword from this user's profile.
      *
      * @param interest the keyword to remove
-     * @return {@code true} if the interest was present and removed
+     * @return true if the interest was present and removed
      */
     public boolean removeResearchInterest(final String interest) {
         return this.researchInterests.remove(interest);
@@ -151,26 +165,7 @@ public final class User {
     }
 
     /**
-     * Adds a paper to this user's publication list.
-     *
-     * @param paper the paper to add
-     */
-    public void addPaper(final Paper paper) {
-        this.papers.add(paper);
-    }
-
-    /**
-     * Removes a paper from this user's publication list by DOI.
-     *
-     * @param doi the DOI of the paper to remove
-     * @return {@code true} if the paper was present and removed
-     */
-    public boolean removePaper(final String doi) {
-        return this.papers.removeIf(paper -> paper.getDoi().equals(doi));
-    }
-
-    /**
-     * Adds a publication to this user's output list.
+     * Adds a publication to this user's profile.
      *
      * @param publication the publication to add
      */
@@ -179,19 +174,19 @@ public final class User {
     }
 
     /**
-     * Removes a publication from this user's output list by DOI.
+     * Removes a publication from this user's profile by DOI.
      *
      * @param doi the DOI of the publication to remove
-     * @return {@code true} if the publication was present and removed
+     * @return true if the publication was present and removed
      */
     public boolean removePublication(final String doi) {
-        return this.publications.removeIf(pub -> pub.getDoi().equals(doi));
+        return this.publications.removeIf(publication -> publication.getDoi().equals(doi));
     }
 
     /**
      * Returns a copy of the publication list.
      *
-     * @return the list of non-paper outputs on this user's profile
+     * @return the list of publications on this user's profile
      */
     public List<Publication> getPublications() {
         return new ArrayList<>(this.publications);
@@ -243,7 +238,7 @@ public final class User {
     }
 
     /**
-     * Returns the user's phone number, or {@code null} if not set.
+     * Returns the user's phone number, or null if not set.
      *
      * @return the phone number
      */
@@ -294,6 +289,24 @@ public final class User {
      */
     public void setAcademicLevel(final AcademicLevel academicLevel) {
         this.academicLevel = academicLevel;
+    }
+
+    /**
+     * Returns the broad research discipline of this user.
+     *
+     * @return the {@link ResearchField}
+     */
+    public ResearchField getResearchField() {
+        return this.researchField;
+    }
+
+    /**
+     * Updates the broad research discipline of this user.
+     *
+     * @param researchField the new research field
+     */
+    public void setResearchField(final ResearchField researchField) {
+        this.researchField = researchField;
     }
 
     /**
@@ -351,6 +364,42 @@ public final class User {
     }
 
     /**
+     * Returns how many hours per week this user can commit to collaboration.
+     *
+     * @return the weekly availability in hours
+     */
+    public Integer getWeeklyAvailabilityHours() {
+        return this.weeklyAvailabilityHours;
+    }
+
+    /**
+     * Updates how many hours per week this user can commit to collaboration.
+     *
+     * @param weeklyAvailabilityHours the new weekly availability in hours
+     */
+    public void setWeeklyAvailabilityHours(final Integer weeklyAvailabilityHours) {
+        this.weeklyAvailabilityHours = weeklyAvailabilityHours;
+    }
+
+    /**
+     * Returns how this user's research is currently funded.
+     *
+     * @return the {@link FundingStatus}
+     */
+    public FundingStatus getFundingStatus() {
+        return this.fundingStatus;
+    }
+
+    /**
+     * Updates how this user's research is currently funded.
+     *
+     * @param fundingStatus the new funding status
+     */
+    public void setFundingStatus(final FundingStatus fundingStatus) {
+        this.fundingStatus = fundingStatus;
+    }
+
+    /**
      * Returns a copy of the research interest list.
      *
      * @return the list of research interest keywords
@@ -360,18 +409,9 @@ public final class User {
     }
 
     /**
-     * Returns a copy of the publication list.
-     *
-     * @return the list of papers on this user's profile
-     */
-    public List<Paper> getPapers() {
-        return new ArrayList<>(this.papers);
-    }
-
-    /**
      * Returns the h-index of this user.
      *
-     * @return the h-index, or {@code null} if unknown (never looked up or entered)
+     * @return the h-index, or null if unknown (never looked up or entered)
      */
     public Integer gethIndex() {
         return this.hIndex;
@@ -380,7 +420,7 @@ public final class User {
     /**
      * Sets the h-index.
      *
-     * @param hIndex the h-index to store, or {@code null} if unknown
+     * @param hIndex the h-index to store, or null if unknown
      */
     public void sethIndex(final Integer hIndex) {
         this.hIndex = hIndex;
@@ -389,7 +429,7 @@ public final class User {
     /**
      * Returns the total citation count across all publications.
      *
-     * @return the total citation count, or {@code null} if unknown (never looked up or entered)
+     * @return the total citation count, or null if unknown (never looked up or entered)
      */
     public Integer getTotalCitations() {
         return this.totalCitations;
@@ -398,7 +438,7 @@ public final class User {
     /**
      * Sets the total citation count.
      *
-     * @param totalCitations the total citations to store, or {@code null} if unknown
+     * @param totalCitations the total citations to store, or null if unknown
      */
     public void setTotalCitations(final Integer totalCitations) {
         this.totalCitations = totalCitations;
