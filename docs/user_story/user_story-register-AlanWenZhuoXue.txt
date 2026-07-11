@@ -1,0 +1,1 @@
+As a new ScholarMatch user, I want to register for an account so that I can create my own ScholarMatch profile. 
