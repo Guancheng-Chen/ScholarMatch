@@ -1,4 +1,0 @@
-Alice opens ScholarMatch and registers for a new account with valid account information.
-After the registration is successful, her account is created and stored by the system.
-Later, Alice can log in with her account information and access her ScholarMatch profile.
-If she enters invalid login information, the system should not log her in and should show an error message.
