@@ -13,7 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserData  {
+/**
+ * Plain, read-only snapshot of a User's profile for use in Input/OutputData DTOs and
+ * everything downstream of them (presenters, view models, views).
+ *
+ * <p>User is an Entity that carries setters and business rules (e.g.
+ * isProfileComplete()); those only make sense inside the use case layer. Once a
+ * user's profile needs to cross an output boundary purely for display (connect, recommend,
+ * load-matches, load-profile), it's converted to this DTO via #from(User) instead of
+ * being passed through directly. The password hash is intentionally omitted — display code
+ * never needs it.
+ */
+public final class UserData  {
     private final String userId;
     private final String firstName;
     private final String lastName;
