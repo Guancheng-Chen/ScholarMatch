@@ -2,7 +2,6 @@ package com.scholarmatch.usecase.recommend;
 
 import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.RecommendDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
 import com.scholarmatch.usecase.dto.UserData;
 import com.scholarmatch.usecase.exception.DataAccessException;
 
@@ -30,29 +29,26 @@ public final class RecommendInteractor implements RecommendInputBoundary {
             "Your profile is incomplete. Please fill in all profile fields before viewing recommendations.";
 
     private final RecommendDataAccessInterface recommendDataAccessObject;
-    private final LoadProfileDataAccessInterface profileDataAccessObject;
     private final RecommendOutputBoundary outputBoundary;
 
     /**
      * Constructs a RecommendInteractor.
      *
-     * @param recommendDataAccessObject server gateway for recommendations
-     * @param profileDataAccessObject   server gateway used to check the current user's profile completeness
+     * @param recommendDataAccessObject server gateway for recommendations and profile
+     *                                   completeness checks
      * @param outputBoundary            the presenter that will receive the result
      */
     public RecommendInteractor(
             final RecommendDataAccessInterface recommendDataAccessObject,
-            final LoadProfileDataAccessInterface profileDataAccessObject,
             final RecommendOutputBoundary outputBoundary) {
         this.recommendDataAccessObject = recommendDataAccessObject;
-        this.profileDataAccessObject = profileDataAccessObject;
         this.outputBoundary = outputBoundary;
     }
 
     @Override
     public void execute() {
         try {
-            final User currentUser = profileDataAccessObject.getProfile();
+            final User currentUser = recommendDataAccessObject.getProfile();
             if (!currentUser.isProfileComplete()) {
                 outputBoundary.prepareFailView(INCOMPLETE_PROFILE_MESSAGE);
                 return;
