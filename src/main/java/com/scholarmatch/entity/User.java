@@ -19,7 +19,7 @@ public final class User {
     private final String lastName;
     private String email;
     private String phoneNumber;
-    private String institution;
+    private Institution institution;
     private AcademicLevel academicLevel;
     private ResearchField researchField;
     private CollaborationType lookingFor;
@@ -59,7 +59,7 @@ public final class User {
             final String lastName,
             final String email,
             final String phoneNumber,
-            final String institution,
+            final Institution institution,
             final AcademicLevel academicLevel,
             final ResearchField researchField,
             final CollaborationType lookingFor,
@@ -113,7 +113,7 @@ public final class User {
                 && isNotBlank(this.lastName)
                 && isNotBlank(this.email)
                 && isNotBlank(this.phoneNumber)
-                && isNotBlank(this.institution)
+                && this.institution != null
                 && this.academicLevel != null
                 && this.researchField != null
                 && this.lookingFor != null
@@ -260,7 +260,7 @@ public final class User {
      *
      * @return the institution name
      */
-    public String getInstitution() {
+    public Institution getInstitution() {
         return this.institution;
     }
 
@@ -269,7 +269,7 @@ public final class User {
      *
      * @param institution the new institution name
      */
-    public void setInstitution(final String institution) {
+    public void setInstitution(final Institution institution) {
         this.institution = institution;
     }
 
