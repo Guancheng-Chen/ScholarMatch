@@ -1,0 +1,1 @@
+As a logged-in ScholarMatch user, I want to log out of my account so that I can safely leave my profile when I am done using ScholarMatch.
