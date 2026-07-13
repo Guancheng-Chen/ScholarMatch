@@ -54,7 +54,7 @@ public final class RecommendInteractor implements RecommendInputBoundary {
                 return;
             }
             final List<User> recommendations = recommendDataAccessObject.getRecommendations();
-            outputBoundary.prepareSuccessView(new RecommendOutputData(UserData.fromAll(recommendations), false));
+            outputBoundary.prepareSuccessView(new RecommendOutputData(UserData.fromAll(recommendations)));
         } catch (final DataAccessException e) {
             outputBoundary.prepareFailView(e.getMessage());
         }

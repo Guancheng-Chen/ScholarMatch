@@ -7,34 +7,26 @@ import java.util.List;
 
 /**
  * Output data for the get-recommendations use case.
+ *
+ * <p>Only ever constructed on the success path — RecommendOutputBoundary#prepareFailView(String)
+ * carries failures instead, so there is no separate failure flag here.
  */
 public final class RecommendOutputData {
     private final List<UserData> recommendations;
-    private final boolean useCaseFailed;
 
     /**
      * Constructs recommend output.
      *
      * @param recommendations the ranked list of recommended collaborators
-     * @param useCaseFailed   true if the use case failed
      */
-    public RecommendOutputData(List<UserData> recommendations, boolean useCaseFailed) {
+    public RecommendOutputData(List<UserData> recommendations) {
         this.recommendations = new ArrayList<>(recommendations);
-        this.useCaseFailed = useCaseFailed;
     }
 
     /**
-     * @return the recommended users.
+     * @return the recommended users. @return the recommendations list
      */
     public List<UserData> getRecommendations() {
         return new ArrayList<>(this.recommendations);
-    }
-
-    /**
-     *
-     * @return true if the use case failed.
-     */
-    public boolean isUseCaseFailed() {
-        return this.useCaseFailed;
     }
 }
