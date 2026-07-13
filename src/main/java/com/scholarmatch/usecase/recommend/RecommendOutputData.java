@@ -24,7 +24,7 @@ public final class RecommendOutputData {
     }
 
     /**
-     * @return the recommended users. @return the recommendations list
+     * @return the recommended users.
      */
     public List<UserData> getRecommendations() {
         return new ArrayList<>(this.recommendations);
@@ -32,7 +32,7 @@ public final class RecommendOutputData {
 
     /**
      *
-     * @return true if the use case failed. @return failure flag
+     * @return true if the use case failed.
      */
     public boolean isUseCaseFailed() {
         return this.useCaseFailed;
