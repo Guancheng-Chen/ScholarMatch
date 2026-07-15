@@ -1,6 +1,10 @@
 package com.scholarmatch.usecase.dto;
 
+import com.scholarmatch.entity.Message;
+
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Plain, read-only snapshot of a single chat message for use in Input/OutputData DTOs
@@ -34,6 +38,31 @@ public final class MessageData {
         this.receiverId = receiverId;
         this.content = content;
         this.sentAt = sentAt;
+    }
+
+    /**
+     * Builds a MessageData snapshot from a Message entity.
+     *
+     * @param message the entity to snapshot
+     * @return the equivalent read-only DTO
+     */
+    public static MessageData from(final Message message) {
+        return new MessageData(
+                message.getMessageId(),
+                message.getSenderId(),
+                message.getReceiverId(),
+                message.getContent(),
+                message.getSentAt());
+    }
+
+    /**
+     * Builds a list of MessageData snapshots from a list of Message entities.
+     *
+     * @param messages the entities to snapshot
+     * @return the equivalent read-only DTOs, in the same order
+     */
+    public static List<MessageData> fromAll(final List<Message> messages) {
+        return messages.stream().map(MessageData::from).collect(Collectors.toList());
     }
 
     /**
