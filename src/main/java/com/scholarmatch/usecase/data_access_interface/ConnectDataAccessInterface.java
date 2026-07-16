@@ -1,10 +1,15 @@
-package com.scholarmatch.usecase.data_access_interface;
+package com.scholarmatch.usecase.connect;
 
-import com.scholarmatch.usecase.connect.ConnectOutputData;
-
+/**
+ * Data access interface for the connect use case.
+ */
 public interface ConnectDataAccessInterface {
 
+    /**
+     * Records a connection request for the selected scholar.
+     *
+     * @param connectedScholarId the ID of the scholar receiving the request
+     * @return output data indicating whether a mutual match was created
+     */
     ConnectOutputData connect(String connectedScholarId);
-
-    void dislike(String dislikedScholarId);
 }
