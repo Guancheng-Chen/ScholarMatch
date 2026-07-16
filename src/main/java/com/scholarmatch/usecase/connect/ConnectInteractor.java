@@ -1,4 +1,4 @@
 package com.scholarmatch.usecase.connect;
 
-public final class ConnectInteractor {
+public final class ConnectInteractor implements ConnectInputBoundary {
 }
