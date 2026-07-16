@@ -5,4 +5,6 @@ import com.scholarmatch.usecase.connect.ConnectOutputData;
 public interface ConnectDataAccessInterface {
 
     ConnectOutputData connect(String connectedScholarId);
+
+    void dislike(String dislikedScholarId);
 }
