@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+  <defs>
+    <filter id="rough" x="-2%" y="-2%" width="104%" height="104%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="11" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"/>
+    </filter>
+    <style>
+      .ink { fill: none; stroke: #202124; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .thin { fill: none; stroke: #4b4f52; stroke-width: 2; stroke-linecap: round; }
+      .paper { fill: #fffef8; }
+      .panel { fill: #fffef8; stroke: #202124; stroke-width: 3; }
+      .soft { fill: #f4f6f5; stroke: #4b4f52; stroke-width: 2; }
+      .accent { fill: #dcefe7; stroke: #1f6650; stroke-width: 2.5; }
+      .warn { fill: #fff4d8; stroke: #8b6418; stroke-width: 2; }
+      text { font-family: "Bradley Hand", "Marker Felt", sans-serif; fill: #202124; letter-spacing: 0; }
+      .title { font-size: 42px; font-weight: 700; }
+      .section { font-size: 28px; font-weight: 700; }
+      .label { font-size: 21px; }
+      .value { font-size: 20px; fill: #414548; }
+      .small { font-size: 17px; fill: #555b5e; }
+      .button { font-size: 22px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1200" fill="#f5f2e8"/>
+  <g opacity="0.18">
+    <path d="M0 60H1800 M0 120H1800 M0 180H1800 M0 240H1800 M0 300H1800 M0 360H1800 M0 420H1800 M0 480H1800 M0 540H1800 M0 600H1800 M0 660H1800 M0 720H1800 M0 780H1800 M0 840H1800 M0 900H1800 M0 960H1800 M0 1020H1800 M0 1080H1800 M0 1140H1800" stroke="#7c9aab"/>
+    <path d="M60 0V1200 M120 0V1200 M180 0V1200 M240 0V1200 M300 0V1200 M360 0V1200 M420 0V1200 M480 0V1200 M540 0V1200 M600 0V1200 M660 0V1200 M720 0V1200 M780 0V1200 M840 0V1200 M900 0V1200 M960 0V1200 M1020 0V1200 M1080 0V1200 M1140 0V1200 M1200 0V1200 M1260 0V1200 M1320 0V1200 M1380 0V1200 M1440 0V1200 M1500 0V1200 M1560 0V1200 M1620 0V1200 M1680 0V1200 M1740 0V1200" stroke="#7c9aab"/>
+  </g>
+
+  <g filter="url(#rough)">
+    <rect x="55" y="45" width="1690" height="1110" rx="8" class="panel"/>
+    <text x="95" y="105" class="title">Update Profile</text>
+    <text x="95" y="140" class="small">Current values are pre-filled. Edit only what changed.</text>
+    <line x1="900" y1="165" x2="900" y2="1115" class="ink"/>
+
+    <text x="95" y="205" class="section">Profile details</text>
+    <text x="95" y="250" class="label">Email</text>
+    <rect x="95" y="265" width="345" height="48" class="soft"/>
+    <text x="112" y="297" class="value">researcher@utoronto.ca</text>
+    <text x="475" y="250" class="label">Phone</text>
+    <rect x="475" y="265" width="345" height="48" class="soft"/>
+    <text x="492" y="297" class="value">+1 416 555 0184</text>
+
+    <text x="95" y="365" class="section">Academic background</text>
+    <text x="95" y="405" class="label">Institution</text>
+    <rect x="95" y="420" width="345" height="48" class="soft"/>
+    <text x="112" y="452" class="value">University of Toronto   v</text>
+    <text x="475" y="405" class="label">Academic level</text>
+    <rect x="475" y="420" width="345" height="48" class="soft"/>
+    <text x="492" y="452" class="value">Graduate student   v</text>
+    <text x="95" y="505" class="label">Research field</text>
+    <rect x="95" y="520" width="345" height="48" class="soft"/>
+    <text x="112" y="552" class="value">Machine learning   v</text>
+    <text x="475" y="505" class="label">Looking for</text>
+    <rect x="475" y="520" width="345" height="48" class="soft"/>
+    <text x="492" y="552" class="value">Co-author   v</text>
+
+    <text x="95" y="625" class="section">Research profile</text>
+    <text x="95" y="665" class="label">Research description</text>
+    <rect x="95" y="680" width="725" height="82" class="soft"/>
+    <text x="112" y="714" class="value">Reliable machine learning and human-centred AI...</text>
+    <text x="95" y="805" class="label">Research interests</text>
+    <rect x="95" y="820" width="725" height="52" class="soft"/>
+    <text x="112" y="853" class="value">[ machine learning ]  [ interpretability ]  + Add</text>
+
+    <text x="95" y="925" class="section">Metrics</text>
+    <text x="95" y="965" class="label">h-index</text>
+    <rect x="95" y="980" width="210" height="50" class="warn"/>
+    <text x="112" y="1013" class="value">N/A</text>
+    <text x="340" y="965" class="label">Total citations</text>
+    <rect x="340" y="980" width="210" height="50" class="warn"/>
+    <text x="357" y="1013" class="value">N/A</text>
+    <text x="95" y="1060" class="small">Unknown values stay blank and display as "N/A" - never changed to 0.</text>
+
+    <rect x="575" y="1068" width="105" height="48" class="soft"/>
+    <text x="600" y="1100" class="button">Cancel</text>
+    <rect x="695" y="1068" width="125" height="48" class="accent"/>
+    <text x="726" y="1100" class="button">Save</text>
+
+    <text x="950" y="205" class="section">Find my papers</text>
+    <text x="950" y="240" class="small">Search Semantic Scholar by author name</text>
+    <rect x="950" y="265" width="540" height="52" class="soft"/>
+    <text x="968" y="299" class="value">Geoffrey Hinton</text>
+    <rect x="1505" y="265" width="155" height="52" class="accent"/>
+    <text x="1540" y="299" class="button">Search</text>
+
+    <text x="950" y="370" class="label">Choose the correct author</text>
+    <rect x="950" y="390" width="710" height="105" class="accent"/>
+    <circle cx="980" cy="425" r="12" fill="#1f6650"/>
+    <text x="1010" y="430" class="label">Geoffrey E. Hinton</text>
+    <text x="1010" y="462" class="small">University of Toronto | 401 papers | h-index 168</text>
+    <rect x="950" y="510" width="710" height="90" class="soft"/>
+    <circle cx="980" cy="545" r="12" class="thin"/>
+    <text x="1010" y="550" class="label">Geoff Hinton</text>
+    <text x="1010" y="580" class="small">Affiliation unavailable | 3 papers | h-index N/A</text>
+
+    <path d="M1300 620 C1330 650, 1330 675, 1300 700" class="ink"/>
+    <path d="M1291 688 L1300 701 L1315 691" class="ink"/>
+    <text x="950" y="660" class="section">Preview import</text>
+    <rect x="950" y="685" width="710" height="300" class="panel"/>
+    <text x="980" y="730" class="label">Selected author metrics</text>
+    <text x="980" y="768" class="value">h-index: 168        Total citations: 782,431</text>
+    <line x1="980" y1="790" x2="1630" y2="790" class="thin"/>
+    <text x="980" y="830" class="label">Papers to add</text>
+    <rect x="980" y="850" width="22" height="22" class="soft"/>
+    <path d="M984 861 L991 868 L1000 854" class="ink"/>
+    <text x="1020" y="869" class="value">Deep Learning (2015)</text>
+    <rect x="980" y="895" width="22" height="22" class="soft"/>
+    <path d="M984 906 L991 913 L1000 899" class="ink"/>
+    <text x="1020" y="914" class="value">Learning Representations by Back-propagating Errors</text>
+    <rect x="980" y="940" width="22" height="22" class="soft"/>
+    <text x="1020" y="959" class="value">ImageNet Classification with Deep Neural Networks</text>
+
+    <rect x="1370" y="1015" width="290" height="56" class="accent"/>
+    <text x="1420" y="1051" class="button">Import selected papers</text>
+    <path d="M1370 1090 C1210 1130, 1020 1120, 830 1035" class="ink"/>
+    <path d="M846 1034 L830 1035 L838 1050" class="ink"/>
+    <text x="1030" y="1140" class="small">Import fills metrics and publications in the form before Save</text>
+  </g>
+</svg>
