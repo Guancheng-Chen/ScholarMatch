@@ -1,7 +1,9 @@
-package com.scholarmatch.usecase.connect;
+package com.scholarmatch.usecase.data_access_interface;
+
+import com.scholarmatch.usecase.connect.ConnectOutputData;
 
 /**
- * Data access interface for the connect use case.
+ * Data access interface for the Connect use case.
  */
 public interface ConnectDataAccessInterface {
 
