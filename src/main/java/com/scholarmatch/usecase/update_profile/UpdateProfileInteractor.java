@@ -75,9 +75,31 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
             errors.add("Email format is invalid, e.g. name@example.com.");
         }
 
+        requireText(errors, "Phone number", inputData.getPhoneNumber());
+        requireText(errors, "Institution", inputData.getInstitution());
+        requireText(errors, "Academic level", inputData.getAcademicLevel());
+        requireText(errors, "Research field", inputData.getResearchField());
+        requireText(errors, "Looking for", inputData.getLookingFor());
+        requireText(errors, "Funding status", inputData.getFundingStatus());
+
+        requireText(errors, "Collaboration description", inputData.getCollaborationDescription());
+        requireText(errors, "Research description", inputData.getResearchDescription());
         checkLength(errors, "Collaboration description", inputData.getCollaborationDescription());
         checkLength(errors, "Research description", inputData.getResearchDescription());
 
+        if (inputData.getWeeklyAvailabilityHours() == null) {
+            errors.add("Weekly availability is required.");
+        }
+        if (inputData.getHIndex() == null) {
+            errors.add("h-index is required.");
+        }
+        if (inputData.getTotalCitations() == null) {
+            errors.add("Total citations is required.");
+        }
+
+        if (inputData.getResearchInterests().isEmpty()) {
+            errors.add("At least one research interest is required.");
+        }
         for (final String interest : inputData.getResearchInterests()) {
             if (interest != null && interest.length() > MAX_INTEREST_LENGTH) {
                 errors.add("Research interest \"" + interest + "\" must be at most "
@@ -88,6 +110,12 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
         validateEducations(errors, inputData.getEducations());
 
         return errors;
+    }
+
+    private void requireText(final List<String> errors, final String fieldName, final String value) {
+        if (value == null || value.isBlank()) {
+            errors.add(fieldName + " is required.");
+        }
     }
 
     private void checkLength(final List<String> errors, final String fieldName, final String value) {
@@ -119,9 +147,13 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
                 continue;
             }
 
+            if (education.getEndMonth() == null) {
+                errors.add(label + ": end month is required, or mark this entry as currently enrolled.");
+                continue;
+            }
+
             final boolean endsBeforeStart = endYear < education.getStartYear()
                     || (endYear == education.getStartYear()
-                    && education.getEndMonth() != null
                     && education.getEndMonth().getValue() < education.getStartMonth().getValue());
             if (endsBeforeStart) {
                 errors.add(label + ": end date cannot be before the start date.");
