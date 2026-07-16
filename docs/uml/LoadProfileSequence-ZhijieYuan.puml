@@ -1,0 +1,37 @@
+@startuml
+title Load Profile - Clean Architecture Sequence
+hide footbox
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Researcher
+boundary UpdateProfileView
+control LoadProfileController
+participant LoadProfileInputBoundary <<boundary>>
+control LoadProfileInteractor
+participant LoadProfileDataAccessInterface <<boundary>>
+entity ServerRepository
+collections "ScholarMatch API" as Server
+participant LoadProfileOutputBoundary <<boundary>>
+control LoadProfilePresenter
+entity LoadProfileViewModel
+
+Researcher -> UpdateProfileView: Open profile editor
+UpdateProfileView -> LoadProfileController: execute()
+LoadProfileController -> LoadProfileInputBoundary: execute()
+LoadProfileInputBoundary -> LoadProfileInteractor: execute()
+LoadProfileInteractor -> LoadProfileDataAccessInterface: getProfile()
+LoadProfileDataAccessInterface -> ServerRepository: getProfile()
+ServerRepository -> Server: GET /api/profile
+Server --> ServerRepository: profile JSON
+ServerRepository --> LoadProfileInteractor: User
+LoadProfileInteractor -> LoadProfileOutputBoundary: prepareSuccessView(outputData)
+LoadProfileOutputBoundary -> LoadProfilePresenter: prepareSuccessView(outputData)
+LoadProfilePresenter -> LoadProfileViewModel: setProfile(profile)
+LoadProfileViewModel --> UpdateProfileView: notify change
+UpdateProfileView --> Researcher: Show pre-filled form
+
+note over LoadProfileController, LoadProfileOutputBoundary
+Use-case contracts do not depend on Swing, HTTP, or JSON.
+end note
+@enduml
