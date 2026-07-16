@@ -1,25 +1,25 @@
 package com.scholarmatch.usecase.update_profile;
 
-import com.scholarmatch.usecase.dto.UserData;
-
 /**
- * Output data returned after a profile update succeeds.
+ * Output data produced by a successful profile update.
  */
 public final class UpdateProfileOutputData {
 
-    private final UserData profile;
+    private final String userId;
 
     /**
-     * Constructs profile update output.
+     * Constructs update-profile output data.
      *
-     * @param profile the saved profile snapshot
+     * @param userId the ID of the updated user
      */
-    public UpdateProfileOutputData(final UserData profile) {
-        this.profile = profile;
+    public UpdateProfileOutputData(final String userId) {
+        this.userId = userId;
     }
 
-    /** @return the saved profile snapshot */
-    public UserData getProfile() {
-        return this.profile;
+    /**
+     * @return the user ID
+     */
+    public String getUserId() {
+        return this.userId;
     }
 }
