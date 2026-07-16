@@ -32,7 +32,7 @@ public final class ConnectInteractor implements ConnectInputBoundary {
     @Override
     public void execute(final ConnectInputData inputData) {
         final ConnectOutputData outputData =
-                dataAccessObject.connect(inputData.getConnectdUserId());
+                dataAccessObject.connect(inputData.getConnectedUserId());
 
         if (outputData == null) {
             outputBoundary.prepareNoMatch();
