@@ -12,6 +12,7 @@ import com.scholarmatch.entity.User;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +37,7 @@ class UserDataTest {
                 FundingStatus.INSTITUTIONAL_FUNDING,
                 "hash");
         user.addResearchInterest("computing");
-        user.addEducation(new Education("Cambridge", DegreeType.MASTER, 1840, 9, 1843, 6));
+        user.addEducation(new Education("Cambridge", DegreeType.MASTER, 1840, Month.SEPTEMBER, 1843, Month.JUNE));
         user.addPublication(new Publication("10.1000/example", "Notes on the Analytical Engine", 1843, 100));
         user.sethIndex(5);
         user.setTotalCitations(200);
