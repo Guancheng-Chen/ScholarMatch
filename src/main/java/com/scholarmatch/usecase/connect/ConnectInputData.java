@@ -30,7 +30,7 @@ public final class ConnectInputData {
      *
      * @return the connected user's ID
      */
-    public String getConnectdUserId() {
+    public String getConnectedUserId() {
         return this.connectedUserId;
     }
 
@@ -39,7 +39,7 @@ public final class ConnectInputData {
      *
      * @return the connected user
      */
-    public UserData getConnectdUser() {
+    public UserData getConnectedUser() {
         return this.connectedUser;
     }
 }
