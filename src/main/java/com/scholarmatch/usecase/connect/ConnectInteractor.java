@@ -13,4 +13,17 @@ public final class ConnectInteractor implements ConnectInputBoundary {
         this.dataAccessObject = dataAccessObject;
         this.outputBoundary = outputBoundary;
     }
+
+    @Override
+    public void execute(final ConnectInputData inputData) {
+        final ConnectOutputData outputData =
+                dataAccessObject.connect(inputData.getConnectdUserId());
+
+        if (outputData == null) {
+            outputBoundary.prepareNoMatch();
+        }
+        else {
+            outputBoundary.prepareMatchFound(outputData);
+        }
+    }
 }
