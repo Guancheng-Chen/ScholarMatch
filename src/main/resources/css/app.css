@@ -1,0 +1,40 @@
+/* ScholarMatch – application-level style overrides on top of AtlantaFX PrimerDark */
+
+/* Generic elevated card surface used for auth forms, profile form, and scholar cards. */
+.sm-card {
+  -fx-background-color: -color-bg-subtle;
+  -fx-background-radius: 14px;
+  -fx-border-color: -color-border-default;
+  -fx-border-radius: 14px;
+  -fx-border-width: 1px;
+  -fx-effect: dropshadow(three-pass-box, -color-shadow-default, 24, 0.25, 0, 8);
+  -fx-padding: 28px;
+}
+
+/* Top bar shared by the logged-in nav and the logged-out shell. */
+.sm-topbar {
+  -fx-background-color: -color-bg-subtle;
+  -fx-border-color: -color-border-default;
+  -fx-border-width: 0 0 1px 0;
+  -fx-padding: 14px 24px;
+}
+
+/* Circular initials avatar on scholar cards. */
+.sm-avatar {
+  -fx-background-color: -color-accent-emphasis;
+  -fx-background-radius: 999px;
+  -fx-text-fill: -color-fg-emphasis;
+  -fx-alignment: center;
+  -fx-font-weight: bold;
+}
+
+/* Swipeable scholar card in the Discover stack. */
+.sm-scholar-card {
+  -fx-background-color: -color-bg-subtle;
+  -fx-background-radius: 18px;
+  -fx-border-color: -color-border-default;
+  -fx-border-radius: 18px;
+  -fx-border-width: 1px;
+  -fx-effect: dropshadow(three-pass-box, -color-shadow-default, 28, 0.3, 0, 10);
+  -fx-padding: 24px;
+}
