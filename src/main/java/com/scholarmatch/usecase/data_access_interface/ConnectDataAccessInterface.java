@@ -11,5 +11,5 @@ public interface ConnectDataAccessInterface {
      * @param connectedScholarId the ID of the scholar receiving the request
      * @return output data indicating whether a mutual match was created
      */
-    ConnectOutputData connect(String connectedScholarId);
+    ConnectOutputData connect(final String connectedScholarId);
 }
