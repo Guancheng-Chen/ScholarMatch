@@ -50,6 +50,16 @@ class PaperLookupInteractorTest {
         assertEquals("Select an author from the current search results.", this.presenter.errorMessage);
     }
 
+    @Test
+    void clearsPreviousCandidatesWhenANewSearchFailsValidation() {
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Zhijie Yuan"));
+        this.interactor.searchAuthors(new SearchAuthorsInputData("  "));
+        this.interactor.selectAuthor(new SelectAuthorInputData("2112339906"));
+
+        assertNull(this.presenter.selectedAuthor);
+        assertEquals("Select an author from the current search results.", this.presenter.errorMessage);
+    }
+
     private static final class FakeGateway implements UserAPIGatewayInterface {
 
         private String lastQuery;

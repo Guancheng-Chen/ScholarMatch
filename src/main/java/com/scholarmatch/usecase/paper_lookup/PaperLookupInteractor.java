@@ -35,6 +35,7 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
 
     @Override
     public void searchAuthors(final SearchAuthorsInputData inputData) {
+        this.candidatesById.clear();
         if (inputData.getAuthorName() == null || inputData.getAuthorName().isBlank()) {
             this.outputBoundary.prepareFailView(EMPTY_QUERY_MESSAGE);
             return;
@@ -43,7 +44,6 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
         try {
             final List<AuthorCandidateData> candidates = List.copyOf(
                     this.userApiGateway.searchAuthors(inputData.getAuthorName()));
-            this.candidatesById.clear();
             for (final AuthorCandidateData candidate : candidates) {
                 this.candidatesById.put(candidate.getAuthorId(), candidate);
             }
