@@ -70,6 +70,23 @@ class FallbackUserApiGatewayTest {
     }
 
     @Test
+    void getAuthorReturnsFallbackResultWhenPrimaryThrows() {
+        final AuthorCandidateDataAccessInterface fallbackResult = authorCandidate("fallback");
+        final RecordingGateway primary = new RecordingGateway();
+        final RecordingGateway fallback = new RecordingGateway();
+        primary.authorError = new ExternalServiceException("primary failed");
+        fallback.authorResult = List.of(fallbackResult);
+        final FallbackUserApiGateway gateway = new FallbackUserApiGateway(primary, fallback);
+
+        final AuthorCandidateDataAccessInterface actual = gateway.getAuthor("1695689");
+
+        assertSame(fallbackResult, actual);
+        assertEquals(1, primary.getAuthorCallCount);
+        assertEquals(1, fallback.getAuthorCallCount);
+        assertEquals("1695689", fallback.lastAuthorId);
+    }
+
+    @Test
     void getAuthorPapersReturnsPrimaryResultWithoutCallingFallback() {
         final List<Publication> primaryResult = List.of(publication("primary"));
         final RecordingGateway primary = new RecordingGateway();
@@ -138,6 +155,7 @@ class FallbackUserApiGatewayTest {
         private DataAccessException authorError;
         private DataAccessException paperError;
         private int searchAuthorsCallCount;
+        private int getAuthorCallCount;
         private int getAuthorPapersCallCount;
         private String lastAuthorName;
         private String lastAuthorId;
@@ -154,6 +172,7 @@ class FallbackUserApiGatewayTest {
 
         @Override
         public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
+            this.getAuthorCallCount++;
             this.lastAuthorId = authorId;
             if (this.authorError != null) {
                 throw this.authorError;
