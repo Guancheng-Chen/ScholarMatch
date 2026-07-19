@@ -51,6 +51,13 @@ class PaperLookupInteractorTest {
     }
 
     @Test
+    void normalizesAuthorNameBeforeSearching() {
+        this.interactor.searchAuthors(new SearchAuthorsInputData("  Fei-Fei   Li  "));
+
+        assertEquals("Fei Fei Li", this.gateway.lastQuery);
+    }
+
+    @Test
     void clearsPreviousCandidatesWhenANewSearchFailsValidation() {
         this.interactor.searchAuthors(new SearchAuthorsInputData("Zhijie Yuan"));
         this.interactor.searchAuthors(new SearchAuthorsInputData("  "));
