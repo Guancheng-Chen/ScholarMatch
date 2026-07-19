@@ -15,6 +15,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -65,6 +66,17 @@ public final class RegisterView extends JPanel {
         final JPasswordField passwordField = passwordField("Password");
         final JPasswordField confirmPasswordField = passwordField("Confirm Password");
 
+        viewModel.errorMessageProperty().addListener(message -> {
+            if (message != null && !message.isBlank()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        message,
+                        "Register Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
         final JButton submitButton = new JButton(
                 "Register", Icons.of(FontAwesomeSolid.USER_PLUS, 15, Theme.FG_EMPHASIS));
         submitButton.setIconTextGap(8);
@@ -72,6 +84,26 @@ public final class RegisterView extends JPanel {
         submitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         submitButton.setPreferredSize(new Dimension(CARD_WIDTH, 38));
         submitButton.setMaximumSize(new Dimension(CARD_WIDTH, 38));
+
+        submitButton.addActionListener(evt -> {
+            final String firstName = firstNameField.getText().trim();
+            final String lastName = lastNameField.getText().trim();
+            final String email = emailField.getText().trim();
+            final String password = new String(passwordField.getPassword());
+            final String confirmPassword = new String(confirmPasswordField.getPassword());
+
+            if (!password.equals(confirmPassword)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Passwords do not match",
+                        "Register Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            controller.execute(firstName, lastName, email, password);
+        });
 
         final RoundedPanel card = new RoundedPanel(Theme.CARD_RADIUS, 24);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
