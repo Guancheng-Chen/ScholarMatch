@@ -32,7 +32,7 @@ When configured, `SemanticScholarGateway` sends it in the `x-api-key` header. Ne
 
 **Note: `hIndex` / `citationCount` can be missing or `null`.** The client code (`SemanticScholarGateway.searchAuthors(...)`) treats them as possibly absent: `node.has("hIndex") && !node.get("hIndex").isNull() ? ... : null`, mapped to `AuthorCandidateDataAccessInterface.getHIndex()` / `getCitationCount()`, both boxed `Integer` and nullable. This defensive handling exists in the code, but hasn't been confirmed against a real low-citation or newly registered author via Postman — searching `/author/search` for an obscure author with few papers and saving the raw response would confirm whether the "N/A instead of 0" design decision (already assumed in the blueprint) actually triggers on real data.
 
-Up to 5 candidates are kept (`MAX_AUTHOR_CANDIDATES`), used to disambiguate authors sharing a name.
+Up to 20 candidates are kept (`MAX_AUTHOR_CANDIDATES`), used to disambiguate authors sharing a name.
 
 ## GET https://api.semanticscholar.org/graph/v1/author/{authorId}/papers
 
@@ -51,6 +51,6 @@ Up to 5 candidates are kept (`MAX_AUTHOR_CANDIDATES`), used to disambiguate auth
   ]
 }
 ```
-`externalIds.DOI` isn't always present — the client's `extractDoi(...)` returns an empty string when missing rather than dropping the paper.
+`externalIds.DOI` isn't always present — the client's `readDoi(...)` returns an empty string when missing rather than dropping the paper.
 
 Failure handling: a 404 is treated as "no data" and returns an empty list (no exception thrown). A 429 is retried once after one second; if the retry also fails, or another 4xx/5xx response is returned, `SemanticScholarGateway` throws `ExternalServiceException`.
