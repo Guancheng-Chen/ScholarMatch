@@ -1,6 +1,14 @@
 # ScholarMatch Client — Semantic Scholar Integration
 
-Unrelated to ScholarMatch's own server (see `API.md`) — this is a public API called directly by the client's `SemanticScholarGateway`, used to search authors by name and auto-import their paper list during registration/profile editing. Free, no API key required.
+Unrelated to ScholarMatch's own server (see `API.md`) — this is a public API called directly by the client's `SemanticScholarGateway`, used to search authors by name and auto-import their paper list during registration/profile editing.
+
+Most endpoints work without an API key, but anonymous callers share a rate limit and can receive HTTP 429 responses. For more reliable development and demos, set an optional API key through the environment:
+
+```text
+SEMANTIC_SCHOLAR_API_KEY=your-key
+```
+
+When configured, `SemanticScholarGateway` sends it in the `x-api-key` header. Never commit the key to this repository.
 
 ## GET https://api.semanticscholar.org/graph/v1/author/search
 
@@ -45,4 +53,4 @@ Up to 5 candidates are kept (`MAX_AUTHOR_CANDIDATES`), used to disambiguate auth
 ```
 `externalIds.DOI` isn't always present — the client's `extractDoi(...)` returns an empty string when missing rather than dropping the paper.
 
-Failure handling: a 404 is treated as "no data" and returns an empty list (no exception thrown); 429 and other 4xx/5xx responses throw `ExternalServiceException`, at which point the client's `FallbackUserApiGateway` switches to `LocalUserApiGateway`'s offline dataset instead of failing the search outright.
+Failure handling: a 404 is treated as "no data" and returns an empty list (no exception thrown). A 429 is retried once after one second; if the retry also fails, or another 4xx/5xx response is returned, `SemanticScholarGateway` throws `ExternalServiceException`.
