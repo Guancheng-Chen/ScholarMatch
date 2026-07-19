@@ -27,6 +27,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     private static final String API_BASE_URL = "https://api.semanticscholar.org/graph/v1";
     private static final String AUTHOR_FIELDS = "authorId,name,affiliations,paperCount,hIndex,citationCount";
     private static final String PAPER_FIELDS = "title,year,citationCount,externalIds";
+    private static final String API_KEY_ENVIRONMENT_VARIABLE = "SEMANTIC_SCHOLAR_API_KEY";
     private static final int MAX_AUTHOR_CANDIDATES = 20;
     private static final int MAX_PAPERS = 50;
     private static final long RATE_LIMIT_RETRY_DELAY_MILLIS = 1_000;
@@ -34,17 +35,29 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final String apiKey;
 
     /**
      * Constructs a Semantic Scholar gateway with standard HTTP and JSON clients.
      */
     public SemanticScholarGateway() {
-        this(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(), new ObjectMapper());
+        this(
+                HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(),
+                new ObjectMapper(),
+                System.getenv(API_KEY_ENVIRONMENT_VARIABLE));
     }
 
     SemanticScholarGateway(final HttpClient httpClient, final ObjectMapper objectMapper) {
+        this(httpClient, objectMapper, null);
+    }
+
+    SemanticScholarGateway(
+            final HttpClient httpClient,
+            final ObjectMapper objectMapper,
+            final String apiKey) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
+        this.apiKey = apiKey;
     }
 
     @Override
@@ -84,11 +97,13 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     }
 
     private JsonNode sendGet(final String uri) {
-        final HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
+        final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(uri))
                 .timeout(REQUEST_TIMEOUT)
-                .header("Accept", "application/json")
-                .GET()
-                .build();
+                .header("Accept", "application/json");
+        if (this.apiKey != null && !this.apiKey.isBlank()) {
+            requestBuilder.header("x-api-key", this.apiKey);
+        }
+        final HttpRequest request = requestBuilder.GET().build();
         try {
             HttpResponse<String> response = this.httpClient.send(
                     request,
