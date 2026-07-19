@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -68,12 +69,7 @@ public final class RegisterView extends JPanel {
 
         viewModel.errorMessageProperty().addListener(message -> {
             if (message != null && !message.isBlank()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        message,
-                        "Register Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this, message, "Register Failed", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -84,7 +80,6 @@ public final class RegisterView extends JPanel {
         submitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         submitButton.setPreferredSize(new Dimension(CARD_WIDTH, 38));
         submitButton.setMaximumSize(new Dimension(CARD_WIDTH, 38));
-
         submitButton.addActionListener(evt -> {
             final String firstName = firstNameField.getText().trim();
             final String lastName = lastNameField.getText().trim();
@@ -94,15 +89,24 @@ public final class RegisterView extends JPanel {
 
             if (!password.equals(confirmPassword)) {
                 JOptionPane.showMessageDialog(
-                        this,
-                        "Passwords do not match",
-                        "Register Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                        this, "Passwords do not match", "Register Failed", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            // execute() blocks on a network call — run it off the EDT so the form doesn't
+            // freeze for the duration of the request.
+            submitButton.setEnabled(false);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    controller.execute(firstName, lastName, email, password);
+                    return null;
+                }
 
-            controller.execute(firstName, lastName, email, password);
+                @Override
+                protected void done() {
+                    submitButton.setEnabled(true);
+                }
+            }.execute();
         });
 
         final RoundedPanel card = new RoundedPanel(Theme.CARD_RADIUS, 24);
@@ -163,3 +167,5 @@ public final class RegisterView extends JPanel {
         }
     }
 }
+
+
