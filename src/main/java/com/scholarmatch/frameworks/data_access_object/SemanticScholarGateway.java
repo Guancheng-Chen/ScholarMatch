@@ -27,7 +27,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     private static final String API_BASE_URL = "https://api.semanticscholar.org/graph/v1";
     private static final String AUTHOR_FIELDS = "authorId,name,affiliations,paperCount,hIndex,citationCount";
     private static final String PAPER_FIELDS = "title,year,citationCount,externalIds";
-    private static final int MAX_AUTHOR_CANDIDATES = 5;
+    private static final int MAX_AUTHOR_CANDIDATES = 20;
     private static final int MAX_PAPERS = 50;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
