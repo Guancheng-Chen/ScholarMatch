@@ -21,6 +21,8 @@
         <jackson.version>2.16.1</jackson.version>
         <junit.version>5.10.1</junit.version>
         <checkstyle.version>10.12.5</checkstyle.version>
+        <!-- 添加了 Kordamp Ikonli 的版本号 -->
+        <ikonli.version>12.3.1</ikonli.version>
     </properties>
 
     <dependencies>
@@ -36,6 +38,20 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- Kordamp Ikonli 核心库（支持 Swing） -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-swing</artifactId>
+            <version>${ikonli.version}</version>
+        </dependency>
+
+        <!-- Kordamp Ikonli 图标包：FontAwesome 5 -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
+            <version>${ikonli.version}</version>
         </dependency>
 
         <!-- JUnit 5 -->
