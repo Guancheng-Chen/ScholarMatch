@@ -5,7 +5,9 @@ import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -58,6 +60,40 @@ class PaperLookupInteractorTest {
     }
 
     @Test
+    void ranksMatchingNamesByCitationsAndReturnsTwentyCandidates() {
+        final List<AuthorCandidateData> candidates = new ArrayList<>(IntStream.range(0, 20)
+                .mapToObj(index -> new AuthorCandidateData(
+                        "other-" + index,
+                        "F. Li",
+                        List.of(),
+                        10,
+                        3,
+                        100))
+                .toList());
+        candidates.add(new AuthorCandidateData(
+                "split-profile",
+                "Fei-Fei Li",
+                List.of(),
+                8,
+                7,
+                1000));
+        candidates.add(new AuthorCandidateData(
+                "48004138",
+                "Li Fei-Fei",
+                List.of(),
+                607,
+                143,
+                247196));
+        this.gateway.authorCandidates = candidates;
+
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Fei Fei Li"));
+
+        assertEquals(20, this.presenter.candidates.size());
+        assertEquals("48004138", this.presenter.candidates.getFirst().getAuthorId());
+        assertEquals("split-profile", this.presenter.candidates.get(1).getAuthorId());
+    }
+
+    @Test
     void clearsPreviousCandidatesWhenANewSearchFailsValidation() {
         this.interactor.searchAuthors(new SearchAuthorsInputData("Zhijie Yuan"));
         this.interactor.searchAuthors(new SearchAuthorsInputData("  "));
@@ -70,17 +106,18 @@ class PaperLookupInteractorTest {
     private static final class FakeGateway implements UserAPIGatewayInterface {
 
         private String lastQuery;
+        private List<AuthorCandidateData> authorCandidates = List.of(new AuthorCandidateData(
+                "2112339906",
+                "Zhijie Yuan",
+                List.of(),
+                6,
+                2,
+                14));
 
         @Override
         public List<AuthorCandidateData> searchAuthors(final String authorName) {
             this.lastQuery = authorName;
-            return List.of(new AuthorCandidateData(
-                    "2112339906",
-                    "Zhijie Yuan",
-                    List.of(),
-                    6,
-                    2,
-                    14));
+            return this.authorCandidates;
         }
 
         @Override

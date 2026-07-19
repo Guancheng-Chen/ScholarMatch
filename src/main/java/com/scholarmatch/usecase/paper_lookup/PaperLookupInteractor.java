@@ -4,8 +4,10 @@ import com.scholarmatch.entity.Publication;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -15,6 +17,7 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
 
     private static final String EMPTY_QUERY_MESSAGE = "Enter an author name before searching.";
     private static final String UNKNOWN_AUTHOR_MESSAGE = "Select an author from the current search results.";
+    private static final int MAX_AUTHOR_CANDIDATES = 20;
 
     private final UserAPIGatewayInterface userApiGateway;
     private final PaperLookupOutputBoundary outputBoundary;
@@ -42,12 +45,10 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
         }
 
         try {
-            final String normalizedName = inputData.getAuthorName()
-                    .trim()
-                    .replace('-', ' ')
-                    .replaceAll("\\s+", " ");
-            final List<AuthorCandidateData> candidates = List.copyOf(
-                    this.userApiGateway.searchAuthors(normalizedName));
+            final String normalizedName = normalizeName(inputData.getAuthorName());
+            final List<AuthorCandidateData> candidates = rankCandidates(
+                    this.userApiGateway.searchAuthors(normalizedName),
+                    normalizedName);
             for (final AuthorCandidateData candidate : candidates) {
                 this.candidatesById.put(candidate.getAuthorId(), candidate);
             }
@@ -72,5 +73,44 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
         } catch (final DataAccessException exception) {
             this.outputBoundary.prepareFailView(exception.getMessage());
         }
+    }
+
+    private static List<AuthorCandidateData> rankCandidates(
+            final List<AuthorCandidateData> candidates,
+            final String query) {
+        final List<String> queryTokens = sortedNameTokens(query);
+        return candidates.stream()
+                .sorted((first, second) -> compareCandidates(first, second, queryTokens))
+                .limit(MAX_AUTHOR_CANDIDATES)
+                .toList();
+    }
+
+    private static int compareCandidates(
+            final AuthorCandidateData first,
+            final AuthorCandidateData second,
+            final List<String> queryTokens) {
+        final boolean firstNameMatches = sortedNameTokens(first.getName()).equals(queryTokens);
+        final boolean secondNameMatches = sortedNameTokens(second.getName()).equals(queryTokens);
+        if (firstNameMatches != secondNameMatches) {
+            return firstNameMatches ? -1 : 1;
+        }
+        if (firstNameMatches) {
+            return Integer.compare(citationCount(second), citationCount(first));
+        }
+        return 0;
+    }
+
+    private static int citationCount(final AuthorCandidateData candidate) {
+        return candidate.getCitationCount() == null ? 0 : candidate.getCitationCount();
+    }
+
+    private static List<String> sortedNameTokens(final String name) {
+        return Arrays.stream(normalizeName(name).toLowerCase(Locale.ROOT).split(" "))
+                .sorted()
+                .toList();
+    }
+
+    private static String normalizeName(final String name) {
+        return name.trim().replace('-', ' ').replaceAll("\\s+", " ");
     }
 }
