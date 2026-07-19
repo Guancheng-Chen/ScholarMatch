@@ -1,6 +1,7 @@
 package com.scholarmatch.frameworks.data_access_object;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scholarmatch.usecase.exception.ExternalServiceException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -9,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -102,6 +104,25 @@ class SemanticScholarGatewayTest {
 
         gateway.searchAuthors("Geoffrey Hinton");
 
+        verify(httpClient, times(2)).send(any(), any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void failsAfterSecondRateLimitResponse() throws Exception {
+        final HttpClient httpClient = mock(HttpClient.class);
+        final HttpResponse<String> rateLimitedResponse = mock(HttpResponse.class);
+        when(rateLimitedResponse.statusCode()).thenReturn(429);
+        when(httpClient.<String>send(any(), any())).thenReturn(rateLimitedResponse);
+        final SemanticScholarGateway gateway = new SemanticScholarGateway(
+                httpClient,
+                new ObjectMapper());
+
+        final ExternalServiceException exception = assertThrows(
+                ExternalServiceException.class,
+                () -> gateway.searchAuthors("Geoffrey Hinton"));
+
+        assertEquals("Semantic Scholar returned HTTP 429.", exception.getMessage());
         verify(httpClient, times(2)).send(any(), any());
     }
 
