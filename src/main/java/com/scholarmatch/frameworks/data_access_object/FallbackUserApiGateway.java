@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.scholarmatch.entity.Publication;
-import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
+import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 
 /**
  * Decorator over {@link UserAPIGatewayInterface} that first tries a primary
@@ -35,18 +35,17 @@ public final class FallbackUserApiGateway implements UserAPIGatewayInterface {
     }
 
     @Override
-    public List<AuthorCandidateDataAccessInterface> searchAuthors(
-            final String name) {
+    public List<AuthorCandidateData> searchAuthors(final String name) {
         return attempt(
                 () -> this.primary.searchAuthors(name),
                 () -> this.fallback.searchAuthors(name));
     }
 
     @Override
-    public List<Publication> fetchPapersByAuthorId(final String authorId) {
+    public List<Publication> getAuthorPapers(final String authorId) {
         return attempt(
-                () -> this.primary.fetchPapersByAuthorId(authorId),
-                () -> this.fallback.fetchPapersByAuthorId(authorId));
+                () -> this.primary.getAuthorPapers(authorId),
+                () -> this.fallback.getAuthorPapers(authorId));
     }
 
     /**
@@ -58,7 +57,7 @@ public final class FallbackUserApiGateway implements UserAPIGatewayInterface {
      * @param primaryCall the preferred operation
      * @param fallbackCall the fallback operation
      * @param <T> the type returned by the operation
-     * @return the result of the primary or fallback operation
+     * @return the result from the primary or fallback operation
      * @throws DataAccessException if both operations fail
      */
     private <T> T attempt(
