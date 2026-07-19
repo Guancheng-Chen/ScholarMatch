@@ -29,6 +29,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     private static final String PAPER_FIELDS = "title,year,citationCount,externalIds";
     private static final int MAX_AUTHOR_CANDIDATES = 20;
     private static final int MAX_PAPERS = 50;
+    private static final long RATE_LIMIT_RETRY_DELAY_MILLIS = 1_000;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
     private final HttpClient httpClient;
@@ -89,9 +90,13 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
                 .GET()
                 .build();
         try {
-            final HttpResponse<String> response = this.httpClient.send(
+            HttpResponse<String> response = this.httpClient.send(
                     request,
                     HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 429) {
+                Thread.sleep(RATE_LIMIT_RETRY_DELAY_MILLIS);
+                response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            }
             if (response.statusCode() == 404) {
                 final ObjectNode emptyResponse = this.objectMapper.createObjectNode();
                 emptyResponse.putArray("data");
