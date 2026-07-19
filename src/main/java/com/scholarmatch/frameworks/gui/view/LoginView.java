@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -41,8 +42,7 @@ public final class LoginView extends JPanel {
     private static final int DIALOG_WIDTH = 320;
     private static final int FIELD_HEIGHT = 34;
     private static final int BUTTON_HEIGHT = 46;
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final LoginController controller;
     private final LoginViewModel viewModel;
@@ -68,7 +68,7 @@ public final class LoginView extends JPanel {
         emailField.setAlignmentX(Component.CENTER_ALIGNMENT);
         emailField.putClientProperty("JTextField.placeholderText", "Email address");
         emailField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-                Icons.of(FontAwesomeSolid.ENVELOPE, 14, Theme.FG_SUBTLE));
+            Icons.of(FontAwesomeSolid.ENVELOPE, 14, Theme.FG_SUBTLE));
 
         final JPasswordField passwordField = new JPasswordField();
         passwordField.setPreferredSize(new Dimension(DIALOG_WIDTH, FIELD_HEIGHT));
@@ -76,7 +76,7 @@ public final class LoginView extends JPanel {
         passwordField.setAlignmentX(Component.CENTER_ALIGNMENT);
         passwordField.putClientProperty("JTextField.placeholderText", "Password");
         passwordField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-                Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
+            Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
 
         final JLabel validationLabel = new JLabel(" ");
         validationLabel.setForeground(Theme.DANGER_FG);
@@ -90,27 +90,45 @@ public final class LoginView extends JPanel {
         errorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final JButton loginButton = new JButton(
-                "Login", Icons.of(FontAwesomeSolid.SIGN_IN_ALT, 15, Theme.FG_EMPHASIS));
+            "Login", Icons.of(FontAwesomeSolid.SIGN_IN_ALT, 15, Theme.FG_EMPHASIS));
         loginButton.setIconTextGap(8);
         Buttons.accent(loginButton);
         loginButton.setFont(loginButton.getFont().deriveFont(Font.BOLD, 15f));
         loginButton.setPreferredSize(new Dimension(DIALOG_WIDTH, BUTTON_HEIGHT));
         loginButton.setMaximumSize(new Dimension(DIALOG_WIDTH, BUTTON_HEIGHT));
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         loginButton.addActionListener(evt -> {
             final String email = emailField.getText().trim();
             final String password = new String(passwordField.getPassword());
             final String validationError = validate(email, password);
-
             if (validationError != null) {
                 validationLabel.setText(validationError);
                 validationLabel.setVisible(true);
                 return;
             }
-
             validationLabel.setVisible(false);
-            controller.login(email, password);
+            // login() blocks on a network call — run it off the EDT so the dialog (and its
+            // fields) doesn't freeze for the duration of the request.
+            loginButton.setEnabled(false);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    controller.login(email, password);
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    loginButton.setEnabled(true);
+                }
+            }.execute();
+        });
+        // Deferred until this panel is attached to its dialog's root pane, so Enter submits.
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            final javax.swing.JRootPane rootPane = javax.swing.SwingUtilities.getRootPane(loginButton);
+            if (rootPane != null) {
+                rootPane.setDefaultButton(loginButton);
+            }
         });
 
         add(emailField);
@@ -129,15 +147,12 @@ public final class LoginView extends JPanel {
         if (email.isEmpty()) {
             return "Please enter an email address";
         }
-
         if (!EMAIL_PATTERN.matcher(email).matches()) {
             return "Email format is invalid, e.g. name@example.com";
         }
-
         if (password.isEmpty()) {
             return "Please enter a password";
         }
-
         return null;
     }
 }
