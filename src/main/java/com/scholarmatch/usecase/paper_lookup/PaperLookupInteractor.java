@@ -46,8 +46,15 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
 
         try {
             final String normalizedName = normalizeName(inputData.getAuthorName());
+            final List<AuthorCandidateData> searchResults;
+            if (normalizedName.chars().allMatch(Character::isDigit)) {
+                searchResults = List.of(this.userApiGateway.getAuthor(normalizedName));
+            }
+            else {
+                searchResults = this.userApiGateway.searchAuthors(normalizedName);
+            }
             final List<AuthorCandidateData> candidates = rankCandidates(
-                    this.userApiGateway.searchAuthors(normalizedName),
+                    searchResults,
                     normalizedName);
             for (final AuthorCandidateData candidate : candidates) {
                 this.candidatesById.put(candidate.getAuthorId(), candidate);

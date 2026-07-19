@@ -94,6 +94,14 @@ class PaperLookupInteractorTest {
     }
 
     @Test
+    void searchesBySemanticScholarAuthorId() {
+        this.interactor.searchAuthors(new SearchAuthorsInputData("1695689"));
+
+        assertEquals("1695689", this.gateway.lastAuthorId);
+        assertEquals("1695689", this.presenter.candidates.getFirst().getAuthorId());
+    }
+
+    @Test
     void clearsPreviousCandidatesWhenANewSearchFailsValidation() {
         this.interactor.searchAuthors(new SearchAuthorsInputData("Zhijie Yuan"));
         this.interactor.searchAuthors(new SearchAuthorsInputData("  "));
@@ -106,6 +114,7 @@ class PaperLookupInteractorTest {
     private static final class FakeGateway implements UserAPIGatewayInterface {
 
         private String lastQuery;
+        private String lastAuthorId;
         private List<AuthorCandidateData> authorCandidates = List.of(new AuthorCandidateData(
                 "2112339906",
                 "Zhijie Yuan",
@@ -122,6 +131,7 @@ class PaperLookupInteractorTest {
 
         @Override
         public AuthorCandidateData getAuthor(final String authorId) {
+            this.lastAuthorId = authorId;
             return new AuthorCandidateData(
                     authorId,
                     "Zhijie Yuan",
