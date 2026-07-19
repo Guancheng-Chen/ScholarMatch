@@ -2,26 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+
     <groupId>com.scholarmatch</groupId>
-    <artifactId>scholarmatch</artifactId>
+    <artifactId>scholarmatch-prev</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+
     <name>ScholarMatch</name>
     <description>Academic Matchmaking and Collaboration Network</description>
+
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flatlaf.version>3.7.1</flatlaf.version>
+        <ikonli.version>12.4.0</ikonli.version>
         <jackson.version>2.16.1</jackson.version>
         <junit.version>5.10.1</junit.version>
         <checkstyle.version>10.12.5</checkstyle.version>
     </properties>
+
 
     <dependencies>
         <!-- FlatLaf – modern flat Look and Feel for Swing -->
@@ -31,12 +36,27 @@
             <version>${flatlaf.version}</version>
         </dependency>
 
+
+        <!-- Ikonli – scalable vector icon fonts for Swing (FontAwesome pack) -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-swing</artifactId>
+            <version>${ikonli.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
+            <version>${ikonli.version}</version>
+        </dependency>
+
+
         <!-- Jackson Databind – JSON parsing for Semantic Scholar API responses -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+
 
         <!-- JUnit 5 -->
         <dependency>
@@ -46,6 +66,7 @@
             <scope>test</scope>
         </dependency>
 
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -53,6 +74,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
@@ -67,15 +89,17 @@
                 </configuration>
             </plugin>
 
+
             <!-- Exec Maven Plugin – `mvn exec:java` launches the Swing app -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <mainClass>com.scholarmatch.app.Main</mainClass>
+                    <mainClass>com.scholarmatch.app.ScholarMatchApp</mainClass>
                 </configuration>
             </plugin>
+
 
             <!-- Maven Surefire Plugin (JUnit 5) -->
             <plugin>
@@ -83,6 +107,36 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
             </plugin>
+
+
+            <!-- JaCoCo – test coverage reports -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>com/sun/tools/attach/**</exclude>
+                                <exclude>net/bytebuddy/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
 
             <!-- Checkstyle Plugin -->
             <plugin>
@@ -113,6 +167,7 @@
                 </dependencies>
             </plugin>
 
+
             <!-- Maven JAR Plugin – executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -121,7 +176,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.scholarmatch.app.Main</mainClass>
+                            <mainClass>com.scholarmatch.app.ScholarMatchApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -129,3 +184,4 @@
         </plugins>
     </build>
 </project>
+
