@@ -52,8 +52,8 @@ public final class RegisterView extends JPanel {
      * @param viewModel  the observable state for this view
      */
     public RegisterView(
-            final RegisterController controller,
-            final RegisterViewModel viewModel) {
+        final RegisterController controller,
+        final RegisterViewModel viewModel) {
         super(new BorderLayout());
         this.controller = controller;
         this.viewModel = viewModel;
@@ -74,7 +74,7 @@ public final class RegisterView extends JPanel {
         });
 
         final JButton submitButton = new JButton(
-                "Register", Icons.of(FontAwesomeSolid.USER_PLUS, 15, Theme.FG_EMPHASIS));
+            "Register", Icons.of(FontAwesomeSolid.USER_PLUS, 15, Theme.FG_EMPHASIS));
         submitButton.setIconTextGap(8);
         Buttons.accent(submitButton);
         submitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -89,7 +89,7 @@ public final class RegisterView extends JPanel {
 
             if (!password.equals(confirmPassword)) {
                 JOptionPane.showMessageDialog(
-                        this, "Passwords do not match", "Register Failed", JOptionPane.ERROR_MESSAGE);
+                    this, "Passwords do not match", "Register Failed", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             // execute() blocks on a network call — run it off the EDT so the form doesn't
@@ -113,9 +113,9 @@ public final class RegisterView extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setMaximumSize(new Dimension(CARD_WIDTH + 48, Integer.MAX_VALUE));
         addAll(card, titleLabel, strut(),
-                firstNameField, strut(), lastNameField, strut(), emailField, strut(),
-                passwordField, strut(), confirmPasswordField, strut(),
-                submitButton);
+            firstNameField, strut(), lastNameField, strut(), emailField, strut(),
+            passwordField, strut(), confirmPasswordField, strut(),
+            submitButton);
 
         final CenteringScrollPanel centeringPanel = new CenteringScrollPanel(card);
         centeringPanel.setBorder(new EmptyBorder(24, 0, 24, 0));
@@ -142,7 +142,7 @@ public final class RegisterView extends JPanel {
         textField.setAlignmentX(Component.LEFT_ALIGNMENT);
         textField.putClientProperty("JTextField.placeholderText", placeholder);
         textField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-                Icons.of(leadingGlyph, 14, Theme.FG_SUBTLE));
+            Icons.of(leadingGlyph, 14, Theme.FG_SUBTLE));
         return textField;
     }
 
@@ -153,7 +153,7 @@ public final class RegisterView extends JPanel {
         passwordField.setAlignmentX(Component.LEFT_ALIGNMENT);
         passwordField.putClientProperty("JTextField.placeholderText", placeholder);
         passwordField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-                Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
+            Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
         return passwordField;
     }
 
@@ -167,5 +167,3 @@ public final class RegisterView extends JPanel {
         }
     }
 }
-
-
