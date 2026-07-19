@@ -1,6 +1,7 @@
 package com.scholarmatch.usecase.paper_lookup;
 
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 
@@ -46,13 +47,16 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
 
         try {
             final String normalizedName = normalizeName(inputData.getAuthorName());
-            final List<AuthorCandidateData> searchResults;
+            final List<AuthorCandidateDataAccessInterface> gatewayResults;
             if (normalizedName.chars().allMatch(Character::isDigit)) {
-                searchResults = List.of(this.userApiGateway.getAuthor(normalizedName));
+                gatewayResults = List.of(this.userApiGateway.getAuthor(normalizedName));
             }
             else {
-                searchResults = this.userApiGateway.searchAuthors(normalizedName);
+                gatewayResults = this.userApiGateway.searchAuthors(normalizedName);
             }
+            final List<AuthorCandidateData> searchResults = gatewayResults.stream()
+                    .map(AuthorCandidateData::from)
+                    .toList();
             final List<AuthorCandidateData> candidates = rankCandidates(
                     searchResults,
                     normalizedName);

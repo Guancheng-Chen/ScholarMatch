@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
-import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 
 /**
  * Decorator over {@link UserAPIGatewayInterface} that first tries a primary
@@ -35,10 +35,17 @@ public final class FallbackUserApiGateway implements UserAPIGatewayInterface {
     }
 
     @Override
-    public List<AuthorCandidateData> searchAuthors(final String name) {
+    public List<AuthorCandidateDataAccessInterface> searchAuthors(final String name) {
         return attempt(
                 () -> this.primary.searchAuthors(name),
                 () -> this.fallback.searchAuthors(name));
+    }
+
+    @Override
+    public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
+        return attempt(
+                () -> this.primary.getAuthor(authorId),
+                () -> this.fallback.getAuthor(authorId));
     }
 
     @Override

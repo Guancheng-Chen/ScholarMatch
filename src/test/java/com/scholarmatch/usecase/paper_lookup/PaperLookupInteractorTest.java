@@ -1,6 +1,8 @@
 package com.scholarmatch.usecase.paper_lookup;
 
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.frameworks.data_access_object.AuthorCandidateDto;
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +63,8 @@ class PaperLookupInteractorTest {
 
     @Test
     void ranksMatchingNamesByCitationsAndReturnsTwentyCandidates() {
-        final List<AuthorCandidateData> candidates = new ArrayList<>(IntStream.range(0, 20)
-                .mapToObj(index -> new AuthorCandidateData(
+        final List<AuthorCandidateDataAccessInterface> candidates = new ArrayList<>(IntStream.range(0, 20)
+                .mapToObj(index -> new AuthorCandidateDto(
                         "other-" + index,
                         "F. Li",
                         List.of(),
@@ -70,14 +72,14 @@ class PaperLookupInteractorTest {
                         3,
                         100))
                 .toList());
-        candidates.add(new AuthorCandidateData(
+        candidates.add(new AuthorCandidateDto(
                 "split-profile",
                 "Fei-Fei Li",
                 List.of(),
                 8,
                 7,
                 1000));
-        candidates.add(new AuthorCandidateData(
+        candidates.add(new AuthorCandidateDto(
                 "48004138",
                 "Li Fei-Fei",
                 List.of(),
@@ -115,7 +117,7 @@ class PaperLookupInteractorTest {
 
         private String lastQuery;
         private String lastAuthorId;
-        private List<AuthorCandidateData> authorCandidates = List.of(new AuthorCandidateData(
+        private List<AuthorCandidateDataAccessInterface> authorCandidates = List.of(new AuthorCandidateDto(
                 "2112339906",
                 "Zhijie Yuan",
                 List.of(),
@@ -124,15 +126,15 @@ class PaperLookupInteractorTest {
                 14));
 
         @Override
-        public List<AuthorCandidateData> searchAuthors(final String authorName) {
+        public List<AuthorCandidateDataAccessInterface> searchAuthors(final String authorName) {
             this.lastQuery = authorName;
             return this.authorCandidates;
         }
 
         @Override
-        public AuthorCandidateData getAuthor(final String authorId) {
+        public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
             this.lastAuthorId = authorId;
-            return new AuthorCandidateData(
+            return new AuthorCandidateDto(
                     authorId,
                     "Zhijie Yuan",
                     List.of(),

@@ -1,8 +1,6 @@
 package com.scholarmatch.usecase.data_access_interface;
 
 import com.scholarmatch.entity.Publication;
-import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
-
 import java.util.List;
 
 /**
@@ -16,7 +14,7 @@ public interface UserAPIGatewayInterface {
      * @param authorName the author name query
      * @return matching author candidates
      */
-    List<AuthorCandidateData> searchAuthors(String authorName);
+    List<AuthorCandidateDataAccessInterface> searchAuthors(String authorName);
 
     /**
      * Retrieves one author by Semantic Scholar author ID.
@@ -24,7 +22,7 @@ public interface UserAPIGatewayInterface {
      * @param authorId the Semantic Scholar author ID
      * @return the matching author
      */
-    AuthorCandidateData getAuthor(String authorId);
+    AuthorCandidateDataAccessInterface getAuthor(String authorId);
 
     /**
      * Retrieves publications for one external author ID.

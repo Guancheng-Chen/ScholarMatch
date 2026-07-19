@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
-import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,12 +62,12 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     }
 
     @Override
-    public List<AuthorCandidateData> searchAuthors(final String authorName) {
+    public List<AuthorCandidateDataAccessInterface> searchAuthors(final String authorName) {
         final String encodedName = URLEncoder.encode(authorName, StandardCharsets.UTF_8);
         final String uri = API_BASE_URL + "/author/search?query=" + encodedName
                 + "&limit=" + AUTHOR_SEARCH_RESULT_LIMIT + "&fields=" + AUTHOR_FIELDS;
         final JsonNode root = this.sendGet(uri);
-        final List<AuthorCandidateData> candidates = new ArrayList<>();
+        final List<AuthorCandidateDataAccessInterface> candidates = new ArrayList<>();
         for (final JsonNode node : root.path("data")) {
             candidates.add(this.readAuthorCandidate(node));
         }
@@ -75,7 +75,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     }
 
     @Override
-    public AuthorCandidateData getAuthor(final String authorId) {
+    public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
         final String encodedAuthorId = URLEncoder.encode(authorId, StandardCharsets.UTF_8);
         final String uri = API_BASE_URL + "/author/" + encodedAuthorId + "?fields=" + AUTHOR_FIELDS;
         final JsonNode root = this.sendGet(uri);
@@ -146,8 +146,8 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
         return values;
     }
 
-    private AuthorCandidateData readAuthorCandidate(final JsonNode node) {
-        return new AuthorCandidateData(
+    private AuthorCandidateDataAccessInterface readAuthorCandidate(final JsonNode node) {
+        return new AuthorCandidateDto(
                 node.path("authorId").asText(),
                 node.path("name").asText(),
                 this.readStringList(node.path("affiliations")),
