@@ -84,6 +84,17 @@ class PaperLookupInteractorTest {
         }
 
         @Override
+        public AuthorCandidateData getAuthor(final String authorId) {
+            return new AuthorCandidateData(
+                    authorId,
+                    "Zhijie Yuan",
+                    List.of(),
+                    6,
+                    2,
+                    14);
+        }
+
+        @Override
         public List<Publication> getAuthorPapers(final String authorId) {
             return List.of(new Publication(
                     "10.0000/verification",

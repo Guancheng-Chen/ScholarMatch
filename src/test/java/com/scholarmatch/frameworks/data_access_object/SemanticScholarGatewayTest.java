@@ -46,6 +46,28 @@ class SemanticScholarGatewayTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void getsAuthorById() throws Exception {
+        final HttpClient httpClient = mock(HttpClient.class);
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("""
+                {"authorId":"1695689","name":"Geoffrey E. Hinton","affiliations":[],
+                "paperCount":467,"hIndex":162,"citationCount":578042}
+                """);
+        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        final SemanticScholarGateway gateway = new SemanticScholarGateway(
+                httpClient,
+                new ObjectMapper());
+
+        final var author = gateway.getAuthor("1695689");
+
+        assertEquals("1695689", author.getAuthorId());
+        assertEquals("Geoffrey E. Hinton", author.getName());
+        assertEquals(467, author.getPaperCount());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void mapsPaperWithoutDoi() throws Exception {
         final HttpClient httpClient = mock(HttpClient.class);
         final HttpResponse<String> response = mock(HttpResponse.class);

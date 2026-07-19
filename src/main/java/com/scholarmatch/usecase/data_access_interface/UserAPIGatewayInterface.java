@@ -19,6 +19,14 @@ public interface UserAPIGatewayInterface {
     List<AuthorCandidateData> searchAuthors(String authorName);
 
     /**
+     * Retrieves one author by Semantic Scholar author ID.
+     *
+     * @param authorId the Semantic Scholar author ID
+     * @return the matching author
+     */
+    AuthorCandidateData getAuthor(String authorId);
+
+    /**
      * Retrieves publications for one external author ID.
      *
      * @param authorId the external author ID

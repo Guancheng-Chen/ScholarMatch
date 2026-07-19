@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
+import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 
 import java.io.IOException;
@@ -68,15 +69,20 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
         final JsonNode root = this.sendGet(uri);
         final List<AuthorCandidateData> candidates = new ArrayList<>();
         for (final JsonNode node : root.path("data")) {
-            candidates.add(new AuthorCandidateData(
-                    node.path("authorId").asText(),
-                    node.path("name").asText(),
-                    this.readStringList(node.path("affiliations")),
-                    this.readNullableInteger(node, "paperCount"),
-                    this.readNullableInteger(node, "hIndex"),
-                    this.readNullableInteger(node, "citationCount")));
+            candidates.add(this.readAuthorCandidate(node));
         }
         return candidates;
+    }
+
+    @Override
+    public AuthorCandidateData getAuthor(final String authorId) {
+        final String encodedAuthorId = URLEncoder.encode(authorId, StandardCharsets.UTF_8);
+        final String uri = API_BASE_URL + "/author/" + encodedAuthorId + "?fields=" + AUTHOR_FIELDS;
+        final JsonNode root = this.sendGet(uri);
+        if (root.path("authorId").asText().isBlank()) {
+            throw new ResourceNotFoundException("Semantic Scholar author was not found.");
+        }
+        return this.readAuthorCandidate(root);
     }
 
     @Override
@@ -138,6 +144,16 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
             }
         }
         return values;
+    }
+
+    private AuthorCandidateData readAuthorCandidate(final JsonNode node) {
+        return new AuthorCandidateData(
+                node.path("authorId").asText(),
+                node.path("name").asText(),
+                this.readStringList(node.path("affiliations")),
+                this.readNullableInteger(node, "paperCount"),
+                this.readNullableInteger(node, "hIndex"),
+                this.readNullableInteger(node, "citationCount"));
     }
 
     private Integer readNullableInteger(final JsonNode node, final String fieldName) {
