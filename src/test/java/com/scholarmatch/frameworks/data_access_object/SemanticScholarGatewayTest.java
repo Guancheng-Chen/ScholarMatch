@@ -20,6 +20,54 @@ class SemanticScholarGatewayTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void mapsAuthorSearchResponse() throws Exception {
+        final HttpClient httpClient = mock(HttpClient.class);
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("""
+                {"data":[{"authorId":"1695689","name":"Geoffrey E. Hinton",
+                "affiliations":["Google","University of Toronto"],"paperCount":467,
+                "hIndex":162,"citationCount":578042}]}
+                """);
+        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        final SemanticScholarGateway gateway = new SemanticScholarGateway(
+                httpClient,
+                new ObjectMapper());
+
+        final var candidates = gateway.searchAuthors("Geoffrey Hinton");
+
+        assertEquals(1, candidates.size());
+        assertEquals("1695689", candidates.getFirst().getAuthorId());
+        assertEquals("Geoffrey E. Hinton", candidates.getFirst().getName());
+        assertEquals(162, candidates.getFirst().getHIndex());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void mapsPaperWithoutDoi() throws Exception {
+        final HttpClient httpClient = mock(HttpClient.class);
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("""
+                {"data":[{"title":"The Forward-Forward Algorithm","year":2022,
+                "citationCount":441,"externalIds":{}}]}
+                """);
+        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        final SemanticScholarGateway gateway = new SemanticScholarGateway(
+                httpClient,
+                new ObjectMapper());
+
+        final var papers = gateway.getAuthorPapers("1695689");
+
+        assertEquals(1, papers.size());
+        assertEquals("", papers.getFirst().getDoi());
+        assertEquals("The Forward-Forward Algorithm", papers.getFirst().getTitle());
+        assertEquals(2022, papers.getFirst().getYear());
+        assertEquals(441, papers.getFirst().getCitationCount());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void requestsTwentyAuthorCandidates() throws Exception {
         final HttpClient httpClient = mock(HttpClient.class);
         final HttpResponse<String> response = mock(HttpResponse.class);
