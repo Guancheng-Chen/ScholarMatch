@@ -1,5 +1,7 @@
 package com.scholarmatch.usecase.paper_lookup;
 
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,22 @@ public final class AuthorCandidateData {
         this.paperCount = paperCount;
         this.hIndex = hIndex;
         this.citationCount = citationCount;
+    }
+
+    /**
+     * Creates use-case output data from an author returned by the data gateway.
+     *
+     * @param candidate the gateway author data
+     * @return author data suitable for the paper lookup output boundary
+     */
+    public static AuthorCandidateData from(final AuthorCandidateDataAccessInterface candidate) {
+        return new AuthorCandidateData(
+                candidate.getAuthorId(),
+                candidate.getName(),
+                candidate.getAffiliations(),
+                candidate.getPaperCount(),
+                candidate.getHIndex(),
+                candidate.getCitationCount());
     }
 
     /** @return the Semantic Scholar author ID */
