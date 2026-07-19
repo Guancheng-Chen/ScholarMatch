@@ -38,12 +38,9 @@ public final class LocalUserApiGateway implements UserAPIGatewayInterface {
         "he-local", List.of(PAPERS.get(1)));
 
     private static final List<AuthorCandidateDataAccessInterface> AUTHORS = List.of(
-        new AuthorCandidateDto(
-                "hinton-local", "Geoffrey Hinton", List.of("University of Toronto"), 466, 135, 900000),
-        new AuthorCandidateDto(
-                "vaswani-local", "Ashish Vaswani", List.of("Google Brain"), 50, 45, 150000),
-        new AuthorCandidateDto(
-                "he-local", "Kaiming He", List.of("Meta AI"), 300, 105, 500000));
+        new AuthorCandidateDto("hinton-local", "Geoffrey Hinton", "University of Toronto", 466, 135, 900000),
+        new AuthorCandidateDto("vaswani-local", "Ashish Vaswani", "Google Brain", 50, 45, 150000),
+        new AuthorCandidateDto("he-local", "Kaiming He", "Meta AI", 300, 105, 500000));
 
     @Override
     public List<AuthorCandidateDataAccessInterface> searchAuthors(final String name) {
@@ -58,17 +55,7 @@ public final class LocalUserApiGateway implements UserAPIGatewayInterface {
     }
 
     @Override
-    public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
-        for (final AuthorCandidateDataAccessInterface author : AUTHORS) {
-            if (author.getAuthorId().equals(authorId)) {
-                return author;
-            }
-        }
-        throw new ResourceNotFoundException("No offline sample data available for author ID: " + authorId);
-    }
-
-    @Override
-    public List<Publication> getAuthorPapers(final String authorId) {
+    public List<Publication> fetchPapersByAuthorId(final String authorId) {
         // Only 3 curated demo IDs have paper data here. Any other ID must have come from the
         // real API's search results (e.g. selected before the follow-up "import" call got rate
         // limited), which this offline dataset has no way to serve — so this must throw rather
