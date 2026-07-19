@@ -32,7 +32,7 @@ When configured, `SemanticScholarGateway` sends it in the `x-api-key` header. Ne
 
 **Note: `hIndex` / `citationCount` can be missing or `null`.** The client code (`SemanticScholarGateway.searchAuthors(...)`) treats them as possibly absent: `node.has("hIndex") && !node.get("hIndex").isNull() ? ... : null`, mapped to `AuthorCandidateDataAccessInterface.getHIndex()` / `getCitationCount()`, both boxed `Integer` and nullable. This defensive handling exists in the code, but hasn't been confirmed against a real low-citation or newly registered author via Postman — searching `/author/search` for an obscure author with few papers and saving the raw response would confirm whether the "N/A instead of 0" design decision (already assumed in the blueprint) actually triggers on real data.
 
-Up to 20 candidates are kept (`MAX_AUTHOR_CANDIDATES`), used to disambiguate authors sharing a name.
+The gateway requests up to 200 results so common names have enough candidates for local ranking. The interactor moves candidates with the same normalized name tokens to the front, orders those matches by citation count, and returns at most 20 candidates to the view. A numeric query is treated as a Semantic Scholar author ID, providing a fallback when name search cannot find the correct profile.
 
 ## GET https://api.semanticscholar.org/graph/v1/author/{authorId}/papers
 
