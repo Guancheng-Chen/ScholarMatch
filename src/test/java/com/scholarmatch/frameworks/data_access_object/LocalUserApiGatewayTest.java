@@ -46,15 +46,28 @@ class LocalUserApiGatewayTest {
     }
 
     @Test
-    void testFetchPapersByAuthorIdReturnsKnownAuthorPapers() {
-        final List<Publication> papers = gateway.fetchPapersByAuthorId("he-local");
+    void testGetAuthorReturnsKnownAuthor() {
+        final AuthorCandidateDataAccessInterface author = gateway.getAuthor("hinton-local");
+
+        assertEquals("Geoffrey Hinton", author.getName());
+        assertEquals(List.of("University of Toronto"), author.getAffiliations());
+    }
+
+    @Test
+    void testGetAuthorThrowsForUnknownId() {
+        assertThrows(ResourceNotFoundException.class, () -> gateway.getAuthor("unknown-id"));
+    }
+
+    @Test
+    void testGetAuthorPapersReturnsKnownAuthorPapers() {
+        final List<Publication> papers = gateway.getAuthorPapers("he-local");
 
         assertEquals(1, papers.size());
         assertEquals("Deep Residual Learning for Image Recognition", papers.get(0).getTitle());
     }
 
     @Test
-    void testFetchPapersByAuthorIdThrowsForUnknownId() {
-        assertThrows(ResourceNotFoundException.class, () -> gateway.fetchPapersByAuthorId("unknown-id"));
+    void testGetAuthorPapersThrowsForUnknownId() {
+        assertThrows(ResourceNotFoundException.class, () -> gateway.getAuthorPapers("unknown-id"));
     }
 }
