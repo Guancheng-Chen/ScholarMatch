@@ -92,7 +92,7 @@ class SemanticScholarGatewayTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void requestsTwentyAuthorCandidates() throws Exception {
+    void requestsEnoughAuthorsForLocalRanking() throws Exception {
         final HttpClient httpClient = mock(HttpClient.class);
         final HttpResponse<String> response = mock(HttpResponse.class);
         when(response.statusCode()).thenReturn(200);
@@ -106,7 +106,7 @@ class SemanticScholarGatewayTest {
 
         final ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
         verify(httpClient).send(requestCaptor.capture(), any());
-        assertTrue(requestCaptor.getValue().uri().getQuery().contains("limit=20"));
+        assertTrue(requestCaptor.getValue().uri().getQuery().contains("limit=200"));
     }
 
     @Test

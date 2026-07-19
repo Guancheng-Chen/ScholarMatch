@@ -29,7 +29,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     private static final String AUTHOR_FIELDS = "authorId,name,affiliations,paperCount,hIndex,citationCount";
     private static final String PAPER_FIELDS = "title,year,citationCount,externalIds";
     private static final String API_KEY_ENVIRONMENT_VARIABLE = "SEMANTIC_SCHOLAR_API_KEY";
-    private static final int MAX_AUTHOR_CANDIDATES = 20;
+    private static final int AUTHOR_SEARCH_RESULT_LIMIT = 200;
     private static final int MAX_PAPERS = 50;
     private static final long RATE_LIMIT_RETRY_DELAY_MILLIS = 1_000;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
@@ -65,7 +65,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     public List<AuthorCandidateData> searchAuthors(final String authorName) {
         final String encodedName = URLEncoder.encode(authorName, StandardCharsets.UTF_8);
         final String uri = API_BASE_URL + "/author/search?query=" + encodedName
-                + "&limit=" + MAX_AUTHOR_CANDIDATES + "&fields=" + AUTHOR_FIELDS;
+                + "&limit=" + AUTHOR_SEARCH_RESULT_LIMIT + "&fields=" + AUTHOR_FIELDS;
         final JsonNode root = this.sendGet(uri);
         final List<AuthorCandidateData> candidates = new ArrayList<>();
         for (final JsonNode node : root.path("data")) {
