@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.regex.Pattern;
 
 /**
  * Content of the login popup: just an email field, a password field, and a
@@ -40,6 +41,8 @@ public final class LoginView extends JPanel {
     private static final int DIALOG_WIDTH = 320;
     private static final int FIELD_HEIGHT = 34;
     private static final int BUTTON_HEIGHT = 46;
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final LoginController controller;
     private final LoginViewModel viewModel;
@@ -75,6 +78,12 @@ public final class LoginView extends JPanel {
         passwordField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
                 Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
 
+        final JLabel validationLabel = new JLabel(" ");
+        validationLabel.setForeground(Theme.DANGER_FG);
+        validationLabel.setFont(validationLabel.getFont().deriveFont(11f));
+        validationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        validationLabel.setVisible(false);
+
         final JLabel errorLabel = new JLabel(" ");
         errorLabel.setForeground(Theme.DANGER_FG);
         errorLabel.setFont(errorLabel.getFont().deriveFont(11f));
@@ -92,6 +101,15 @@ public final class LoginView extends JPanel {
         loginButton.addActionListener(evt -> {
             final String email = emailField.getText().trim();
             final String password = new String(passwordField.getPassword());
+            final String validationError = validate(email, password);
+
+            if (validationError != null) {
+                validationLabel.setText(validationError);
+                validationLabel.setVisible(true);
+                return;
+            }
+
+            validationLabel.setVisible(false);
             controller.login(email, password);
         });
 
@@ -101,8 +119,25 @@ public final class LoginView extends JPanel {
         add(Box.createVerticalStrut(14));
         add(loginButton);
         add(Box.createVerticalStrut(10));
+        add(validationLabel);
         add(errorLabel);
 
         viewModel.errorMessageProperty().addListener(errorLabel::setText);
+    }
+
+    private String validate(final String email, final String password) {
+        if (email.isEmpty()) {
+            return "Please enter an email address";
+        }
+
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            return "Email format is invalid, e.g. name@example.com";
+        }
+
+        if (password.isEmpty()) {
+            return "Please enter a password";
+        }
+
+        return null;
     }
 }
