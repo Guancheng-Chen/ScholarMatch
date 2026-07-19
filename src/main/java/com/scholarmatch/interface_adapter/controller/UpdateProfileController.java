@@ -8,7 +8,7 @@ import com.scholarmatch.usecase.update_profile.UpdateProfileInputData;
 import java.util.List;
 
 /**
- * Controller for the update-profile use case.
+ * Controller that forwards profile-edit form submission to the update-profile use case.
  */
 public final class UpdateProfileController {
 
@@ -24,23 +24,27 @@ public final class UpdateProfileController {
     }
 
     /**
-     * Submits updated profile information.
+     * Called when the user submits the profile-edit form.
      *
-     * @param email updated email
-     * @param institution updated institution
-     * @param academicLevel updated academic level
-     * @param researchField updated research field
-     * @param lookingFor updated collaboration type
-     * @param collaborationDescription updated collaboration description
-     * @param researchDescription updated research description
-     * @param weeklyAvailabilityHours updated weekly availability
-     * @param fundingStatus updated funding status
-     * @param researchInterests updated research interests
-     * @param phoneNumber updated phone number
-     * @param hIndex updated h-index
-     * @param totalCitations updated citation count
-     * @param educations updated education history
-     * @param publications updated publications
+     * <p>The user's identity is resolved server-side from the request's auth token — the
+     * interactor itself has no session dependency.
+     *
+     * @param email                    updated email address; the server rejects this if
+     *                                  another account already uses it
+     * @param institution              updated institution
+     * @param academicLevel            updated academic level name
+     * @param researchField            updated research field name
+     * @param lookingFor               updated collaboration type name
+     * @param collaborationDescription updated description
+     * @param researchDescription      updated research description
+     * @param weeklyAvailabilityHours  updated weekly availability in hours
+     * @param fundingStatus            updated funding status name
+     * @param researchInterests        updated interest tags
+     * @param phoneNumber              updated phone number
+     * @param hIndex                   manually-entered h-index, or null if left blank
+     * @param totalCitations           manually-entered total citations, or null if left blank
+     * @param educations               updated education history
+     * @param publications             updated publication list
      */
     public void updateProfile(
             final String email,
@@ -59,21 +63,8 @@ public final class UpdateProfileController {
             final List<Education> educations,
             final List<Publication> publications) {
         this.interactor.execute(new UpdateProfileInputData(
-                email,
-                institution,
-                academicLevel,
-                researchField,
-                lookingFor,
-                collaborationDescription,
-                researchDescription,
-                weeklyAvailabilityHours,
-                fundingStatus,
-                researchInterests,
-                phoneNumber,
-                hIndex,
-                totalCitations,
-                educations,
-                publications
-        ));
+                email, institution, academicLevel, researchField, lookingFor,
+                collaborationDescription, researchDescription, weeklyAvailabilityHours, fundingStatus,
+                researchInterests, phoneNumber, hIndex, totalCitations, educations, publications));
     }
 }
