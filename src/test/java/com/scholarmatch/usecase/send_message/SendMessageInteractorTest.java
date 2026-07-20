@@ -34,7 +34,6 @@ class SendMessageInteractorTest {
         interactor = new SendMessageInteractor(dataAccessObject, outputBoundary);
     }
 
-
     private String captureFailMessage(final SendMessageInputData inputData) {
         interactor.execute(inputData);
         final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -42,14 +41,11 @@ class SendMessageInteractorTest {
         return captor.getValue();
     }
 
-
     @Test
     void testExecuteSucceedsWithValidMessage() {
         final Message sent = new Message("msg-1", "sender-1", "receiver-1", "Hello!", LocalDateTime.now());
         when(dataAccessObject.sendMessage("receiver-1", "Hello!")).thenReturn(sent);
-
         interactor.execute(new SendMessageInputData("receiver-1", "Hello!"));
-
         verify(dataAccessObject).sendMessage("receiver-1", "Hello!");
         verify(outputBoundary).prepareSuccessView(any());
         verify(outputBoundary, never()).prepareFailView(anyString());
@@ -79,8 +75,6 @@ class SendMessageInteractorTest {
     @Test
     void testFailsWhenContentTooLong() {
         final String tooLong = "x".repeat(1001);
-
-
         assertTrue(captureFailMessage(new SendMessageInputData("receiver-1", tooLong))
                 .contains("Message must be at most 1000 characters (currently 1001)."));
     }
@@ -90,11 +84,7 @@ class SendMessageInteractorTest {
         final String maxLength = "x".repeat(1000);
         final Message sent = new Message("msg-1", "sender-1", "receiver-1", maxLength, LocalDateTime.now());
         when(dataAccessObject.sendMessage("receiver-1", maxLength)).thenReturn(sent);
-
-
         interactor.execute(new SendMessageInputData("receiver-1", maxLength));
-
-
         verify(dataAccessObject).sendMessage("receiver-1", maxLength);
         verify(outputBoundary, never()).prepareFailView(anyString());
     }
@@ -109,11 +99,7 @@ class SendMessageInteractorTest {
     void testExecuteFailsWhenServerRejectsMessage() {
         when(dataAccessObject.sendMessage(anyString(), anyString()))
                 .thenThrow(new InvalidRequestException("Users have not mutually matched"));
-
-
         interactor.execute(new SendMessageInputData("receiver-1", "Hello!"));
-
-
         verify(outputBoundary).prepareFailView("Users have not mutually matched");
     }
 }

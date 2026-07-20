@@ -54,9 +54,7 @@ class LoadMatchesInteractorTest {
     @Test
     void testExecuteReturnsConfirmedMatchesInOrder() {
         when(dataAccessObject.getMatches()).thenReturn(List.of(matchedUser("m1"), matchedUser("m2")));
-
         interactor.execute();
-
         final ArgumentCaptor<LoadMatchesOutputData> captor = ArgumentCaptor.forClass(LoadMatchesOutputData.class);
         verify(outputBoundary).prepareSuccessView(captor.capture());
         assertEquals(2, captor.getValue().getMatches().size());
@@ -67,9 +65,7 @@ class LoadMatchesInteractorTest {
     @Test
     void testExecuteReturnsEmptyListWhenNoMatches() {
         when(dataAccessObject.getMatches()).thenReturn(List.of());
-
         interactor.execute();
-
         final ArgumentCaptor<LoadMatchesOutputData> captor = ArgumentCaptor.forClass(LoadMatchesOutputData.class);
         verify(outputBoundary).prepareSuccessView(captor.capture());
         assertEquals(0, captor.getValue().getMatches().size());
@@ -78,9 +74,7 @@ class LoadMatchesInteractorTest {
     @Test
     void testExecuteFailsWhenDataAccessThrows() {
         when(dataAccessObject.getMatches()).thenThrow(new ExternalServiceException("Server unreachable"));
-
         interactor.execute();
-
         verify(outputBoundary).prepareFailView("Server unreachable");
     }
 }
