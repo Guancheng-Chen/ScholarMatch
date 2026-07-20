@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.gui.sytle;
+package com.scholarmatch.frameworks.gui.style;
 
 /**
  * Implemented by components whose internal layout depends on the width they're given —
