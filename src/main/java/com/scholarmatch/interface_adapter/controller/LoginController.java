@@ -4,7 +4,7 @@ import com.scholarmatch.usecase.login.LoginInputBoundary;
 import com.scholarmatch.usecase.login.LoginInputData;
 
 /**
- * Controller for the login use case.
+ * Controller that forwards login form submission to the login use case.
  */
 public final class LoginController {
 
@@ -20,13 +20,12 @@ public final class LoginController {
     }
 
     /**
-     * Sends the entered credentials to the login use case.
+     * Called when the user submits the login form.
      *
-     * @param email the entered email
-     * @param password the entered password
+     * @param email    the entered email address
+     * @param password the entered plain-text password
      */
     public void login(final String email, final String password) {
-        final LoginInputData inputData = new LoginInputData(email, password);
-        this.interactor.execute(inputData);
+        this.interactor.execute(new LoginInputData(email, password));
     }
 }
