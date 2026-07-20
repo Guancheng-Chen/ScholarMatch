@@ -2,26 +2,28 @@ package com.scholarmatch.usecase.skip;
 
 /**
  * Input data for the skip use case.
+ *
+ * <p>The skipped user's ID is carried for symmetry with every other card-decision use
+ * case and in case a future variant needs it (e.g. per-user skip analytics), even
+ * though today's interactor does nothing with it — skip has nothing to persist.
  */
 public final class SkipInputData {
 
-    private final String candidateUserId;
+    private final String skippedUserId;
 
     /**
-     * Constructs skip input data.
+     * Constructs SkipInputData.
      *
-     * @param candidateUserId the ID of the candidate being skipped
+     * @param skippedUserId the ID of the user who was skipped
      */
-    public SkipInputData(final String candidateUserId) {
-        this.candidateUserId = candidateUserId;
+    public SkipInputData(final String skippedUserId) {
+        this.skippedUserId = skippedUserId;
     }
 
     /**
-     * Returns the skipped candidate's ID.
-     *
-     * @return the candidate ID
+     * @return the ID of the user who was skipped
      */
-    public String getCandidateUserId() {
-        return candidateUserId;
+    public String getSkippedUserId() {
+        return this.skippedUserId;
     }
 }

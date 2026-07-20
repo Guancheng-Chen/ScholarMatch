@@ -5,16 +5,13 @@
             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <groupId>com.scholarmatch</groupId>
     <artifactId>scholarmatch-prev</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-
     <name>ScholarMatch</name>
     <description>Academic Matchmaking and Collaboration Network</description>
-
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -25,8 +22,9 @@
         <jackson.version>2.16.1</jackson.version>
         <junit.version>5.10.1</junit.version>
         <checkstyle.version>10.12.5</checkstyle.version>
+        <!-- 添加了 Kordamp Ikonli 的版本号 -->
+        <ikonli.version>12.3.1</ikonli.version>
     </properties>
-
 
     <dependencies>
         <!-- FlatLaf – modern flat Look and Feel for Swing -->
@@ -35,7 +33,6 @@
             <artifactId>flatlaf</artifactId>
             <version>${flatlaf.version}</version>
         </dependency>
-
 
         <!-- Ikonli – scalable vector icon fonts for Swing (FontAwesome pack) -->
         <dependency>
@@ -49,7 +46,6 @@
             <version>${ikonli.version}</version>
         </dependency>
 
-
         <!-- Jackson Databind – JSON parsing for Semantic Scholar API responses -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -57,6 +53,19 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!-- Kordamp Ikonli 核心库（支持 Swing） -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-swing</artifactId>
+            <version>${ikonli.version}</version>
+        </dependency>
+
+        <!-- Kordamp Ikonli 图标包：FontAwesome 5 -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
+            <version>${ikonli.version}</version>
+        </dependency>
 
         <!-- JUnit 5 -->
         <dependency>
@@ -66,7 +75,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -74,7 +82,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -89,7 +96,6 @@
                 </configuration>
             </plugin>
 
-
             <!-- Exec Maven Plugin – `mvn exec:java` launches the Swing app -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -100,14 +106,15 @@
                 </configuration>
             </plugin>
 
-
             <!-- Maven Surefire Plugin (JUnit 5) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
+                <configuration>
+                    <argLine>@{argLine} --add-opens java.net.http/java.net.http=ALL-UNNAMED -XX:+EnableDynamicAgentLoading</argLine>
+                </configuration>
             </plugin>
-
 
             <!-- JaCoCo – test coverage reports -->
             <plugin>
@@ -136,7 +143,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <!-- Checkstyle Plugin -->
             <plugin>
@@ -167,7 +173,6 @@
                 </dependencies>
             </plugin>
 
-
             <!-- Maven JAR Plugin – executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -184,4 +189,3 @@
         </plugins>
     </build>
 </project>
-
