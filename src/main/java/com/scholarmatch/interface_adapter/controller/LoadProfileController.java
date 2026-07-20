@@ -17,4 +17,11 @@ public final class LoadProfileController {
     public LoadProfileController(final LoadProfileInputBoundary loadProfileInteractor) {
         this.loadProfileInteractor = loadProfileInteractor;
     }
+
+    /**
+     * Loads the current user's profile.
+     */
+    public void execute() {
+        this.loadProfileInteractor.execute();
+    }
 }
