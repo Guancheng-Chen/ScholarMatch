@@ -3,7 +3,7 @@ package com.scholarmatch.interface_adapter.controller;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInputBoundary;
 
 /**
- * Controller for the delete-account use case.
+ * Controller that forwards delete-account requests to the delete-account use case.
  */
 public final class DeleteAccountController {
 
@@ -14,13 +14,12 @@ public final class DeleteAccountController {
      *
      * @param interactor the delete-account use case
      */
-    public DeleteAccountController(
-            final DeleteAccountInputBoundary interactor) {
+    public DeleteAccountController(final DeleteAccountInputBoundary interactor) {
         this.interactor = interactor;
     }
 
     /**
-     * Sends a delete-account request to the use case.
+     * Called when the user confirms they want to permanently delete their account.
      */
     public void deleteAccount() {
         this.interactor.execute();
