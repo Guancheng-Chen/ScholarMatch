@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.gui.view;
 
-import com.scholarmatch.frameworks.gui.component.MatchedUserCard;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;

@@ -6,7 +6,6 @@ import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
-import com.scholarmatch.frameworks.gui.component.MatchedUserCard;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
 import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
