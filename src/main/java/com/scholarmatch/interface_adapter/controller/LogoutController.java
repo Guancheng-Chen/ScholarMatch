@@ -4,7 +4,7 @@ import com.scholarmatch.usecase.logout.LogoutInputBoundary;
 import com.scholarmatch.usecase.logout.LogoutInputData;
 
 /**
- * Controller for the logout use case.
+ * Controller that forwards logout requests to the logout use case.
  */
 public final class LogoutController {
 
@@ -20,10 +20,9 @@ public final class LogoutController {
     }
 
     /**
-     * Sends a logout request to the logout use case.
+     * Called when the user clicks Logout.
      */
     public void logout() {
-        final LogoutInputData inputData = new LogoutInputData();
-        this.interactor.execute(inputData);
+        this.interactor.execute(new LogoutInputData());
     }
 }
