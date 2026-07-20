@@ -18,15 +18,12 @@ import com.scholarmatch.usecase.dto.UserData;
 import com.scholarmatch.usecase.recommend.RecommendInputBoundary;
 import com.scholarmatch.usecase.skip.SkipInputBoundary;
 
-
 import org.junit.jupiter.api.Test;
-
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import java.util.List;
-
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,9 +57,7 @@ class RecommendViewTest {
                 new SkipController(mock(SkipInputBoundary.class)),
                 viewModel);
 
-
         SwingUtilities.invokeAndWait(() -> viewModel.setErrorMessage("Could not load recommendations"));
-
 
         final JLabel label = SwingTestSupport.find(view, JLabel.class, 0);
         assertEquals("Could not load recommendations", label.getText());
@@ -80,7 +75,6 @@ class RecommendViewTest {
         // The constructor only registers listeners and kicks off a refresh — nothing renders
         // until the card-stack (or error) listener actually fires, so trigger it explicitly.
         viewModel.setCardStack(List.of());
-
 
         final JLabel label = SwingTestSupport.find(view, JLabel.class, 0);
         assertEquals("No more recommendations right now.", label.getText());
@@ -133,7 +127,6 @@ class RecommendViewTest {
         assertEquals(1, viewModel.getCardStack().size());
     }
 
-
     @Test
     void testConnectCallsConnectControllerAndPermanentlyExcludesTheUser() {
         final ConnectInputBoundary interactor = mock(ConnectInputBoundary.class);
@@ -147,25 +140,20 @@ class RecommendViewTest {
                 viewModel);
         viewModel.setCardStack(List.of(user));
 
-
         SwingTestSupport.find(view, JButton.class, 2).doClick();
-
 
         verify(interactor, times(1)).execute(org.mockito.ArgumentMatchers.argThat(
                 data -> data != null && "connect-me".equals(data.getConnectedUserId())
                         && data.getConnectedUser() == user));
         assertTrue(viewModel.getCardStack().isEmpty());
 
-
         viewModel.setCardStack(List.of(user));
         assertTrue(viewModel.getCardStack().isEmpty());
     }
 
-
     private static com.scholarmatch.usecase.dislike.DislikeInputData argThatHasUserId(final String userId) {
         return org.mockito.ArgumentMatchers.argThat(data -> data != null && userId.equals(data.getDislikedUserId()));
     }
-
 
     private UserData sampleUser(final String userId) {
         final User user = new User(
