@@ -4,7 +4,7 @@ import com.scholarmatch.usecase.skip.SkipInputBoundary;
 import com.scholarmatch.usecase.skip.SkipInputData;
 
 /**
- * Controller for the skip use case.
+ * Controller that forwards skip actions to the skip use case.
  */
 public final class SkipController {
 
@@ -20,9 +20,9 @@ public final class SkipController {
     }
 
     /**
-     * Submits a skipped user ID.
+     * Called when the current user skips a user card.
      *
-     * @param skippedUserId the skipped user's ID
+     * @param skippedUserId the ID of the user shown on the card
      */
     public void skip(final String skippedUserId) {
         this.interactor.execute(new SkipInputData(skippedUserId));
