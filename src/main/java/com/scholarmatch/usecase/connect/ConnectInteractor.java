@@ -1,44 +1,44 @@
 package com.scholarmatch.usecase.connect;
 
 import com.scholarmatch.usecase.data_access_interface.ConnectDataAccessInterface;
+import com.scholarmatch.usecase.exception.DataAccessException;
 
 /**
- * Interactor for recording a Connect decision and reporting whether it creates
- * a mutual match.
+ * Interactor implementing the connect use case.
+ *
+ * <p>Sends the connect to the server, which persists it and checks for mutual matches.
+ * If a mutual match is detected, the connected user (already available on the client
+ * from the card being displayed) is passed to the presenter.
  */
 public final class ConnectInteractor implements ConnectInputBoundary {
 
-    private final ConnectDataAccessInterface dataAccessObject;
+    private final ConnectDataAccessInterface connectDataAccessObject;
     private final ConnectOutputBoundary outputBoundary;
 
     /**
-     * Constructs a Connect interactor.
+     * Constructs a ConnectInteractor.
      *
-     * @param dataAccessObject the data access object used to record the decision
-     * @param outputBoundary the presenter used to report the result
+     * @param connectDataAccessObject server gateway for recording connects
+     * @param outputBoundary          the presenter that receives the result
      */
     public ConnectInteractor(
-            final ConnectDataAccessInterface dataAccessObject,
+            final ConnectDataAccessInterface connectDataAccessObject,
             final ConnectOutputBoundary outputBoundary) {
-        this.dataAccessObject = dataAccessObject;
+        this.connectDataAccessObject = connectDataAccessObject;
         this.outputBoundary = outputBoundary;
     }
 
-    /**
-     * Records the Connect decision and prepares the appropriate view.
-     *
-     * @param inputData the selected scholar's ID and profile snapshot
-     */
     @Override
     public void execute(final ConnectInputData inputData) {
-        final ConnectOutputData outputData =
-                dataAccessObject.connect(inputData.getConnectedUserId());
-
-        if (outputData == null) {
+        try {
+            final boolean matched = connectDataAccessObject.connect(inputData.getConnectedUserId());
+            if (matched) {
+                outputBoundary.prepareMatchFound(new ConnectOutputData(inputData.getConnectedUser()));
+            } else {
+                outputBoundary.prepareNoMatch();
+            }
+        } catch (final DataAccessException e) {
             outputBoundary.prepareNoMatch();
-        }
-        else {
-            outputBoundary.prepareMatchFound(outputData);
         }
     }
 }
