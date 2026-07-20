@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.gui.sytle;
+package com.scholarmatch.frameworks.gui.style;
 
 import java.awt.Color;
 

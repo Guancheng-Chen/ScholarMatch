@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.gui.sytle;
+package com.scholarmatch.frameworks.gui.style;
 
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
