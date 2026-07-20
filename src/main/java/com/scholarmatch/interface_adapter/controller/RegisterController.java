@@ -32,10 +32,10 @@ public final class RegisterController {
      * @param password  plain-text password
      */
     public void execute(
-            final String firstName,
-            final String lastName,
-            final String email,
-            final String password) {
+        final String firstName,
+        final String lastName,
+        final String email,
+        final String password) {
         this.registerInteractor.execute(new RegisterInputData(firstName, lastName, email, password));
     }
 }
