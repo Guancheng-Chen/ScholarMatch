@@ -5,6 +5,10 @@ import com.scholarmatch.usecase.register.RegisterInputData;
 
 /**
  * Controller for the register use case.
+ *
+ * <p>Translates raw UI strings from the registration form into a
+ * RegisterInputData and invokes the use case input boundary.
+ * Controllers in CA never call presenters directly.
  */
 public final class RegisterController {
 
@@ -13,26 +17,25 @@ public final class RegisterController {
     /**
      * Constructs a RegisterController.
      *
-     * @param registerInteractor the register use case
+     * @param registerInteractor the input boundary to invoke
      */
     public RegisterController(final RegisterInputBoundary registerInteractor) {
         this.registerInteractor = registerInteractor;
     }
 
     /**
-     * Submits registration data to the register use case.
+     * Handles the user submitting the registration form.
      *
-     * @param firstName the user's first name
-     * @param lastName  the user's last name
-     * @param email     the user's email
-     * @param password  the user's password
+     * @param firstName given name
+     * @param lastName  family name
+     * @param email     email address
+     * @param password  plain-text password
      */
     public void execute(
             final String firstName,
             final String lastName,
             final String email,
             final String password) {
-        this.registerInteractor.execute(
-                new RegisterInputData(firstName, lastName, email, password));
+        this.registerInteractor.execute(new RegisterInputData(firstName, lastName, email, password));
     }
 }
