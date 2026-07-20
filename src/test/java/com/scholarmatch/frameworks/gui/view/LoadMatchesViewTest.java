@@ -1,5 +1,6 @@
 package com.scholarmatch.frameworks.gui.view;
 
+import com.scholarmatch.frameworks.gui.component.MatchedUserCard;
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.FundingStatus;
