@@ -1,6 +1,5 @@
 package com.scholarmatch.usecase.send_message;
 
-
 import com.scholarmatch.entity.Message;
 import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInterface;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
@@ -22,14 +21,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 class SendMessageInteractorTest {
-
 
     private SendMessageDataAccessInterface dataAccessObject;
     private SendMessageOutputBoundary outputBoundary;
     private SendMessageInteractor interactor;
-
 
     @BeforeEach
     void setUp() {
@@ -52,15 +48,12 @@ class SendMessageInteractorTest {
         final Message sent = new Message("msg-1", "sender-1", "receiver-1", "Hello!", LocalDateTime.now());
         when(dataAccessObject.sendMessage("receiver-1", "Hello!")).thenReturn(sent);
 
-
         interactor.execute(new SendMessageInputData("receiver-1", "Hello!"));
-
 
         verify(dataAccessObject).sendMessage("receiver-1", "Hello!");
         verify(outputBoundary).prepareSuccessView(any());
         verify(outputBoundary, never()).prepareFailView(anyString());
     }
-
 
     @Test
     void testValidationFailurePreventsDataAccessCall() {
@@ -71,20 +64,17 @@ class SendMessageInteractorTest {
         verify(outputBoundary, never()).prepareSuccessView(any());
     }
 
-
     @Test
     void testFailsWhenContentBlank() {
         assertTrue(captureFailMessage(new SendMessageInputData("receiver-1", "   "))
                 .contains("Message cannot be empty."));
     }
 
-
     @Test
     void testFailsWhenContentNull() {
         assertTrue(captureFailMessage(new SendMessageInputData("receiver-1", null))
                 .contains("Message cannot be empty."));
     }
-
 
     @Test
     void testFailsWhenContentTooLong() {
@@ -94,7 +84,6 @@ class SendMessageInteractorTest {
         assertTrue(captureFailMessage(new SendMessageInputData("receiver-1", tooLong))
                 .contains("Message must be at most 1000 characters (currently 1001)."));
     }
-
 
     @Test
     void testSucceedsWithContentAtExactlyMaxLength() {
@@ -110,13 +99,11 @@ class SendMessageInteractorTest {
         verify(outputBoundary, never()).prepareFailView(anyString());
     }
 
-
     @Test
     void testFailsWhenReceiverIdBlank() {
         assertTrue(captureFailMessage(new SendMessageInputData("", "Hello!"))
                 .contains("Receiver is required."));
     }
-
 
     @Test
     void testExecuteFailsWhenServerRejectsMessage() {
