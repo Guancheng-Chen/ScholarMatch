@@ -4,7 +4,7 @@ import com.scholarmatch.usecase.send_message.SendMessageInputBoundary;
 import com.scholarmatch.usecase.send_message.SendMessageInputData;
 
 /**
- * Controller for the send-message use case.
+ * Controller that forwards send actions to the send-message use case.
  */
 public final class SendMessageController {
 
@@ -20,10 +20,10 @@ public final class SendMessageController {
     }
 
     /**
-     * Submits a message to the send-message use case.
+     * Sends a chat message from the current user to the given scholar.
      *
-     * @param receiverId the receiver's ID
-     * @param content the message content
+     * @param receiverId the ID of the scholar to send the message to
+     * @param content    the message text
      */
     public void sendMessage(final String receiverId, final String content) {
         this.interactor.execute(new SendMessageInputData(receiverId, content));
