@@ -60,6 +60,7 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
     private static final int STACK_BREAKPOINT = 720;
     private static final int AVATAR_SIZE = 84;
     private static final String NOT_SPECIFIED = "Not specified";
+
     private final UserData cardUser;
 
     /**
@@ -89,6 +90,7 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
 
     private JPanel buildHeader(final UserData user, final int cardWidth) {
         final CircleAvatar avatar = new CircleAvatar(initial(user.getFirstName()) + initial(user.getLastName()));
+
         final JLabel nameLabel = new JLabel(user.getFirstName() + " " + user.getLastName());
         nameLabel.setForeground(Theme.FG_DEFAULT);
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 26f));
@@ -164,6 +166,7 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
     private JPanel buildColumns(final UserData user, final int cardWidth) {
         final boolean stacked = cardWidth < STACK_BREAKPOINT;
         final int columnWidth = stacked ? cardWidth : (cardWidth - 48 - 40) / 3;
+
         final JPanel educationColumn = buildEducationColumn(user.getEducations(), columnWidth);
         final JPanel publicationsColumn = buildPublicationsColumn(user.getPublications(), columnWidth);
         final JPanel researchColumn = buildResearchColumn(user, columnWidth);
@@ -308,9 +311,6 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
         return (month == null ? "" : month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + " ") + year;
     }
 
-
-
-
     /**
      * Returns the first character of a name for the avatar's initials, or "?" if the name
      * is null/blank — a bare {@code name.substring(0, 1)} throws
@@ -320,15 +320,9 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
         return name == null || name.isBlank() ? "?" : name.substring(0, 1);
     }
 
-
-
-
     private String displayOr(final String value) {
         return value == null || value.isBlank() ? NOT_SPECIFIED : value;
     }
-
-
-
 
     private String joinNonBlank(final String separator, final String... parts) {
         final StringBuilder result = new StringBuilder();
@@ -343,9 +337,6 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
         }
         return result.toString();
     }
-
-
-
 
     private String formatEnum(final Enum<?> value) {
         if (value == null) {
@@ -362,33 +353,18 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
         return result.toString();
     }
 
-
-
-
     private String escapeHtml(final String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
-
-
-
 
     private static Component strut(final int height) {
         return javax.swing.Box.createVerticalStrut(height);
     }
 
-
-
-
     /** A small circular initials avatar, painted with the theme's accent color. */
     private static final class CircleAvatar extends JComponent {
 
-
-
-
         private final String initials;
-
-
-
 
         CircleAvatar(final String initials) {
             this.initials = initials;
@@ -396,9 +372,6 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
             setMinimumSize(new Dimension(AVATAR_SIZE, AVATAR_SIZE));
             setMaximumSize(new Dimension(AVATAR_SIZE, AVATAR_SIZE));
         }
-
-
-
 
         @Override
         protected void paintComponent(final Graphics g) {
@@ -417,4 +390,3 @@ public final class MatchedUserCard extends RoundedPanel implements Reflowable {
         }
     }
 }
-
