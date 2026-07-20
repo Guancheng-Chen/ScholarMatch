@@ -18,4 +18,11 @@ public final class DeleteAccountController {
             final DeleteAccountInputBoundary interactor) {
         this.interactor = interactor;
     }
+
+    /**
+     * Sends a delete-account request to the use case.
+     */
+    public void deleteAccount() {
+        this.interactor.execute();
+    }
 }
