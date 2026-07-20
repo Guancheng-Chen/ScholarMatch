@@ -8,4 +8,13 @@ import com.scholarmatch.usecase.recommend.RecommendInputBoundary;
 public final class RecommendController {
 
     private final RecommendInputBoundary recommendInteractor;
+
+    /**
+     * Constructs a RecommendController.
+     *
+     * @param recommendInteractor the recommendation use case
+     */
+    public RecommendController(final RecommendInputBoundary recommendInteractor) {
+        this.recommendInteractor = recommendInteractor;
+    }
 }
