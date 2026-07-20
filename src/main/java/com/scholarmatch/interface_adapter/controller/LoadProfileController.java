@@ -3,7 +3,7 @@ package com.scholarmatch.interface_adapter.controller;
 import com.scholarmatch.usecase.load_profile.LoadProfileInputBoundary;
 
 /**
- * Controller for loading a user profile.
+ * Controller for the load-current-profile use case.
  */
 public final class LoadProfileController {
 
@@ -12,14 +12,14 @@ public final class LoadProfileController {
     /**
      * Constructs a LoadProfileController.
      *
-     * @param loadProfileInteractor the load profile use case
+     * @param loadProfileInteractor the input boundary to invoke
      */
     public LoadProfileController(final LoadProfileInputBoundary loadProfileInteractor) {
         this.loadProfileInteractor = loadProfileInteractor;
     }
 
     /**
-     * Loads the current user's profile.
+     * Requests the current user's full saved profile.
      */
     public void execute() {
         this.loadProfileInteractor.execute();
