@@ -34,7 +34,6 @@ class PaperLookupInteractorTest {
 
         assertEquals("Zhijie Yuan", this.gateway.lastQuery);
         assertEquals(1, this.presenter.candidates.size());
-        assertEquals("Zhijie Yuan", this.presenter.selectedAuthor.getName());
         assertEquals("A Verification Paper", this.presenter.publications.getFirst().getTitle());
         assertNull(this.presenter.errorMessage);
     }
@@ -109,7 +108,7 @@ class PaperLookupInteractorTest {
         this.interactor.searchAuthors(new SearchAuthorsInputData("  "));
         this.interactor.selectAuthor(new SelectAuthorInputData("2112339906"));
 
-        assertNull(this.presenter.selectedAuthor);
+        assertNull(this.presenter.publications);
         assertEquals("Select an author from the current search results.", this.presenter.errorMessage);
     }
 
@@ -156,25 +155,21 @@ class PaperLookupInteractorTest {
     private static final class RecordingPresenter implements PaperLookupOutputBoundary {
 
         private List<AuthorCandidateData> candidates;
-        private AuthorCandidateData selectedAuthor;
         private List<Publication> publications;
         private String errorMessage;
 
         @Override
-        public void prepareAuthorCandidatesView(final List<AuthorCandidateData> authorCandidates) {
+        public void prepareAuthorCandidates(final List<AuthorCandidateData> authorCandidates) {
             this.candidates = authorCandidates;
         }
 
         @Override
-        public void prepareAuthorImportView(
-                final AuthorCandidateData author,
-                final List<Publication> importedPublications) {
-            this.selectedAuthor = author;
+        public void prepareAuthorPapersFound(final List<Publication> importedPublications) {
             this.publications = importedPublications;
         }
 
         @Override
-        public void prepareFailView(final String message) {
+        public void prepareError(final String message) {
             this.errorMessage = message;
         }
     }

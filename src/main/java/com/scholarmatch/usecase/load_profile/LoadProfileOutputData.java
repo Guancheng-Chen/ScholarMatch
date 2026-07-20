@@ -18,8 +18,12 @@ public final class LoadProfileOutputData {
         this.profile = profile;
     }
 
-    /** @return the current user's profile snapshot */
-    public UserData getProfile() {
+    /**
+     * Returns the loaded profile.
+     *
+     * @return the user
+     */
+    public UserData getUser() {
         return this.profile;
     }
 }
