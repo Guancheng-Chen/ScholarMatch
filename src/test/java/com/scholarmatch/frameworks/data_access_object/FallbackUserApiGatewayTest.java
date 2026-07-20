@@ -3,10 +3,10 @@ package com.scholarmatch.frameworks.data_access_object;
 import java.util.List;
 
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
-import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,14 +17,14 @@ class FallbackUserApiGatewayTest {
 
     @Test
     void searchAuthorsReturnsPrimaryResultWithoutCallingFallback() {
-        final List<AuthorCandidateData> primaryResult = List.of(authorCandidate("primary"));
+        final List<AuthorCandidateDataAccessInterface> primaryResult = List.of(authorCandidate("primary"));
         final RecordingGateway primary = new RecordingGateway();
         final RecordingGateway fallback = new RecordingGateway();
         primary.authorResult = primaryResult;
         fallback.authorResult = List.of(authorCandidate("fallback"));
         final FallbackUserApiGateway gateway = new FallbackUserApiGateway(primary, fallback);
 
-        final List<AuthorCandidateData> actual = gateway.searchAuthors("Ada Lovelace");
+        final List<AuthorCandidateDataAccessInterface> actual = gateway.searchAuthors("Ada Lovelace");
 
         assertSame(primaryResult, actual);
         assertEquals(1, primary.searchAuthorsCallCount);
@@ -35,14 +35,14 @@ class FallbackUserApiGatewayTest {
     @Test
     void searchAuthorsReturnsFallbackResultWhenPrimaryThrows() {
         final DataAccessException primaryError = new ExternalServiceException("primary failed");
-        final List<AuthorCandidateData> fallbackResult = List.of(authorCandidate("fallback"));
+        final List<AuthorCandidateDataAccessInterface> fallbackResult = List.of(authorCandidate("fallback"));
         final RecordingGateway primary = new RecordingGateway();
         final RecordingGateway fallback = new RecordingGateway();
         primary.authorError = primaryError;
         fallback.authorResult = fallbackResult;
         final FallbackUserApiGateway gateway = new FallbackUserApiGateway(primary, fallback);
 
-        final List<AuthorCandidateData> actual = gateway.searchAuthors("Grace Hopper");
+        final List<AuthorCandidateDataAccessInterface> actual = gateway.searchAuthors("Grace Hopper");
 
         assertSame(fallbackResult, actual);
         assertEquals(1, primary.searchAuthorsCallCount);
@@ -67,6 +67,23 @@ class FallbackUserApiGatewayTest {
         assertSame(primaryError, actual);
         assertEquals(1, primary.searchAuthorsCallCount);
         assertEquals(1, fallback.searchAuthorsCallCount);
+    }
+
+    @Test
+    void getAuthorReturnsFallbackResultWhenPrimaryThrows() {
+        final AuthorCandidateDataAccessInterface fallbackResult = authorCandidate("fallback");
+        final RecordingGateway primary = new RecordingGateway();
+        final RecordingGateway fallback = new RecordingGateway();
+        primary.authorError = new ExternalServiceException("primary failed");
+        fallback.authorResult = List.of(fallbackResult);
+        final FallbackUserApiGateway gateway = new FallbackUserApiGateway(primary, fallback);
+
+        final AuthorCandidateDataAccessInterface actual = gateway.getAuthor("1695689");
+
+        assertSame(fallbackResult, actual);
+        assertEquals(1, primary.getAuthorCallCount);
+        assertEquals(1, fallback.getAuthorCallCount);
+        assertEquals("1695689", fallback.lastAuthorId);
     }
 
     @Test
@@ -123,8 +140,8 @@ class FallbackUserApiGatewayTest {
         assertEquals(1, fallback.getAuthorPapersCallCount);
     }
 
-    private static AuthorCandidateData authorCandidate(final String id) {
-        return new AuthorCandidateData(id, "Test Author", List.of("Test University"), 1, 1, 1);
+    private static AuthorCandidateDataAccessInterface authorCandidate(final String id) {
+        return new AuthorCandidateDto(id, "Test Author", List.of("Test University"), 1, 1, 1);
     }
 
     private static Publication publication(final String suffix) {
@@ -133,23 +150,34 @@ class FallbackUserApiGatewayTest {
 
     private static final class RecordingGateway implements UserAPIGatewayInterface {
 
-        private List<AuthorCandidateData> authorResult;
+        private List<AuthorCandidateDataAccessInterface> authorResult;
         private List<Publication> paperResult;
         private DataAccessException authorError;
         private DataAccessException paperError;
         private int searchAuthorsCallCount;
+        private int getAuthorCallCount;
         private int getAuthorPapersCallCount;
         private String lastAuthorName;
         private String lastAuthorId;
 
         @Override
-        public List<AuthorCandidateData> searchAuthors(final String authorName) {
+        public List<AuthorCandidateDataAccessInterface> searchAuthors(final String authorName) {
             this.searchAuthorsCallCount++;
             this.lastAuthorName = authorName;
             if (this.authorError != null) {
                 throw this.authorError;
             }
             return this.authorResult;
+        }
+
+        @Override
+        public AuthorCandidateDataAccessInterface getAuthor(final String authorId) {
+            this.getAuthorCallCount++;
+            this.lastAuthorId = authorId;
+            if (this.authorError != null) {
+                throw this.authorError;
+            }
+            return this.authorResult.getFirst();
         }
 
         @Override
