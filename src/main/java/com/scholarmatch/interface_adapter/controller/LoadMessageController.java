@@ -4,7 +4,7 @@ import com.scholarmatch.usecase.load_message.LoadMessageInputBoundary;
 import com.scholarmatch.usecase.load_message.LoadMessageInputData;
 
 /**
- * Controller for the load-message use case.
+ * Controller that forwards conversation-loading requests to the load-message use case.
  */
 public final class LoadMessageController {
 
@@ -20,14 +20,11 @@ public final class LoadMessageController {
     }
 
     /**
-     * Loads messages exchanged with another user.
+     * Loads the conversation between the current user and the given scholar.
      *
-     * @param otherUserId the other user's ID
+     * @param otherUserId the ID of the other participant in the conversation
      */
     public void loadMessages(final String otherUserId) {
-        final LoadMessageInputData inputData =
-                new LoadMessageInputData(otherUserId);
-
-        this.interactor.execute(inputData);
+        this.interactor.execute(new LoadMessageInputData(otherUserId));
     }
 }
