@@ -42,7 +42,7 @@ import java.util.Locale;
  * standing in for the drag-to-connect gesture from the previous JavaFX version.
  *
  * <p>Implements Reflowable: CenteringScrollPanel calls
- * {@link #reflow(int)} whenever the scroll viewport is resized, so the card shrinks with
+ * reflow(int) whenever the scroll viewport is resized, so the card shrinks with
  * a narrow window instead of being clipped, and drops the three columns to a single
  * vertically-stacked column (each one extending downward) once too narrow to show them
  * side by side.
@@ -415,4 +415,3 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         }
     }
 }
-
