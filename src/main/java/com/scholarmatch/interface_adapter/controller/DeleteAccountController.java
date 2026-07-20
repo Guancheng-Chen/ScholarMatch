@@ -1,5 +1,7 @@
 package com.scholarmatch.interface_adapter.controller;
 
+import com.scholarmatch.usecase.delete_account.DeleteAccountInputBoundary;
+
 /**
  * Controller that forwards delete-account requests to the delete-account use case.
  */
