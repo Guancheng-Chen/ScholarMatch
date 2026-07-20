@@ -1,13 +1,13 @@
 package com.scholarmatch.frameworks.data_access_object;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSender;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSenderResponse;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,19 +21,16 @@ import static org.mockito.Mockito.when;
 class SemanticScholarGatewayTest {
 
     @Test
-    @SuppressWarnings("unchecked")
     void mapsAuthorSearchResponse() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn("""
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse response = new HttpSenderResponse(200, """
                 {"data":[{"authorId":"1695689","name":"Geoffrey E. Hinton",
                 "affiliations":["Google","University of Toronto"],"paperCount":467,
                 "hIndex":162,"citationCount":578042}]}
                 """);
-        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        when(httpSender.send(any())).thenReturn(response);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         final var candidates = gateway.searchAuthors("Geoffrey Hinton");
@@ -45,18 +42,15 @@ class SemanticScholarGatewayTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void getsAuthorById() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn("""
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse response = new HttpSenderResponse(200, """
                 {"authorId":"1695689","name":"Geoffrey E. Hinton","affiliations":[],
                 "paperCount":467,"hIndex":162,"citationCount":578042}
                 """);
-        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        when(httpSender.send(any())).thenReturn(response);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         final var author = gateway.getAuthor("1695689");
@@ -67,18 +61,15 @@ class SemanticScholarGatewayTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void mapsPaperWithoutDoi() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn("""
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse response = new HttpSenderResponse(200, """
                 {"data":[{"title":"The Forward-Forward Algorithm","year":2022,
                 "citationCount":441,"externalIds":{}}]}
                 """);
-        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        when(httpSender.send(any())).thenReturn(response);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         final var papers = gateway.getAuthorPapers("1695689");
@@ -91,53 +82,44 @@ class SemanticScholarGatewayTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void requestsEnoughAuthorsForLocalRanking() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn("{\"data\":[]}");
-        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse response = new HttpSenderResponse(200, "{\"data\":[]}");
+        when(httpSender.send(any())).thenReturn(response);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         gateway.searchAuthors("Geoffrey Hinton");
 
         final ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-        verify(httpClient).send(requestCaptor.capture(), any());
+        verify(httpSender).send(requestCaptor.capture());
         assertTrue(requestCaptor.getValue().uri().getQuery().contains("limit=200"));
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void retriesOnceWhenRateLimited() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> rateLimitedResponse = mock(HttpResponse.class);
-        final HttpResponse<String> successResponse = mock(HttpResponse.class);
-        when(rateLimitedResponse.statusCode()).thenReturn(429);
-        when(successResponse.statusCode()).thenReturn(200);
-        when(successResponse.body()).thenReturn("{\"data\":[]}");
-        when(httpClient.<String>send(any(), any()))
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse rateLimitedResponse = new HttpSenderResponse(429, "");
+        final HttpSenderResponse successResponse = new HttpSenderResponse(200, "{\"data\":[]}");
+        when(httpSender.send(any()))
                 .thenReturn(rateLimitedResponse, successResponse);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         gateway.searchAuthors("Geoffrey Hinton");
 
-        verify(httpClient, times(2)).send(any(), any());
+        verify(httpSender, times(2)).send(any());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void failsAfterSecondRateLimitResponse() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> rateLimitedResponse = mock(HttpResponse.class);
-        when(rateLimitedResponse.statusCode()).thenReturn(429);
-        when(httpClient.<String>send(any(), any())).thenReturn(rateLimitedResponse);
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse rateLimitedResponse = new HttpSenderResponse(429, "");
+        when(httpSender.send(any())).thenReturn(rateLimitedResponse);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper());
 
         final ExternalServiceException exception = assertThrows(
@@ -145,26 +127,23 @@ class SemanticScholarGatewayTest {
                 () -> gateway.searchAuthors("Geoffrey Hinton"));
 
         assertEquals("Semantic Scholar returned HTTP 429.", exception.getMessage());
-        verify(httpClient, times(2)).send(any(), any());
+        verify(httpSender, times(2)).send(any());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void sendsConfiguredApiKey() throws Exception {
-        final HttpClient httpClient = mock(HttpClient.class);
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.statusCode()).thenReturn(200);
-        when(response.body()).thenReturn("{\"data\":[]}");
-        when(httpClient.<String>send(any(), any())).thenReturn(response);
+        final HttpSender httpSender = mock(HttpSender.class);
+        final HttpSenderResponse response = new HttpSenderResponse(200, "{\"data\":[]}");
+        when(httpSender.send(any())).thenReturn(response);
         final SemanticScholarGateway gateway = new SemanticScholarGateway(
-                httpClient,
+                httpSender,
                 new ObjectMapper(),
                 "test-api-key");
 
         gateway.searchAuthors("Geoffrey Hinton");
 
         final ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-        verify(httpClient).send(requestCaptor.capture(), any());
+        verify(httpSender).send(requestCaptor.capture());
         assertEquals(
                 "test-api-key",
                 requestCaptor.getValue().headers().firstValue("x-api-key").orElseThrow());

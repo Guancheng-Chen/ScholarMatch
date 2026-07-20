@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSender;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSenderResponse;
+import com.scholarmatch.frameworks.data_access_object.http.JdkHttpSender;
 import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
@@ -14,7 +17,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
     private static final long RATE_LIMIT_RETRY_DELAY_MILLIS = 1_000;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
-    private final HttpClient httpClient;
+    private final HttpSender httpSender;
     private final ObjectMapper objectMapper;
     private final String apiKey;
 
@@ -43,20 +45,20 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
      */
     public SemanticScholarGateway() {
         this(
-                HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build(),
+                new JdkHttpSender(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build()),
                 new ObjectMapper(),
                 System.getenv(API_KEY_ENVIRONMENT_VARIABLE));
     }
 
-    SemanticScholarGateway(final HttpClient httpClient, final ObjectMapper objectMapper) {
-        this(httpClient, objectMapper, null);
+    SemanticScholarGateway(final HttpSender httpSender, final ObjectMapper objectMapper) {
+        this(httpSender, objectMapper, null);
     }
 
     SemanticScholarGateway(
-            final HttpClient httpClient,
+            final HttpSender httpSender,
             final ObjectMapper objectMapper,
             final String apiKey) {
-        this.httpClient = httpClient;
+        this.httpSender = httpSender;
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
     }
@@ -111,12 +113,10 @@ public final class SemanticScholarGateway implements UserAPIGatewayInterface {
         }
         final HttpRequest request = requestBuilder.GET().build();
         try {
-            HttpResponse<String> response = this.httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString());
+            HttpSenderResponse response = this.httpSender.send(request);
             if (response.statusCode() == 429) {
                 Thread.sleep(RATE_LIMIT_RETRY_DELAY_MILLIS);
-                response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                response = this.httpSender.send(request);
             }
             if (response.statusCode() == 404) {
                 final ObjectNode emptyResponse = this.objectMapper.createObjectNode();
