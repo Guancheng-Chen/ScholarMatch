@@ -104,12 +104,10 @@ class RecommendViewTest {
         verify(interactor).execute(argThatHasUserId("dislike-me"));
         assertTrue(viewModel.getCardStack().isEmpty());
 
-
         // A future fetch that still includes this user must not resurface them.
         viewModel.setCardStack(List.of(user));
         assertTrue(viewModel.getCardStack().isEmpty());
     }
-
 
     @Test
     void testSkipCallsSkipControllerButDoesNotExcludeTheUser() {
@@ -124,9 +122,7 @@ class RecommendViewTest {
                 viewModel);
         viewModel.setCardStack(List.of(user));
 
-
         SwingTestSupport.find(view, JButton.class, 1).doClick();
-
 
         verify(interactor).execute(org.mockito.ArgumentMatchers.argThat(
                 data -> data != null && "skip-me".equals(data.getSkippedUserId())));
