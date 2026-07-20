@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.gui.view;
 
-
 import com.scholarmatch.frameworks.gui.component.RecommendUserCard;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
@@ -11,14 +10,12 @@ import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
 import com.scholarmatch.usecase.dto.UserData;
 
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Font;
-
 
 /**
  * Discover-users screen showing a stack of user cards.

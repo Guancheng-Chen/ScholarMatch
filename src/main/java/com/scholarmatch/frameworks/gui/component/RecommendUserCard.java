@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.gui.component;
 
-
 import com.scholarmatch.entity.Education;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.frameworks.gui.style.Buttons;
@@ -31,7 +30,6 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.util.Locale;
-
 
 /**
  * Card widget that displays a single user's full profile — everything except
@@ -120,16 +118,13 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         repaint();
     }
 
-
     private JPanel buildHeader(final UserData user, final int cardWidth) {
         final CircleAvatar avatar = new CircleAvatar(initial(user.getFirstName()) + initial(user.getLastName()));
-
 
         final JLabel nameLabel = new JLabel(user.getFirstName() + " " + user.getLastName());
         nameLabel.setForeground(Theme.FG_DEFAULT);
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 26f));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
 
         final JLabel institutionLabel = new JLabel(joinNonBlank(" · ",
                 user.getInstitution() == null ? null : user.getInstitution().getDisplayName(),
@@ -138,12 +133,10 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         institutionLabel.setFont(institutionLabel.getFont().deriveFont(16f));
         institutionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-
         final JLabel lookingForLabel = new JLabel("Looking for: " + formatEnum(user.getLookingFor()));
         lookingForLabel.setForeground(Theme.FG_MUTED);
         lookingForLabel.setFont(lookingForLabel.getFont().deriveFont(14f));
         lookingForLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
 
         final JLabel fundingAvailabilityLabel = new JLabel(joinNonBlank("   ",
                 "Field: " + formatEnum(user.getResearchField()),
@@ -153,13 +146,11 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         fundingAvailabilityLabel.setFont(fundingAvailabilityLabel.getFont().deriveFont(14f));
         fundingAvailabilityLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-
         final JLabel statsLabel = new JLabel(
                 "h-index: " + Format.stat(user.gethIndex()) + "    Citations: " + Format.stat(user.getTotalCitations()));
         statsLabel.setForeground(Theme.FG_DEFAULT);
         statsLabel.setFont(statsLabel.getFont().deriveFont(Font.BOLD, 14f));
         statsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
 
         final JPanel textBlock = new JPanel();
         textBlock.setLayout(new BoxLayout(textBlock, BoxLayout.Y_AXIS));
@@ -179,14 +170,12 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
             textBlock.add(wrappedLabel(user.getCollaborationDescription(), cardWidth - AVATAR_SIZE - 90));
         }
 
-
         // BorderLayout.WEST stretches its child to the row's full height, which would squash
         // the circular avatar into an oval since the text block next to it is tall — wrap it
         // in a non-stretching FlowLayout cell so it keeps its fixed 64x64 size.
         final JPanel avatarWrapper = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
         avatarWrapper.setOpaque(false);
         avatarWrapper.add(avatar);
-
 
         final JPanel header = new JPanel(new BorderLayout());
         header.setOpaque(false);
@@ -199,11 +188,9 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return header;
     }
 
-
     private JPanel buildColumns(final UserData user, final int cardWidth) {
         final boolean stacked = cardWidth < STACK_BREAKPOINT;
         final int columnWidth = stacked ? cardWidth : (cardWidth - 48 - 32) / 3;
-
 
         final JPanel educationColumn = column("EDUCATION", FontAwesomeSolid.GRADUATION_CAP);
         if (user.getEducations().isEmpty()) {
@@ -215,7 +202,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
                 educationColumn.add(verticalStrut(8));
             }
         }
-
 
         final JPanel publicationsColumn = column("PUBLICATIONS", FontAwesomeSolid.BOOK);
         if (user.getPublications().isEmpty()) {
@@ -231,7 +217,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
             }
         }
 
-
         final JPanel researchColumn = column("RESEARCH DESCRIPTION", FontAwesomeSolid.FLASK);
         researchColumn.add(wrappedLabel(
                 user.getResearchDescription().isBlank() ? "None on file" : user.getResearchDescription(),
@@ -241,7 +226,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         researchColumn.add(wrappedLabel(
                 user.getResearchInterests().isEmpty() ? "None on file" : String.join(", ", user.getResearchInterests()),
                 columnWidth));
-
 
         if (stacked) {
             final JPanel columns = new JPanel();
@@ -255,7 +239,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
             return columns;
         }
 
-
         final JPanel columns = new JPanel(new GridLayout(1, 3, 16, 0));
         columns.setOpaque(false);
         columns.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -266,7 +249,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return columns;
     }
 
-
     private JPanel buildButtons(final ConnectListener connectListener) {
         final JButton dislikeButton = new JButton(
                 "Dislike", Icons.of(FontAwesomeRegular.THUMBS_DOWN, 15, Theme.FG_EMPHASIS));
@@ -275,7 +257,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         dislikeButton.setIconTextGap(8);
         dislikeButton.addActionListener(evt -> connectListener.onDislike());
 
-
         final JButton skipButton = new JButton(
                 "Skip", Icons.of(FontAwesomeSolid.FORWARD, 15, Theme.FG_DEFAULT));
         Buttons.outlined(skipButton);
@@ -283,14 +264,12 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         skipButton.setIconTextGap(8);
         skipButton.addActionListener(evt -> connectListener.onSkip());
 
-
         final JButton connectButton = new JButton(
                 "Connect", Icons.of(FontAwesomeSolid.CHECK, 15, Theme.FG_EMPHASIS));
         Buttons.success(connectButton);
         connectButton.setFont(connectButton.getFont().deriveFont(Font.BOLD, 14f));
         connectButton.setIconTextGap(8);
         connectButton.addActionListener(evt -> connectListener.onConnect());
-
 
         final JPanel buttonBox = new JPanel(new GridLayout(1, 3, 14, 0));
         buttonBox.setOpaque(false);
@@ -302,7 +281,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         buttonBox.add(connectButton);
         return buttonBox;
     }
-
 
     private JPanel column(final String heading, final Ikon glyph) {
         final JPanel panel = new JPanel();
@@ -317,7 +295,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return panel;
     }
 
-
     private JLabel columnHeading(final String text, final Ikon glyph) {
         final JLabel label = new JLabel(text, Icons.of(glyph, 13, Theme.FG_SUBTLE), JLabel.LEFT);
         label.setIconTextGap(6);
@@ -328,7 +305,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return label;
     }
 
-
     private JLabel mutedLine(final String text) {
         final JLabel label = new JLabel(text);
         label.setForeground(Theme.FG_SUBTLE);
@@ -338,7 +314,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return label;
     }
 
-
     /**
      * Caps a label's maximum height to its own preferred height. Without this, BoxLayout
      * treats the JLabel default (unbounded) maximum as "willing to stretch" and inflates it
@@ -347,7 +322,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
     private void capHeight(final JLabel label) {
         label.setMaximumSize(new Dimension(Integer.MAX_VALUE, label.getPreferredSize().height));
     }
-
 
     private JLabel wrappedLabel(final String text, final int columnWidth) {
         // FlatLaf's HTML view measures noticeably wider than the declared CSS width (roughly
@@ -365,7 +339,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return label;
     }
 
-
     /**
      * Returns the first character of a name for the avatar's initials, or "?" if the name
      * is null/blank — a bare {@code name.substring(0, 1)} throws
@@ -374,7 +347,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
     private String initial(final String name) {
         return name == null || name.isBlank() ? "?" : name.substring(0, 1);
     }
-
 
     private String joinNonBlank(final String separator, final String... parts) {
         final StringBuilder result = new StringBuilder();
@@ -389,7 +361,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         }
         return result.toString();
     }
-
 
     private String formatEnum(final Enum<?> value) {
         if (value == null) {
@@ -411,18 +382,14 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
-
     private static Component verticalStrut(final int height) {
         return javax.swing.Box.createVerticalStrut(height);
     }
 
-
     /** A small circular initials avatar, painted with the theme's accent color. */
     private static final class CircleAvatar extends JComponent {
 
-
         private final String initials;
-
 
         CircleAvatar(final String initials) {
             this.initials = initials;
@@ -430,7 +397,6 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
             setMinimumSize(new Dimension(AVATAR_SIZE, AVATAR_SIZE));
             setMaximumSize(new Dimension(AVATAR_SIZE, AVATAR_SIZE));
         }
-
 
         @Override
         protected void paintComponent(final Graphics g) {
