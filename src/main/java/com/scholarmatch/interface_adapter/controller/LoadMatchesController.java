@@ -18,4 +18,11 @@ public final class LoadMatchesController {
             final LoadMatchesInputBoundary loadMatchesInteractor) {
         this.loadMatchesInteractor = loadMatchesInteractor;
     }
+
+    /**
+     * Loads the current user's confirmed matches.
+     */
+    public void execute() {
+        this.loadMatchesInteractor.execute();
+    }
 }
