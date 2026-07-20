@@ -101,7 +101,7 @@ public final class PublicationEditorPanel extends JPanel {
                 final boolean isSelected, final boolean cellHasFocus) {
                 final Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof AuthorCandidateData candidate) {
-                    setText(candidate.getName() + " — " + candidate.getAffiliation()
+                    setText(candidate.getName() + " — " + candidate.getAffiliations()
                         + " (" + candidate.getPaperCount() + " papers)");
                 }
                 return c;
