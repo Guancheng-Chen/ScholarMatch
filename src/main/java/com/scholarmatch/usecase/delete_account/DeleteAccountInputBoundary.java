@@ -5,5 +5,8 @@ package com.scholarmatch.usecase.delete_account;
  */
 public interface DeleteAccountInputBoundary {
 
+    /**
+     * Permanently deletes the current user's account and logs them out.
+     */
     void execute();
 }
