@@ -54,8 +54,6 @@ class SendMessageInteractorTest {
     @Test
     void testValidationFailurePreventsDataAccessCall() {
         interactor.execute(new SendMessageInputData("receiver-1", ""));
-
-
         verify(dataAccessObject, never()).sendMessage(anyString(), anyString());
         verify(outputBoundary, never()).prepareSuccessView(any());
     }
