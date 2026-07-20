@@ -3,7 +3,7 @@ package com.scholarmatch.interface_adapter.controller;
 import com.scholarmatch.usecase.load_matches.LoadMatchesInputBoundary;
 
 /**
- * Controller for the load-matches use case.
+ * Controller for the load-confirmed-matches use case.
  */
 public final class LoadMatchesController {
 
@@ -12,15 +12,14 @@ public final class LoadMatchesController {
     /**
      * Constructs a LoadMatchesController.
      *
-     * @param loadMatchesInteractor the load-matches use case
+     * @param loadMatchesInteractor the input boundary to invoke
      */
-    public LoadMatchesController(
-            final LoadMatchesInputBoundary loadMatchesInteractor) {
+    public LoadMatchesController(final LoadMatchesInputBoundary loadMatchesInteractor) {
         this.loadMatchesInteractor = loadMatchesInteractor;
     }
 
     /**
-     * Loads the current user's confirmed matches.
+     * Requests the current user's confirmed matches.
      */
     public void execute() {
         this.loadMatchesInteractor.execute();
