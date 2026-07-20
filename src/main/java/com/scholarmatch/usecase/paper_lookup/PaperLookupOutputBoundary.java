@@ -5,29 +5,28 @@ import com.scholarmatch.entity.Publication;
 import java.util.List;
 
 /**
- * Output boundary for author search and paper import results.
+ * Output boundary receiving the results of paper and author lookups.
  */
 public interface PaperLookupOutputBoundary {
 
     /**
-     * Presents matching author candidates after an author search.
+     * Reports the author candidates found for a name search.
      *
-     * @param candidates the matching authors
+     * @param candidates up to five matching authors; empty if none found
      */
-    void prepareAuthorCandidatesView(List<AuthorCandidateData> candidates);
+    void prepareAuthorCandidates(List<AuthorCandidateData> candidates);
 
     /**
-     * Presents the author and papers selected for profile import.
+     * Reports the papers bulk-imported for a selected author.
      *
-     * @param author       the selected author
-     * @param publications the selected author's papers
+     * @param papers the author's papers; DOI is empty for any Semantic User didn't report one for
      */
-    void prepareAuthorImportView(AuthorCandidateData author, List<Publication> publications);
+    void prepareAuthorPapersFound(List<Publication> papers);
 
     /**
-     * Presents a paper lookup failure.
+     * Reports that a lookup failed due to a network or server error.
      *
-     * @param errorMessage the reason the lookup could not be completed
+     * @param message a human-readable description of the failure
      */
-    void prepareFailView(String errorMessage);
+    void prepareError(String message);
 }

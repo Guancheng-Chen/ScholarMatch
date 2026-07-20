@@ -41,7 +41,7 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
     public void searchAuthors(final SearchAuthorsInputData inputData) {
         this.candidatesById.clear();
         if (inputData.getAuthorName() == null || inputData.getAuthorName().isBlank()) {
-            this.outputBoundary.prepareFailView(EMPTY_QUERY_MESSAGE);
+            this.outputBoundary.prepareError(EMPTY_QUERY_MESSAGE);
             return;
         }
 
@@ -63,9 +63,9 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
             for (final AuthorCandidateData candidate : candidates) {
                 this.candidatesById.put(candidate.getAuthorId(), candidate);
             }
-            this.outputBoundary.prepareAuthorCandidatesView(candidates);
+            this.outputBoundary.prepareAuthorCandidates(candidates);
         } catch (final DataAccessException exception) {
-            this.outputBoundary.prepareFailView(exception.getMessage());
+            this.outputBoundary.prepareError(exception.getMessage());
         }
     }
 
@@ -73,16 +73,16 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
     public void selectAuthor(final SelectAuthorInputData inputData) {
         final AuthorCandidateData selectedAuthor = this.candidatesById.get(inputData.getAuthorId());
         if (selectedAuthor == null) {
-            this.outputBoundary.prepareFailView(UNKNOWN_AUTHOR_MESSAGE);
+            this.outputBoundary.prepareError(UNKNOWN_AUTHOR_MESSAGE);
             return;
         }
 
         try {
             final List<Publication> publications = List.copyOf(
                     this.userApiGateway.getAuthorPapers(inputData.getAuthorId()));
-            this.outputBoundary.prepareAuthorImportView(selectedAuthor, publications);
+            this.outputBoundary.prepareAuthorPapersFound(publications);
         } catch (final DataAccessException exception) {
-            this.outputBoundary.prepareFailView(exception.getMessage());
+            this.outputBoundary.prepareError(exception.getMessage());
         }
     }
 
