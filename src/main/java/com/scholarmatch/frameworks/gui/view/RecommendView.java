@@ -29,13 +29,11 @@ import java.awt.Font;
  */
 public final class RecommendView extends JPanel {
 
-
     private final RecommendController recommendController;
     private final ConnectController connectController;
     private final DislikeController dislikeController;
     private final SkipController skipController;
     private final RecommendViewModel viewModel;
-
 
     /**
      * Constructs the RecommendView.
@@ -60,10 +58,75 @@ public final class RecommendView extends JPanel {
         this.viewModel = viewModel;
         setBackground(Theme.BG_DEFAULT);
 
-
         viewModel.getCardStack().addListener(this::renderTopCard);
         viewModel.errorMessageProperty().addListener(message -> renderTopCard());
 
-
         recommendController.execute();
     }
+
+    private void renderTopCard() {
+        removeAll();
+
+        final String errorMessage = this.viewModel.errorMessageProperty().get();
+        if (errorMessage != null && !errorMessage.isBlank()) {
+            add(emptyStateLabel(errorMessage), BorderLayout.CENTER);
+            revalidate();
+            repaint();
+            return;
+        }
+
+        if (this.viewModel.getCardStack().isEmpty()) {
+            add(emptyStateLabel("No more recommendations right now."), BorderLayout.CENTER);
+            revalidate();
+            repaint();
+            return;
+        }
+
+        final UserData top = this.viewModel.getCardStack().get(0);
+        final RecommendUserCard card = new RecommendUserCard(top, new RecommendUserCard.ConnectListener() {
+            @Override
+            public void onDislike() {
+                dislikeController.dislike(top.getUserId());
+                viewModel.excludeUser(top.getUserId());
+                viewModel.getCardStack().remove(0);
+            }
+
+            @Override
+            public void onSkip() {
+                skipController.skip(top.getUserId());
+                // Deliberately no excludeUser() call here — skip is not persisted, so a
+                // future recommendation fetch is free to resurface this user.
+                viewModel.getCardStack().remove(0);
+            }
+
+            @Override
+            public void onConnect() {
+                connectController.connect(top.getUserId(), top);
+                viewModel.excludeUser(top.getUserId());
+                viewModel.getCardStack().remove(0);
+            }
+        });
+
+        final CenteringScrollPanel centeringPanel = new CenteringScrollPanel(card);
+        centeringPanel.setBorder(new EmptyBorder(32, 32, 32, 32));
+        final JScrollPane scrollPane = new JScrollPane(centeringPanel);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(Theme.BG_DEFAULT);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        add(scrollPane, BorderLayout.CENTER);
+        revalidate();
+        repaint();
+        // The panel's width isn't known until Swing finishes laying out the frame, so the
+        // constructor's own size is still 0 here — defer the first reflow past that.
+        javax.swing.SwingUtilities.invokeLater(centeringPanel::reflowNow);
+    }
+
+    private JLabel emptyStateLabel(final String text) {
+        final JLabel label = new JLabel(text);
+        label.setForeground(Theme.FG_MUTED);
+        label.setFont(label.getFont().deriveFont(Font.PLAIN, 14f));
+        label.setHorizontalAlignment(JLabel.CENTER);
+        return label;
+    }
+}
