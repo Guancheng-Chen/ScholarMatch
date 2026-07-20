@@ -33,9 +33,7 @@ class LoadMatchesViewTest {
     void testConstructionRefreshesConfirmedMatches() {
         final LoadMatchesInputBoundary interactor = mock(LoadMatchesInputBoundary.class);
 
-
         new LoadMatchesView(new LoadMatchesController(interactor), new LoadMatchesViewModel());
-
 
         verify(interactor).execute();
     }
