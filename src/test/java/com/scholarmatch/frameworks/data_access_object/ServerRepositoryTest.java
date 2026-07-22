@@ -6,12 +6,13 @@ import com.scholarmatch.entity.Message;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
-import com.scholarmatch.usecase.register.RegisterInputData;
+import com.scholarmatch.usecase.register.RegisterAccountData;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputData;
 
 import com.sun.net.httpserver.HttpServer;
@@ -75,7 +76,8 @@ class ServerRepositoryTest {
         server.start();
         session = mock(CurrentUserProviderInterface.class);
         when(session.getToken()).thenReturn("test-token");
-        repo = new ServerRepository("http://127.0.0.1:" + server.getAddress().getPort(), session);
+        repo = new ServerRepository(
+                "http://127.0.0.1:" + server.getAddress().getPort(), session);
     }
 
     @AfterEach
@@ -103,11 +105,13 @@ class ServerRepositoryTest {
     void testRegisterParsesAuthResult() {
         bodyToReturn.set("{\"token\": \"jwt-2\", \"scholarId\": \"u-2\", \"name\": \"Jane Doe\"}");
 
-        final AuthResult result = repo.register(new RegisterInputData("Jane", "Doe", "jane@example.com", "pw123456"));
+        final AuthResult result = repo.register(new RegisterAccountData(
+                "Jane", "Doe", "jane@mit.edu", "pw123456", EmailAccountType.ACADEMIC));
 
         assertEquals("jwt-2", result.token());
         assertEquals("u-2", result.userId());
-        assertTrue(lastRequestBody.get().contains("jane@example.com"));
+        assertTrue(lastRequestBody.get().contains("jane@mit.edu"));
+        assertTrue(lastRequestBody.get().contains("\"academicEmailVerified\":true"));
     }
 
     // ── recommend / connect / dislike / matches ─────────────────────────────
@@ -211,6 +215,28 @@ class ServerRepositoryTest {
         assertEquals(com.scholarmatch.entity.Institution.OTHER, user.getInstitution());
         assertEquals(null, user.getWeeklyAvailabilityHours());
         assertEquals(DegreeType.BACHELOR, user.getEducations().get(0).getDegreeType());
+    }
+
+    @Test
+    void testGetProfileDoesNotAssumeVerificationWhenServerOmitsFlag() {
+        bodyToReturn.set("""
+            {"scholarId": "u-1", "firstName": "Ada", "lastName": "Lovelace",
+             "email": "ada@mit.edu"}""");
+
+        final User user = repo.getProfile();
+
+        assertEquals(EmailAccountType.REGULAR, user.getEmailAccountType());
+    }
+
+    @Test
+    void testGetProfileUsesServerClassificationWhenPresent() {
+        bodyToReturn.set("""
+            {"scholarId": "u-1", "firstName": "Ada", "lastName": "Lovelace",
+             "email": "ada@mit.edu", "academicEmailVerified": false}""");
+
+        final User user = repo.getProfile();
+
+        assertEquals(EmailAccountType.REGULAR, user.getEmailAccountType());
     }
 
     @Test
