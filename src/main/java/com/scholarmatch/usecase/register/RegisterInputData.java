@@ -13,6 +13,7 @@ public final class RegisterInputData {
     private final String lastName;
     private final String email;
     private final String password;
+    private final String verificationCode;
 
     /**
      * Constructs the register input data.
@@ -26,11 +27,13 @@ public final class RegisterInputData {
             final String firstName,
             final String lastName,
             final String email,
-            final String password) {
+            final String password,
+            final String verificationCode) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
+        this.verificationCode = verificationCode;
     }
 
     /**
@@ -59,5 +62,9 @@ public final class RegisterInputData {
      */
     public String getPassword() {
         return this.password;
+    }
+
+    public String getVerificationCode() {
+        return this.verificationCode;
     }
 }
