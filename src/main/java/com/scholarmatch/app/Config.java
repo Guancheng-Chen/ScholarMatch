@@ -1,11 +1,16 @@
 package com.scholarmatch.app;
 
 import com.scholarmatch.frameworks.data_access_object.FallbackUserApiGateway;
+import com.scholarmatch.frameworks.data_access_object.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.LocalUserApiGateway;
 import com.scholarmatch.frameworks.data_access_object.LocalServerRepository;
 import com.scholarmatch.frameworks.data_access_object.SemanticScholarGateway;
 import com.scholarmatch.frameworks.data_access_object.ServerRepository;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
+import com.scholarmatch.frameworks.data_access_object.InMemoryEmailVerificationChallengeRepository;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.ResendVerificationEmailSender;
+import com.scholarmatch.frameworks.data_access_object.SecureVerificationCodeGenerator;
 import com.scholarmatch.frameworks.gui.MainView;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
@@ -21,6 +26,13 @@ import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
+import com.scholarmatch.interface_adapter.controller.CreatePostingController;
+import com.scholarmatch.interface_adapter.controller.ClosePostingController;
+import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
+import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
+import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.presenter.DeleteAccountPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMatchesPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMessagePresenter;
@@ -31,10 +43,18 @@ import com.scholarmatch.interface_adapter.presenter.DislikePresenter;
 import com.scholarmatch.interface_adapter.presenter.RecommendPresenter;
 import com.scholarmatch.interface_adapter.presenter.PaperLookupPresenter;
 import com.scholarmatch.interface_adapter.presenter.RegisterPresenter;
+import com.scholarmatch.interface_adapter.presenter.RequestEmailVerificationPresenter;
 import com.scholarmatch.interface_adapter.presenter.ConnectPresenter;
 import com.scholarmatch.interface_adapter.presenter.SendMessagePresenter;
 import com.scholarmatch.interface_adapter.presenter.SkipPresenter;
 import com.scholarmatch.interface_adapter.presenter.UpdateProfilePresenter;
+import com.scholarmatch.interface_adapter.presenter.CreatePostingPresenter;
+import com.scholarmatch.interface_adapter.presenter.ClosePostingPresenter;
+import com.scholarmatch.interface_adapter.presenter.LoadPostingsPresenter;
+import com.scholarmatch.interface_adapter.presenter.ApplyToPostingPresenter;
+import com.scholarmatch.interface_adapter.presenter.AcceptApplicationPresenter;
+import com.scholarmatch.interface_adapter.presenter.DeclineApplicationPresenter;
+import com.scholarmatch.interface_adapter.presenter.LoadMyApplicationsPresenter;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
@@ -44,7 +64,11 @@ import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
 import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
@@ -56,6 +80,14 @@ import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInter
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.data_access_interface.ConnectDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.CreatePostingDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ClosePostingDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.LoadPostingsDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ApplyToPostingDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.AcceptApplicationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.DeclineApplicationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInteractor;
 import com.scholarmatch.usecase.load_profile.LoadProfileInteractor;
 import com.scholarmatch.usecase.login.LoginInteractor;
@@ -66,16 +98,25 @@ import com.scholarmatch.usecase.recommend.RecommendInteractor;
 import com.scholarmatch.usecase.load_matches.LoadMatchesInteractor;
 import com.scholarmatch.usecase.paper_lookup.PaperLookupInteractor;
 import com.scholarmatch.usecase.register.RegisterInteractor;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInteractor;
 import com.scholarmatch.usecase.connect.ConnectInteractor;
 import com.scholarmatch.usecase.send_message.SendMessageInteractor;
 import com.scholarmatch.usecase.skip.SkipInteractor;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInteractor;
+import com.scholarmatch.usecase.create_posting.CreatePostingInteractor;
+import com.scholarmatch.usecase.close_posting.ClosePostingInteractor;
+import com.scholarmatch.usecase.load_postings.LoadPostingsInteractor;
+import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInteractor;
+import com.scholarmatch.usecase.accept_application.AcceptApplicationInteractor;
+import com.scholarmatch.usecase.decline_application.DeclineApplicationInteractor;
+import com.scholarmatch.usecase.load_my_applications.LoadMyApplicationsInteractor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Clock;
 
 /**
  * Composition root — the only class that instantiates concrete types across layers.
@@ -124,8 +165,16 @@ public final class Config {
         // ── Layer 4: server-facing repositories, chosen once at startup ────────
         final boolean offline = "true".equalsIgnoreCase(System.getenv("OFFLINE_MODE"))
                 || !isServerReachable(SERVER_URL);
-        final ServerRepository serverRepo = new ServerRepository(SERVER_URL, currentUserProvider);
-        final LocalServerRepository localRepo = new LocalServerRepository(currentUserProvider);
+        final InstitutionCatalogDataAccessInterface institutionCatalog =
+                new ClasspathInstitutionCatalogRepository();
+        final AcademicEmailDomainDataAccessInterface academicEmailDomains =
+                new ClasspathAcademicEmailDomainRepository(institutionCatalog);
+        final InMemoryEmailVerificationChallengeRepository verificationChallenges =
+                new InMemoryEmailVerificationChallengeRepository();
+        final ServerRepository serverRepo =
+                new ServerRepository(SERVER_URL, currentUserProvider, institutionCatalog);
+        final LocalServerRepository localRepo =
+                new LocalServerRepository(currentUserProvider, institutionCatalog);
         final LoginDataAccessInterface loginDataAccessObject = offline ? localRepo : serverRepo;
         final RegisterDataAccessInterface registerDataAccessObject = offline ? localRepo : serverRepo;
         final RecommendDataAccessInterface recommendDataAccessObject = offline ? localRepo : serverRepo;
@@ -137,6 +186,14 @@ public final class Config {
         final DeleteAccountDataAccessInterface deleteAccountDataAccessObject = offline ? localRepo : serverRepo;
         final SendMessageDataAccessInterface sendMessageDataAccessObject = offline ? localRepo : serverRepo;
         final LoadMessageDataAccessInterface loadMessageDataAccessObject = offline ? localRepo : serverRepo;
+        final CreatePostingDataAccessInterface createPostingDataAccessObject = offline ? localRepo : serverRepo;
+        final ClosePostingDataAccessInterface closePostingDataAccessObject = offline ? localRepo : serverRepo;
+        final LoadPostingsDataAccessInterface loadPostingsDataAccessObject = offline ? localRepo : serverRepo;
+        final ApplyToPostingDataAccessInterface applyToPostingDataAccessObject = offline ? localRepo : serverRepo;
+        final AcceptApplicationDataAccessInterface acceptApplicationDataAccessObject = offline ? localRepo : serverRepo;
+        final DeclineApplicationDataAccessInterface declineApplicationDataAccessObject = offline ? localRepo : serverRepo;
+        final LoadMyApplicationsDataAccessInterface loadMyApplicationsDataAccessObject =
+                offline ? localRepo : serverRepo;
         // Falls back to a small offline dataset per-call if the live Semantic User API is
         // rate limited or unreachable, so a demo isn't derailed by a third-party outage.
         final UserAPIGatewayInterface userApiGateway =
@@ -152,6 +209,10 @@ public final class Config {
         final LoadMatchesViewModel loadMatchesViewModel = new LoadMatchesViewModel();
         final ChatViewModel chatViewModel = new ChatViewModel();
         final UpdateProfileViewModel updateProfileViewModel = new UpdateProfileViewModel();
+        updateProfileViewModel.setInstitutions(institutionCatalog.getAllInstitutions());
+        final OpportunitiesViewModel opportunitiesViewModel = new OpportunitiesViewModel();
+        final MyPostingsViewModel myPostingsViewModel = new MyPostingsViewModel();
+        final MyApplicationsViewModel myApplicationsViewModel = new MyApplicationsViewModel();
 
         // ── Layer 3: Presenters ───────────────────────────────────────────────
         final LoginPresenter loginPresenter = new LoginPresenter(loginViewModel);
@@ -159,6 +220,8 @@ public final class Config {
         final DeleteAccountPresenter deleteAccountPresenter =
                 new DeleteAccountPresenter(logoutViewModel, deleteAccountViewModel);
         final RegisterPresenter registerPresenter = new RegisterPresenter(registerViewModel);
+        final RequestEmailVerificationPresenter verificationPresenter =
+                new RequestEmailVerificationPresenter(registerViewModel);
         final PaperLookupPresenter paperLookupPresenter = new PaperLookupPresenter(paperLookupViewModel);
         final RecommendPresenter recommendPresenter = new RecommendPresenter(recommendViewModel);
         final ConnectPresenter connectPresenter = new ConnectPresenter(loadMatchesViewModel);
@@ -170,6 +233,22 @@ public final class Config {
         final UpdateProfilePresenter updateProfilePresenter =
                 new UpdateProfilePresenter(updateProfileViewModel);
         final LoadProfilePresenter loadProfilePresenter = new LoadProfilePresenter(updateProfileViewModel);
+        final CreatePostingPresenter createPostingPresenter =
+                new CreatePostingPresenter(myPostingsViewModel);
+        final ClosePostingPresenter closePostingPresenter =
+                new ClosePostingPresenter(myPostingsViewModel);
+        final LoadPostingsPresenter opportunitiesLoadPostingsPresenter =
+                new LoadPostingsPresenter(opportunitiesViewModel);
+        final LoadPostingsPresenter myPostingsLoadPostingsPresenter =
+                new LoadPostingsPresenter(myPostingsViewModel);
+        final ApplyToPostingPresenter applyToPostingPresenter =
+                new ApplyToPostingPresenter(opportunitiesViewModel);
+        final AcceptApplicationPresenter acceptApplicationPresenter =
+                new AcceptApplicationPresenter(myPostingsViewModel);
+        final DeclineApplicationPresenter declineApplicationPresenter =
+                new DeclineApplicationPresenter(myPostingsViewModel);
+        final LoadMyApplicationsPresenter loadMyApplicationsPresenter =
+                new LoadMyApplicationsPresenter(myApplicationsViewModel);
 
         // ── Layer 2: Interactors ──────────────────────────────────────────────
         final LoginInteractor loginInteractor =
@@ -179,7 +258,17 @@ public final class Config {
         final DeleteAccountInteractor deleteAccountInteractor =
                 new DeleteAccountInteractor(deleteAccountDataAccessObject, currentUserProvider, deleteAccountPresenter);
         final RegisterInteractor registerInteractor =
-                new RegisterInteractor(registerDataAccessObject, currentUserProvider, registerPresenter);
+                new RegisterInteractor(
+                        registerDataAccessObject, currentUserProvider, registerPresenter, academicEmailDomains,
+                        verificationChallenges, Clock.systemUTC());
+        final RequestEmailVerificationInteractor verificationInteractor =
+                new RequestEmailVerificationInteractor(
+                        new ResendVerificationEmailSender(
+                                System.getenv("RESEND_API_KEY"), System.getenv("RESEND_FROM_EMAIL")),
+                        verificationChallenges,
+                        new SecureVerificationCodeGenerator(),
+                        verificationPresenter,
+                        Clock.systemUTC());
         final PaperLookupInteractor paperLookupInteractor =
                 new PaperLookupInteractor(userApiGateway, paperLookupPresenter);
         final RecommendInteractor recommendInteractor =
@@ -200,13 +289,35 @@ public final class Config {
                 new UpdateProfileInteractor(updateProfileDataAccessObject, updateProfilePresenter);
         final LoadProfileInteractor loadProfileInteractor =
                 new LoadProfileInteractor(loadProfileDataAccessObject, loadProfilePresenter);
+        final CreatePostingInteractor createPostingInteractor =
+                new CreatePostingInteractor(createPostingDataAccessObject, createPostingPresenter);
+        final ClosePostingInteractor closePostingInteractor =
+                new ClosePostingInteractor(closePostingDataAccessObject, closePostingPresenter);
+        final LoadPostingsInteractor opportunitiesLoadPostingsInteractor =
+                new LoadPostingsInteractor(
+                        loadPostingsDataAccessObject, opportunitiesLoadPostingsPresenter);
+        final LoadPostingsInteractor myPostingsLoadPostingsInteractor =
+                new LoadPostingsInteractor(
+                        loadPostingsDataAccessObject, myPostingsLoadPostingsPresenter);
+        final ApplyToPostingInteractor applyToPostingInteractor =
+                new ApplyToPostingInteractor(applyToPostingDataAccessObject, applyToPostingPresenter);
+        final AcceptApplicationInteractor acceptApplicationInteractor =
+                new AcceptApplicationInteractor(
+                        acceptApplicationDataAccessObject, acceptApplicationPresenter);
+        final DeclineApplicationInteractor declineApplicationInteractor =
+                new DeclineApplicationInteractor(
+                        declineApplicationDataAccessObject, declineApplicationPresenter);
+        final LoadMyApplicationsInteractor loadMyApplicationsInteractor =
+                new LoadMyApplicationsInteractor(
+                        loadMyApplicationsDataAccessObject, loadMyApplicationsPresenter);
 
         // ── Layer 3: Controllers ──────────────────────────────────────────────
         final LoginController loginController = new LoginController(loginInteractor);
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         final DeleteAccountController deleteAccountController =
                 new DeleteAccountController(deleteAccountInteractor);
-        final RegisterController registerController = new RegisterController(registerInteractor);
+        final RegisterController registerController =
+                new RegisterController(registerInteractor, verificationInteractor);
         final PaperLookupController paperLookupController = new PaperLookupController(paperLookupInteractor);
         final RecommendController recommendController = new RecommendController(recommendInteractor);
         final ConnectController connectController = new ConnectController(connectInteractor);
@@ -218,6 +329,22 @@ public final class Config {
         final UpdateProfileController updateProfileController =
                 new UpdateProfileController(updateProfileInteractor);
         final LoadProfileController loadProfileController = new LoadProfileController(loadProfileInteractor);
+        final CreatePostingController createPostingController =
+                new CreatePostingController(createPostingInteractor);
+        final ClosePostingController closePostingController =
+                new ClosePostingController(closePostingInteractor);
+        final LoadPostingsController opportunitiesLoadPostingsController =
+                new LoadPostingsController(opportunitiesLoadPostingsInteractor);
+        final LoadPostingsController myPostingsLoadPostingsController =
+                new LoadPostingsController(myPostingsLoadPostingsInteractor);
+        final ApplyToPostingController applyToPostingController =
+                new ApplyToPostingController(applyToPostingInteractor);
+        final AcceptApplicationController acceptApplicationController =
+                new AcceptApplicationController(acceptApplicationInteractor);
+        final DeclineApplicationController declineApplicationController =
+                new DeclineApplicationController(declineApplicationInteractor);
+        final LoadMyApplicationsController loadMyApplicationsController =
+                new LoadMyApplicationsController(loadMyApplicationsInteractor);
 
         // ── Layer 4: UI ───────────────────────────────────────────────────────
         final MainView mainView = new MainView(
@@ -230,6 +357,12 @@ public final class Config {
                 loadMatchesViewModel, loadMatchesController,
                 sendMessageController, loadMessageController, chatViewModel,
                 updateProfileController, loadProfileController, updateProfileViewModel,
+                createPostingController,
+                closePostingController,
+                opportunitiesLoadPostingsController, myPostingsLoadPostingsController,
+                applyToPostingController, acceptApplicationController, declineApplicationController,
+                loadMyApplicationsController,
+                opportunitiesViewModel, myPostingsViewModel, myApplicationsViewModel,
                 currentUserProvider);
 
         return mainView;
