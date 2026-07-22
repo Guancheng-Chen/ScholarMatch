@@ -2,11 +2,13 @@ package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
 import com.scholarmatch.interface_adapter.controller.LoadProfileController;
 import com.scholarmatch.interface_adapter.controller.PaperLookupController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
@@ -24,6 +26,7 @@ import org.mockito.MockedStatic;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -134,11 +137,29 @@ class UpdateProfileViewTest {
         assertEquals("ada@example.com", SwingTestSupport.find(view, JTextField.class, 0).getText());
     }
 
+    @Test
+    void testAcademicEmailProfileShowsRecognitionMarker() throws Exception {
+        final UpdateProfileViewModel viewModel = new UpdateProfileViewModel();
+        final UpdateProfileView view = new UpdateProfileView(
+            new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
+            new LoadProfileController(mock(LoadProfileInputBoundary.class)),
+            viewModel,
+            new PaperLookupController(mock(PaperLookupInputBoundary.class)),
+            new PaperLookupViewModel());
+
+        SwingUtilities.invokeAndWait(() -> viewModel.setCurrentUser(sampleAcademicUser()));
+
+        assertEquals("Verified university email", emailAccountTypeLabel(view).getText());
+    }
+
     private UpdateProfileView buildView(final UpdateProfileInputBoundary interactor) {
+        final UpdateProfileViewModel viewModel = new UpdateProfileViewModel();
+        viewModel.setInstitutions(
+                new ClasspathInstitutionCatalogRepository().getAllInstitutions());
         return new UpdateProfileView(
             new UpdateProfileController(interactor),
             new LoadProfileController(mock(LoadProfileInputBoundary.class)),
-            new UpdateProfileViewModel(),
+            viewModel,
             new PaperLookupController(mock(PaperLookupInputBoundary.class)),
             new PaperLookupViewModel());
     }
@@ -153,6 +174,15 @@ class UpdateProfileViewTest {
 
     private JTextField weeklyAvailabilityField(final UpdateProfileView view) {
         return SwingTestSupport.find(view, JTextField.class, 1);
+    }
+
+    private JLabel emailAccountTypeLabel(final UpdateProfileView view) {
+        for (final JLabel label : SwingTestSupport.findAll(view, JLabel.class)) {
+            if ("emailAccountType".equals(label.getName())) {
+                return label;
+            }
+        }
+        throw new IllegalStateException("Email account type label not found");
     }
 
     /**
@@ -174,6 +204,15 @@ class UpdateProfileViewTest {
             Institution.UNIVERSITY_OF_CAMBRIDGE, AcademicLevel.FACULTY, ResearchField.MACHINE_LEARNING,
             CollaborationType.CO_AUTHOR, "Looking for co-authors", "Analytical engines and algorithms",
             8, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        return UserData.from(user);
+    }
+
+    private UserData sampleAcademicUser() {
+        final User user = new User(
+            "user-1", "Ada", "Lovelace", "ada@mit.edu", "555-0000",
+            Institution.MIT, AcademicLevel.FACULTY, ResearchField.MACHINE_LEARNING,
+            CollaborationType.CO_AUTHOR, "Looking for co-authors", "Algorithms",
+            8, FundingStatus.INSTITUTIONAL_FUNDING, "hash", EmailAccountType.ACADEMIC);
         return UserData.from(user);
     }
 }
