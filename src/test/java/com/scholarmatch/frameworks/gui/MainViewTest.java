@@ -15,6 +15,13 @@ import com.scholarmatch.interface_adapter.controller.RegisterController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
+import com.scholarmatch.interface_adapter.controller.CreatePostingController;
+import com.scholarmatch.interface_adapter.controller.ClosePostingController;
+import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
+import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
+import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
@@ -24,6 +31,9 @@ import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
 import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
 import com.scholarmatch.usecase.connect.ConnectInputBoundary;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInputBoundary;
 import com.scholarmatch.usecase.dislike.DislikeInputBoundary;
@@ -38,6 +48,13 @@ import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.send_message.SendMessageInputBoundary;
 import com.scholarmatch.usecase.skip.SkipInputBoundary;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputBoundary;
+import com.scholarmatch.usecase.create_posting.CreatePostingInputBoundary;
+import com.scholarmatch.usecase.close_posting.ClosePostingInputBoundary;
+import com.scholarmatch.usecase.load_postings.LoadPostingsInputBoundary;
+import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInputBoundary;
+import com.scholarmatch.usecase.accept_application.AcceptApplicationInputBoundary;
+import com.scholarmatch.usecase.decline_application.DeclineApplicationInputBoundary;
+import com.scholarmatch.usecase.load_my_applications.LoadMyApplicationsInputBoundary;
 
 import org.junit.jupiter.api.Test;
 
@@ -99,6 +116,17 @@ class MainViewTest {
             new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
             new LoadProfileController(mock(LoadProfileInputBoundary.class)),
             new UpdateProfileViewModel(),
+            new CreatePostingController(mock(CreatePostingInputBoundary.class)),
+            new ClosePostingController(mock(ClosePostingInputBoundary.class)),
+            new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
+            new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
+            new ApplyToPostingController(mock(ApplyToPostingInputBoundary.class)),
+            new AcceptApplicationController(mock(AcceptApplicationInputBoundary.class)),
+            new DeclineApplicationController(mock(DeclineApplicationInputBoundary.class)),
+            new LoadMyApplicationsController(mock(LoadMyApplicationsInputBoundary.class)),
+            new OpportunitiesViewModel(),
+            new MyPostingsViewModel(),
+            new MyApplicationsViewModel(),
             session);
     }
 }

@@ -29,6 +29,10 @@ public final class ObservableListModel<T> extends ArrayList<T> {
         this.listeners.add(listener);
     }
 
+    public void removeListener(final Runnable listener) {
+        this.listeners.remove(listener);
+    }
+
 
     /**
      * Replaces the entire contents of this list with items in one notification.

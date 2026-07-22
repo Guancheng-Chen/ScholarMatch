@@ -35,12 +35,14 @@ class NavigationBarTest {
             new DeleteAccountController(mock(DeleteAccountInputBoundary.class)), new DeleteAccountViewModel());
 
         final List<JToggleButton> toggles = SwingTestSupport.findAll(navBar, JToggleButton.class);
-        assertEquals(4, toggles.size());
+        assertEquals(7, toggles.size());
         for (final JToggleButton toggle : toggles) {
             toggle.doClick();
         }
 
-        assertEquals(List.of("recommend", "matched", "chat", "profile"), selections);
+        assertEquals(List.of(
+                "recommend", "matched", "chat", "opportunities",
+                "my-postings", "my-applications", "profile"), selections);
     }
 
     @Test

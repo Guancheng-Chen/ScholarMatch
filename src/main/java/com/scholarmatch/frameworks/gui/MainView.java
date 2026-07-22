@@ -16,6 +16,13 @@ import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
+import com.scholarmatch.interface_adapter.controller.CreatePostingController;
+import com.scholarmatch.interface_adapter.controller.ClosePostingController;
+import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
+import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
+import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
@@ -25,6 +32,9 @@ import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
 import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -64,6 +74,17 @@ public final class MainView extends JPanel {
     private final LoadProfileController loadProfileController;
     private final UpdateProfileViewModel updateProfileViewModel;
     private final CurrentUserProvider currentUserProvider;
+    private final CreatePostingController createPostingController;
+    private final ClosePostingController closePostingController;
+    private final LoadPostingsController opportunitiesLoadPostingsController;
+    private final LoadPostingsController myPostingsLoadPostingsController;
+    private final ApplyToPostingController applyToPostingController;
+    private final AcceptApplicationController acceptApplicationController;
+    private final DeclineApplicationController declineApplicationController;
+    private final LoadMyApplicationsController loadMyApplicationsController;
+    private final OpportunitiesViewModel opportunitiesViewModel;
+    private final MyPostingsViewModel myPostingsViewModel;
+    private final MyApplicationsViewModel myApplicationsViewModel;
 
     /**
      * Constructs the MainView and shows the shell matching the current session state.
@@ -117,6 +138,17 @@ public final class MainView extends JPanel {
         final UpdateProfileController updateProfileController,
         final LoadProfileController loadProfileController,
         final UpdateProfileViewModel updateProfileViewModel,
+        final CreatePostingController createPostingController,
+        final ClosePostingController closePostingController,
+        final LoadPostingsController opportunitiesLoadPostingsController,
+        final LoadPostingsController myPostingsLoadPostingsController,
+        final ApplyToPostingController applyToPostingController,
+        final AcceptApplicationController acceptApplicationController,
+        final DeclineApplicationController declineApplicationController,
+        final LoadMyApplicationsController loadMyApplicationsController,
+        final OpportunitiesViewModel opportunitiesViewModel,
+        final MyPostingsViewModel myPostingsViewModel,
+        final MyApplicationsViewModel myApplicationsViewModel,
         final CurrentUserProvider currentUserProvider) {
         super(new BorderLayout());
         setBackground(Theme.BG_DEFAULT);
@@ -144,6 +176,17 @@ public final class MainView extends JPanel {
         this.updateProfileController = updateProfileController;
         this.loadProfileController = loadProfileController;
         this.updateProfileViewModel = updateProfileViewModel;
+        this.createPostingController = createPostingController;
+        this.closePostingController = closePostingController;
+        this.opportunitiesLoadPostingsController = opportunitiesLoadPostingsController;
+        this.myPostingsLoadPostingsController = myPostingsLoadPostingsController;
+        this.applyToPostingController = applyToPostingController;
+        this.acceptApplicationController = acceptApplicationController;
+        this.declineApplicationController = declineApplicationController;
+        this.loadMyApplicationsController = loadMyApplicationsController;
+        this.opportunitiesViewModel = opportunitiesViewModel;
+        this.myPostingsViewModel = myPostingsViewModel;
+        this.myApplicationsViewModel = myApplicationsViewModel;
         this.currentUserProvider = currentUserProvider;
 
         if (currentUserProvider.isLoggedIn()) {
@@ -174,6 +217,12 @@ public final class MainView extends JPanel {
             paperLookupController, paperLookupViewModel,
             logoutController, logoutViewModel,
             deleteAccountController, deleteAccountViewModel,
+            createPostingController,
+            closePostingController,
+            opportunitiesLoadPostingsController, myPostingsLoadPostingsController,
+            applyToPostingController, acceptApplicationController, declineApplicationController,
+            loadMyApplicationsController,
+            opportunitiesViewModel, myPostingsViewModel, myApplicationsViewModel,
             currentUserProvider,
             this::showAuthShell),
             BorderLayout.CENTER);
