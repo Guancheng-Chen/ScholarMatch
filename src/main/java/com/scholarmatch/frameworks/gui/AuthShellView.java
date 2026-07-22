@@ -17,6 +17,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -39,6 +40,11 @@ import java.util.function.Consumer;
  */
 final class AuthShellView extends JPanel {
 
+    private final LoginViewModel loginViewModel;
+    private final RegisterViewModel registerViewModel;
+    private final Consumer<String> authenticatedLoginListener;
+    private final Consumer<Boolean> authenticatedRegisterListener;
+
     /**
      * Constructs the AuthShellView.
      *
@@ -55,6 +61,18 @@ final class AuthShellView extends JPanel {
         final RegisterViewModel registerViewModel,
         final Runnable onAuthenticated) {
         super(new BorderLayout());
+        this.loginViewModel = loginViewModel;
+        this.registerViewModel = registerViewModel;
+        this.authenticatedLoginListener = newId -> {
+            if (newId != null && !newId.isEmpty()) {
+                SwingUtilities.invokeLater(onAuthenticated);
+            }
+        };
+        this.authenticatedRegisterListener = succeeded -> {
+            if (Boolean.TRUE.equals(succeeded)) {
+                SwingUtilities.invokeLater(onAuthenticated);
+            }
+        };
         setBackground(Theme.BG_DEFAULT);
 
         final JLabel logoLabel = new JLabel("ScholarMatch");
@@ -70,8 +88,8 @@ final class AuthShellView extends JPanel {
         final JPopupMenu authMenu = new JPopupMenu();
         final JMenuItem loginItem = new JMenuItem("Login");
         final JMenuItem registerItem = new JMenuItem("Register");
-        loginItem.addActionListener(evt -> showLoginDialog(loginController, loginViewModel, authButton));
-        registerItem.addActionListener(evt -> showRegisterDialog(registerController, registerViewModel, authButton));
+        loginItem.addActionListener(evt -> showLoginDialog(loginController, authButton));
+        registerItem.addActionListener(evt -> showRegisterDialog(registerController, authButton));
         authMenu.add(loginItem);
         authMenu.add(registerItem);
         authButton.addActionListener(evt -> authMenu.show(authButton, 0, authButton.getHeight()));
@@ -88,16 +106,8 @@ final class AuthShellView extends JPanel {
         add(centerArea, BorderLayout.CENTER);
 
         // Session is already set by the interactor on success — just notify the caller.
-        loginViewModel.loggedInUserIdProperty().addListener(newId -> {
-            if (newId != null && !newId.isEmpty()) {
-                SwingUtilities.invokeLater(onAuthenticated);
-            }
-        });
-        registerViewModel.registrationSucceededProperty().addListener(succeeded -> {
-            if (Boolean.TRUE.equals(succeeded)) {
-                SwingUtilities.invokeLater(onAuthenticated);
-            }
-        });
+        loginViewModel.loggedInUserIdProperty().addListener(this.authenticatedLoginListener);
+        registerViewModel.registrationSucceededProperty().addListener(this.authenticatedRegisterListener);
     }
 
     /**
@@ -107,12 +117,12 @@ final class AuthShellView extends JPanel {
      */
     private void showLoginDialog(
         final LoginController loginController,
-        final LoginViewModel loginViewModel,
         final Component ownerComponent) {
-        final LoginView loginView = new LoginView(loginController, loginViewModel);
+        final LoginView loginView = new LoginView(loginController, this.loginViewModel);
 
         final Window ownerWindow = SwingUtilities.getWindowAncestor(ownerComponent);
         final JDialog dialog = new JDialog(ownerWindow, "Login", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setResizable(false);
         dialog.getContentPane().add(loginView);
         dialog.getContentPane().setBackground(Theme.BG_DEFAULT);
@@ -126,9 +136,11 @@ final class AuthShellView extends JPanel {
                 loginViewModel.loggedInUserIdProperty().removeListener(closeOnSuccess[0]);
             }
         };
-        loginViewModel.loggedInUserIdProperty().addListener(closeOnSuccess[0]);
+        this.loginViewModel.loggedInUserIdProperty().addListener(closeOnSuccess[0]);
 
         dialog.setVisible(true);
+        dialog.dispose();
+        this.loginViewModel.loggedInUserIdProperty().removeListener(closeOnSuccess[0]);
     }
 
     /**
@@ -138,12 +150,12 @@ final class AuthShellView extends JPanel {
      */
     private void showRegisterDialog(
         final RegisterController registerController,
-        final RegisterViewModel registerViewModel,
         final Component ownerComponent) {
-        final RegisterView registerView = new RegisterView(registerController, registerViewModel);
+        final RegisterView registerView = new RegisterView(registerController, this.registerViewModel);
 
         final Window ownerWindow = SwingUtilities.getWindowAncestor(ownerComponent);
         final JDialog dialog = new JDialog(ownerWindow, "Register", Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setResizable(false);
         dialog.getContentPane().add(registerView);
         dialog.getContentPane().setBackground(Theme.BG_DEFAULT);
@@ -157,8 +169,18 @@ final class AuthShellView extends JPanel {
                 registerViewModel.registrationSucceededProperty().removeListener(closeOnSuccess[0]);
             }
         };
-        registerViewModel.registrationSucceededProperty().addListener(closeOnSuccess[0]);
+        this.registerViewModel.registrationSucceededProperty().addListener(closeOnSuccess[0]);
 
         dialog.setVisible(true);
+        dialog.dispose();
+        this.registerViewModel.registrationSucceededProperty().removeListener(closeOnSuccess[0]);
+    }
+
+    @Override
+    public void removeNotify() {
+        this.loginViewModel.loggedInUserIdProperty().removeListener(this.authenticatedLoginListener);
+        this.registerViewModel.registrationSucceededProperty()
+                .removeListener(this.authenticatedRegisterListener);
+        super.removeNotify();
     }
 }

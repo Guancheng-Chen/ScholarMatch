@@ -9,6 +9,9 @@ import com.scholarmatch.frameworks.gui.view.ChatView;
 import com.scholarmatch.frameworks.gui.view.LoadMatchesView;
 import com.scholarmatch.frameworks.gui.view.RecommendView;
 import com.scholarmatch.frameworks.gui.view.UpdateProfileView;
+import com.scholarmatch.frameworks.gui.view.OpportunitiesView;
+import com.scholarmatch.frameworks.gui.view.MyPostingsView;
+import com.scholarmatch.frameworks.gui.view.MyApplicationsView;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
@@ -22,6 +25,13 @@ import com.scholarmatch.interface_adapter.controller.RecommendController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
+import com.scholarmatch.interface_adapter.controller.CreatePostingController;
+import com.scholarmatch.interface_adapter.controller.ClosePostingController;
+import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
+import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
+import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
@@ -29,6 +39,10 @@ import com.scholarmatch.interface_adapter.view_model.LogoutViewModel;
 import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
 import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.support.ObservableValue;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -38,6 +52,9 @@ import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Authenticated app layout.
@@ -51,6 +68,8 @@ import java.awt.Font;
  * caller (MainView) to swap back to the logged-out shell, not manage the session itself.
  */
 final class MainLayoutView extends JPanel {
+
+    private final List<Runnable> listenerRemovers = new ArrayList<>();
 
     /**
      * Constructs the MainLayoutView.
@@ -97,6 +116,17 @@ final class MainLayoutView extends JPanel {
         final LogoutViewModel logoutViewModel,
         final DeleteAccountController deleteAccountController,
         final DeleteAccountViewModel deleteAccountViewModel,
+        final CreatePostingController createPostingController,
+        final ClosePostingController closePostingController,
+        final LoadPostingsController opportunitiesLoadPostingsController,
+        final LoadPostingsController myPostingsLoadPostingsController,
+        final ApplyToPostingController applyToPostingController,
+        final AcceptApplicationController acceptApplicationController,
+        final DeclineApplicationController declineApplicationController,
+        final LoadMyApplicationsController loadMyApplicationsController,
+        final OpportunitiesViewModel opportunitiesViewModel,
+        final MyPostingsViewModel myPostingsViewModel,
+        final MyApplicationsViewModel myApplicationsViewModel,
         final CurrentUserProvider currentUserProvider,
         final Runnable onLoggedOut) {
         super(new BorderLayout());
@@ -107,7 +137,7 @@ final class MainLayoutView extends JPanel {
 
         // The logout use case is the one that clears the session (via LogoutInteractor);
         // this view only reacts once LogoutViewModel confirms it happened.
-        logoutViewModel.loggedOutProperty().addListener(loggedOut -> {
+        listen(logoutViewModel.loggedOutProperty(), loggedOut -> {
             if (Boolean.TRUE.equals(loggedOut)) {
                 SwingUtilities.invokeLater(onLoggedOut);
             }
@@ -124,6 +154,21 @@ final class MainLayoutView extends JPanel {
                 case "chat" -> centerHolder.add(
                     new ChatView(sendMessageController, loadMessageController, loadMatchesController,
                         chatViewModel, loadMatchesViewModel, currentUserProvider),
+                    BorderLayout.CENTER);
+                case "opportunities" -> centerHolder.add(
+                    new OpportunitiesView(
+                        opportunitiesLoadPostingsController, applyToPostingController,
+                        opportunitiesViewModel),
+                    BorderLayout.CENTER);
+                case "my-postings" -> centerHolder.add(
+                    new MyPostingsView(
+                        createPostingController, myPostingsLoadPostingsController,
+                        closePostingController,
+                        acceptApplicationController, declineApplicationController,
+                        myPostingsViewModel),
+                    BorderLayout.CENTER);
+                case "my-applications" -> centerHolder.add(
+                    new MyApplicationsView(loadMyApplicationsController, myApplicationsViewModel),
                     BorderLayout.CENTER);
                 case "profile" -> centerHolder.add(
                     new UpdateProfileView(updateProfileController, loadProfileController, updateProfileViewModel,
@@ -156,7 +201,7 @@ final class MainLayoutView extends JPanel {
         // immediate feedback that a match just happened.
         final MatchToastOverlay toastOverlay = new MatchToastOverlay();
         toastOverlay.setContent(shell);
-        loadMatchesViewModel.matchNotificationProperty().addListener(matchedUser -> {
+        listen(loadMatchesViewModel.matchNotificationProperty(), matchedUser -> {
             if (matchedUser != null) {
                 toastOverlay.showToast(
                     "You matched with " + matchedUser.getFirstName() + " " + matchedUser.getLastName() + "!");
@@ -181,7 +226,7 @@ final class MainLayoutView extends JPanel {
         userLabel.setForeground(Theme.FG_DEFAULT);
         userLabel.setFont(userLabel.getFont().deriveFont(Font.BOLD, 14f));
 
-        updateProfileViewModel.currentUserProperty().addListener(user -> SwingUtilities.invokeLater(() -> {
+        listen(updateProfileViewModel.currentUserProperty(), user -> SwingUtilities.invokeLater(() -> {
             if (user != null) {
                 userLabel.setText(user.getFirstName() + " " + user.getLastName());
             }
@@ -195,5 +240,21 @@ final class MainLayoutView extends JPanel {
         topBar.setPreferredSize(new Dimension(0, 56));
         topBar.add(userLabel, BorderLayout.EAST);
         return topBar;
+    }
+
+    private <T> void listen(
+            final ObservableValue<T> observable,
+            final Consumer<T> listener) {
+        observable.addListener(listener);
+        this.listenerRemovers.add(() -> observable.removeListener(listener));
+    }
+
+    @Override
+    public void removeNotify() {
+        for (final Runnable removeListener : this.listenerRemovers) {
+            removeListener.run();
+        }
+        this.listenerRemovers.clear();
+        super.removeNotify();
     }
 }

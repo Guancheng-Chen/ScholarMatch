@@ -22,6 +22,7 @@ import javax.swing.SwingConstants;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.function.Consumer;
 
 /**
  * Left-hand navigation sidebar shown once the user is logged in.
@@ -47,6 +48,9 @@ public final class NavigationBar extends JPanel {
         "This will permanently delete your account, password, and personal information "
             + "from ScholarMatch. To use the app again, you will need to register a new "
             + "account. This action cannot be undone.";
+
+    private final DeleteAccountViewModel deleteAccountViewModel;
+    private final Consumer<String> deleteErrorListener;
 
     /**
      * Callback interface for screen-selection events raised by this bar.
@@ -74,6 +78,13 @@ public final class NavigationBar extends JPanel {
         final DeleteAccountController deleteAccountController,
         final DeleteAccountViewModel deleteAccountViewModel) {
         super();
+        this.deleteAccountViewModel = deleteAccountViewModel;
+        this.deleteErrorListener = errorMessage -> {
+            if (errorMessage != null && !errorMessage.isBlank()) {
+                JOptionPane.showMessageDialog(
+                    this, errorMessage, "Delete Account Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        };
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
         setBackground(Theme.BG_SUBTLE);
         setBorder(BorderFactory.createCompoundBorder(
@@ -96,10 +107,14 @@ public final class NavigationBar extends JPanel {
         final JToggleButton recommendButton = navToggle("Recommend", FontAwesomeSolid.COMPASS);
         final JToggleButton matchedButton = navToggle("View Matched", FontAwesomeSolid.USERS);
         final JToggleButton chatButton = navToggle("Chat", FontAwesomeSolid.COMMENT_DOTS);
+        final JToggleButton opportunitiesButton = navToggle("Opportunities", FontAwesomeSolid.BRIEFCASE);
+        final JToggleButton myPostingsButton = navToggle("My Postings", FontAwesomeSolid.CLIPBOARD_LIST);
+        final JToggleButton myApplicationsButton = navToggle("My Applications", FontAwesomeSolid.INBOX);
         final JToggleButton profileButton = navToggle("Profile", FontAwesomeSolid.USER_CIRCLE);
 
         for (final JToggleButton button
-            : new JToggleButton[] {recommendButton, matchedButton, chatButton, profileButton}) {
+            : new JToggleButton[] {recommendButton, matchedButton, chatButton, opportunitiesButton,
+                myPostingsButton, myApplicationsButton, profileButton}) {
             navGroup.add(button);
             button.putClientProperty(FlatClientProperties.STYLE, TOGGLE_STYLE);
         }
@@ -107,6 +122,9 @@ public final class NavigationBar extends JPanel {
         recommendButton.addActionListener(evt -> listener.onSelected("recommend"));
         matchedButton.addActionListener(evt -> listener.onSelected("matched"));
         chatButton.addActionListener(evt -> listener.onSelected("chat"));
+        opportunitiesButton.addActionListener(evt -> listener.onSelected("opportunities"));
+        myPostingsButton.addActionListener(evt -> listener.onSelected("my-postings"));
+        myApplicationsButton.addActionListener(evt -> listener.onSelected("my-applications"));
         profileButton.addActionListener(evt -> listener.onSelected("profile"));
 
         final JButton deleteAccountButton = new JButton(
@@ -125,12 +143,7 @@ public final class NavigationBar extends JPanel {
                 deleteAccountController.deleteAccount();
             }
         });
-        deleteAccountViewModel.errorMessageProperty().addListener(errorMessage -> {
-            if (errorMessage != null && !errorMessage.isBlank()) {
-                JOptionPane.showMessageDialog(
-                    this, errorMessage, "Delete Account Failed", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+        deleteAccountViewModel.errorMessageProperty().addListener(this.deleteErrorListener);
 
         final JButton logoutButton = new JButton(
             "Logout", Icons.of(FontAwesomeSolid.SIGN_OUT_ALT, TRAILING_ICON_SIZE, Theme.FG_DEFAULT));
@@ -146,11 +159,23 @@ public final class NavigationBar extends JPanel {
         add(Box.createVerticalStrut(4));
         add(chatButton);
         add(Box.createVerticalStrut(4));
+        add(opportunitiesButton);
+        add(Box.createVerticalStrut(4));
+        add(myPostingsButton);
+        add(Box.createVerticalStrut(4));
+        add(myApplicationsButton);
+        add(Box.createVerticalStrut(4));
         add(profileButton);
         add(Box.createVerticalGlue());
         add(logoutButton);
         add(Box.createVerticalStrut(8));
         add(deleteAccountButton);
+    }
+
+    @Override
+    public void removeNotify() {
+        this.deleteAccountViewModel.errorMessageProperty().removeListener(this.deleteErrorListener);
+        super.removeNotify();
     }
 
     /**
