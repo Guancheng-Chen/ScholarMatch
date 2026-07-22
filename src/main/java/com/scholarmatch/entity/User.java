@@ -33,6 +33,7 @@ public final class User {
     private final List<Publication> publications;
     private Integer hIndex;
     private Integer totalCitations;
+    private EmailAccountType emailAccountType;
 
     /**
      * Constructs a new User with mandatory registration fields.
@@ -68,6 +69,46 @@ public final class User {
             final Integer weeklyAvailabilityHours,
             final FundingStatus fundingStatus,
             final String passwordHash) {
+        this(userId, firstName, lastName, email, phoneNumber, institution, academicLevel,
+                researchField, lookingFor, collaborationDescription, researchDescription,
+                weeklyAvailabilityHours, fundingStatus, passwordHash, EmailAccountType.REGULAR);
+    }
+
+    /**
+     * Constructs a user with an explicitly classified email account.
+     *
+     * @param userId                   the unique identifier assigned by the system
+     * @param firstName                the user's given name
+     * @param lastName                 the user's family name
+     * @param email                    the user's email address
+     * @param phoneNumber              the user's phone number
+     * @param institution              the university or research institution
+     * @param academicLevel            the user's career stage
+     * @param researchField            the user's research discipline
+     * @param lookingFor               the collaboration type being sought
+     * @param collaborationDescription description of the ideal collaboration
+     * @param researchDescription      description of the user's research
+     * @param weeklyAvailabilityHours  weekly availability in hours
+     * @param fundingStatus            the user's funding status
+     * @param passwordHash             the stored password hash
+     * @param emailAccountType         classification of the registered email domain
+     */
+    public User(
+            final String userId,
+            final String firstName,
+            final String lastName,
+            final String email,
+            final String phoneNumber,
+            final Institution institution,
+            final AcademicLevel academicLevel,
+            final ResearchField researchField,
+            final CollaborationType lookingFor,
+            final String collaborationDescription,
+            final String researchDescription,
+            final Integer weeklyAvailabilityHours,
+            final FundingStatus fundingStatus,
+            final String passwordHash,
+            final EmailAccountType emailAccountType) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -87,6 +128,7 @@ public final class User {
         this.publications = new ArrayList<>();
         this.hIndex = null;
         this.totalCitations = null;
+        this.emailAccountType = emailAccountType;
     }
 
     /**
