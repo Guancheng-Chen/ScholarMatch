@@ -29,6 +29,13 @@ public final class MyApplicationsView extends JPanel {
     private final Runnable applicationsListener;
     private final Consumer<String> errorListener;
 
+    /**
+     * Constructs the My Applications view.
+     *
+     * @param loadController controller used to load the current user's applications
+     * @param viewModel view model containing the current user's applications
+     */
+
     public MyApplicationsView(
             final LoadMyApplicationsController loadController,
             final MyApplicationsViewModel viewModel) {
