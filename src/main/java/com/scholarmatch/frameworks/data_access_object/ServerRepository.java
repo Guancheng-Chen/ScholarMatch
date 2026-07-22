@@ -6,10 +6,15 @@ import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.DegreeType;
 import com.scholarmatch.entity.Education;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Message;
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.entity.Posting;
+import com.scholarmatch.entity.PostingApplication;
+import com.scholarmatch.entity.PostingApplicationStatus;
+import com.scholarmatch.entity.PostingStatus;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
@@ -25,12 +30,21 @@ import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterfac
 import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.ConnectDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.CreatePostingDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.LoadPostingsDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ApplyToPostingDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.AcceptApplicationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.DeclineApplicationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ClosePostingDataAccessInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
-import com.scholarmatch.usecase.register.RegisterInputData;
+import com.scholarmatch.usecase.register.RegisterAccountData;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputData;
+import com.scholarmatch.usecase.load_postings.PostingScope;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -41,6 +55,7 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -60,12 +75,20 @@ public final class ServerRepository
         UpdateProfileDataAccessInterface,
         DeleteAccountDataAccessInterface,
         SendMessageDataAccessInterface,
-        LoadMessageDataAccessInterface {
+        LoadMessageDataAccessInterface,
+        CreatePostingDataAccessInterface,
+        LoadPostingsDataAccessInterface,
+        ApplyToPostingDataAccessInterface,
+               AcceptApplicationDataAccessInterface,
+               DeclineApplicationDataAccessInterface,
+               LoadMyApplicationsDataAccessInterface,
+               ClosePostingDataAccessInterface {
 
     private final String baseUrl;
     private final CurrentUserProviderInterface session;
     private final HttpClient http;
     private final ObjectMapper mapper;
+    private final InstitutionCatalogDataAccessInterface institutionCatalog;
 
     /**
      * Constructs a ServerRepository.
@@ -73,11 +96,21 @@ public final class ServerRepository
      * @param baseUrl the server base URL (e.g. https://scholarmatch-server-production.up.railway.app)
      * @param session provides the JWT token for authenticated requests
      */
-    public ServerRepository(final String baseUrl, final CurrentUserProviderInterface session) {
+    public ServerRepository(
+            final String baseUrl,
+            final CurrentUserProviderInterface session) {
+        this(baseUrl, session, new ClasspathInstitutionCatalogRepository());
+    }
+
+    public ServerRepository(
+            final String baseUrl,
+            final CurrentUserProviderInterface session,
+            final InstitutionCatalogDataAccessInterface institutionCatalog) {
         this.baseUrl = baseUrl.replaceAll("/$", "");
         this.session = session;
         this.http = HttpClient.newHttpClient();
         this.mapper = new ObjectMapper();
+        this.institutionCatalog = institutionCatalog;
     }
 
     // ── Auth ─────────────────────────────────────────────────────────────────
@@ -93,7 +126,7 @@ public final class ServerRepository
     }
 
     @Override
-    public AuthResult register(final RegisterInputData data) {
+    public AuthResult register(final RegisterAccountData data) {
         // Registration only collects the account-creation essentials; every other profile
         // field is filled in later from the Edit Profile screen once the user is in the app.
         final Map<String, Object> body = new HashMap<>();
@@ -101,12 +134,97 @@ public final class ServerRepository
         body.put("lastName", data.getLastName());
         body.put("email", data.getEmail());
         body.put("password", data.getPassword());
+        body.put("academicEmailVerified", data.getEmailAccountType() == EmailAccountType.ACADEMIC);
 
         final JsonNode node = post("/api/auth/register", toJson(body), false);
         return new AuthResult(
                 node.get("token").asText(),
                 node.get("scholarId").asText(),
                 node.get("name").asText());
+    }
+
+    @Override
+    public Posting createPosting(
+            final String title,
+            final String description,
+            final ResearchField researchField,
+            final CollaborationType collaborationType,
+            final Integer capacity) {
+        final Map<String, Object> body = new HashMap<>();
+        body.put("title", title);
+        body.put("description", description);
+        if (researchField != null) {
+            body.put("researchField", researchField.name());
+        }
+        if (collaborationType != null) {
+            body.put("collaborationType", collaborationType.name());
+        }
+        body.put("capacity", capacity);
+        return postingFromJson(post("/api/postings", toJson(body), true));
+    }
+
+    @Override
+    public Posting closePosting(final String postingId) {
+        return postingFromJson(post("/api/postings/" + postingId + "/close", "{}", true));
+    }
+
+    @Override
+    public List<Posting> loadPostings(final PostingScope scope) {
+        final JsonNode array = get("/api/postings?scope=" + scope.name());
+        final List<Posting> result = new ArrayList<>();
+        for (final JsonNode node : array) {
+            result.add(postingFromJson(node));
+        }
+        return result;
+    }
+
+    @Override
+    public Map<String, List<PostingApplication>> loadApplicationsForOwnedPostings(
+            final PostingScope scope,
+            final List<Posting> postings) {
+        if (scope != PostingScope.MINE) {
+            return Map.of();
+        }
+        final JsonNode array = get("/api/postings?scope=MINE");
+        final Map<String, List<PostingApplication>> result = new LinkedHashMap<>();
+        for (final JsonNode node : array) {
+            final List<PostingApplication> applications = new ArrayList<>();
+            if (node.has("applications") && node.get("applications").isArray()) {
+                for (final JsonNode applicationNode : node.get("applications")) {
+                    applications.add(applicationFromJson(applicationNode));
+                }
+            }
+            result.put(node.get("postingId").asText(), applications);
+        }
+        return result;
+    }
+
+    @Override
+    public PostingApplication applyToPosting(final String postingId, final String message) {
+        final String body = toJson(Map.of("message", message == null ? "" : message));
+        return applicationFromJson(post("/api/postings/" + postingId + "/apply", body, true));
+    }
+
+    @Override
+    public PostingApplication acceptApplication(final String applicationId) {
+        return applicationFromJson(post(
+                "/api/postings/applications/" + applicationId + "/accept", "{}", true));
+    }
+
+    @Override
+    public PostingApplication declineApplication(final String applicationId) {
+        return applicationFromJson(post(
+                "/api/postings/applications/" + applicationId + "/decline", "{}", true));
+    }
+
+    @Override
+    public List<PostingApplication> getMyApplications() {
+        final JsonNode array = get("/api/postings/applications/mine");
+        final List<PostingApplication> result = new ArrayList<>();
+        for (final JsonNode node : array) {
+            result.add(applicationFromJson(node));
+        }
+        return result;
     }
 
     // ── Recommend ─────────────────────────────────────────────────────────────
@@ -141,7 +259,7 @@ public final class ServerRepository
         final JsonNode array = get("/api/matches");
         // Deduplicate by userId: the endpoint has been observed to list the same
         // matched user more than once (e.g. one row per side of the connection).
-        final Map<String, User> matchesById = new java.util.LinkedHashMap<>();
+        final Map<String, User> matchesById = new LinkedHashMap<>();
         for (final JsonNode node : array) {
             final User user = userFromJson(node);
             matchesById.put(user.getUserId(), user);
@@ -238,6 +356,54 @@ public final class ServerRepository
             result.add(messageFromJson(node));
         }
         return result;
+    }
+
+    private Posting postingFromJson(final JsonNode node) {
+        final ResearchField researchField = safeParseEnum(
+                ResearchField.class,
+                node.has("researchField") ? node.get("researchField").asText(null) : null,
+                ResearchField.OTHER);
+        final CollaborationType collaborationType = safeParseEnum(
+                CollaborationType.class,
+                node.has("collaborationType")
+                        ? node.get("collaborationType").asText(null) : null,
+                CollaborationType.INTEREST_SHARING);
+        final JsonNode capacityNode = node.has("capacity")
+                ? node.get("capacity") : node.get("maxApplicants");
+        final Integer capacity = capacityNode == null || capacityNode.isNull()
+                ? null : capacityNode.asInt();
+        final PostingStatus status = safeParseEnum(
+                PostingStatus.class,
+                node.has("status") ? node.get("status").asText(null) : null,
+                PostingStatus.OPEN);
+        return new Posting(
+                node.get("postingId").asText(),
+                node.get("posterUserId").asText(),
+                node.get("title").asText(),
+                node.has("description") ? node.get("description").asText("") : "",
+                researchField,
+                collaborationType,
+                capacity,
+                node.get("applicantCount").asInt(),
+                node.has("acceptedCount") ? node.get("acceptedCount").asInt() : 0,
+                status,
+                LocalDateTime.parse(node.get("createdAt").asText()));
+    }
+
+    private PostingApplication applicationFromJson(final JsonNode node) {
+        final PostingApplicationStatus status = safeParseEnum(
+                PostingApplicationStatus.class,
+                node.has("status") ? node.get("status").asText(null) : null,
+                PostingApplicationStatus.PENDING);
+        return new PostingApplication(
+                node.get("applicationId").asText(),
+                node.get("postingId").asText(),
+                node.get("applicantUserId").asText(),
+                node.has("message") ? node.get("message").asText("") : "",
+                status,
+                LocalDateTime.parse(node.get("appliedAt").asText()),
+                node.has("postingTitle") ? node.get("postingTitle").asText("") : "",
+                node.has("applicantName") ? node.get("applicantName").asText("") : "");
     }
 
     private Message messageFromJson(final JsonNode node) {
@@ -447,16 +613,19 @@ public final class ServerRepository
                         ? node.get("weeklyAvailabilityHours").asInt()
                         : null;
 
-        final Institution institution = safeParseEnum(
-                Institution.class,
-                node.has("institution") ? node.get("institution").asText(null) : null,
-                Institution.OTHER);
+        final Institution institution = this.institutionCatalog.findById(
+                node.has("institution") ? node.get("institution").asText(null) : null);
+
+        final String email = node.has("email") ? node.get("email").asText("") : "";
+        final boolean academicEmailVerified = node.has("academicEmailVerified")
+                ? node.get("academicEmailVerified").asBoolean()
+                : false;
 
         final User user = new User(
                 node.get("scholarId").asText(),
                 node.get("firstName").asText(),
                 node.get("lastName").asText(),
-                node.has("email") ? node.get("email").asText("") : "",
+                email,
                 node.has("phoneNumber") ? node.get("phoneNumber").asText("") : "",
                 institution,
                 academicLevel,
@@ -466,7 +635,8 @@ public final class ServerRepository
                 node.has("researchDescription") ? node.get("researchDescription").asText("") : "",
                 weeklyAvailabilityHours,
                 fundingStatus,
-                "");
+                "",
+                academicEmailVerified ? EmailAccountType.ACADEMIC : EmailAccountType.REGULAR);
 
         if (node.has("hIndex") && !node.get("hIndex").isNull()) {
             user.sethIndex(node.get("hIndex").asInt());
