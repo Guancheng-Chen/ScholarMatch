@@ -1,5 +1,6 @@
 package com.scholarmatch.entity;
 
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,16 +10,18 @@ class InstitutionTest {
 
     @Test
     void testTotalCount() {
-        assertEquals(1029, Institution.values().length);
+        assertEquals(1029, new ClasspathInstitutionCatalogRepository().getAllInstitutions().size());
     }
 
     @Test
     void testWellKnownConstantsResolve() {
-        assertNotNull(Institution.valueOf("MIT"));
-        assertNotNull(Institution.valueOf("UNIVERSITY_OF_TORONTO"));
-        assertNotNull(Institution.valueOf(
+        final ClasspathInstitutionCatalogRepository catalog =
+                new ClasspathInstitutionCatalogRepository();
+        assertNotNull(catalog.findById("MIT"));
+        assertNotNull(catalog.findById("UNIVERSITY_OF_TORONTO"));
+        assertNotNull(catalog.findById(
                 "CERN_EUROPEAN_ORGANIZATION_FOR_NUCLEAR_RESEARCH"));
-        assertNotNull(Institution.valueOf("OTHER"));
+        assertNotNull(catalog.findById("OTHER"));
     }
 
     @Test
