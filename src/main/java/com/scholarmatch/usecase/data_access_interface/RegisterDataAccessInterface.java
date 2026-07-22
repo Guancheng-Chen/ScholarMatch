@@ -2,7 +2,7 @@ package com.scholarmatch.usecase.data_access_interface;
 
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
-import com.scholarmatch.usecase.register.RegisterInputData;
+import com.scholarmatch.usecase.register.RegisterAccountData;
 
 /**
  * Port for registering a new user, delegated to the server.
@@ -21,5 +21,5 @@ public interface RegisterDataAccessInterface {
      * @throws InvalidRequestException  if the email is already taken or validation fails
      * @throws ExternalServiceException if the server is unreachable
      */
-    AuthResult register(RegisterInputData data);
+    AuthResult register(RegisterAccountData data);
 }
