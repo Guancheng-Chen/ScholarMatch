@@ -3,6 +3,7 @@ package com.scholarmatch.usecase.dto;
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.Education;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Publication;
@@ -43,6 +44,7 @@ public final class UserData  {
     private final List<Publication> publications;
     private final Integer hIndex;
     private final Integer totalCitations;
+    private final EmailAccountType emailAccountType;
 
     /**
      * Constructs a UserData snapshot.
@@ -85,6 +87,32 @@ public final class UserData  {
             final List<Publication> publications,
             final Integer hIndex,
             final Integer totalCitations) {
+        this(userId, firstName, lastName, email, phoneNumber, institution, academicLevel,
+                researchField, lookingFor, collaborationDescription, researchDescription,
+                weeklyAvailabilityHours, fundingStatus, researchInterests, educations,
+                publications, hIndex, totalCitations, EmailAccountType.REGULAR);
+    }
+
+    private UserData(
+            final String userId,
+            final String firstName,
+            final String lastName,
+            final String email,
+            final String phoneNumber,
+            final Institution institution,
+            final AcademicLevel academicLevel,
+            final ResearchField researchField,
+            final CollaborationType lookingFor,
+            final String collaborationDescription,
+            final String researchDescription,
+            final Integer weeklyAvailabilityHours,
+            final FundingStatus fundingStatus,
+            final List<String> researchInterests,
+            final List<Education> educations,
+            final List<Publication> publications,
+            final Integer hIndex,
+            final Integer totalCitations,
+            final EmailAccountType emailAccountType) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -103,6 +131,7 @@ public final class UserData  {
         this.publications = new ArrayList<>(publications);
         this.hIndex = hIndex;
         this.totalCitations = totalCitations;
+        this.emailAccountType = emailAccountType;
     }
 
     /**
@@ -130,7 +159,8 @@ public final class UserData  {
                 user.getEducations(),
                 user.getPublications(),
                 user.gethIndex(),
-                user.getTotalCitations());
+                user.getTotalCitations(),
+                user.getEmailAccountType());
     }
 
     /**
@@ -177,6 +207,15 @@ public final class UserData  {
      */
     public String getEmail() {
         return this.email;
+    }
+
+    /**
+     * Returns the classification of the user's registered email.
+     *
+     * @return the email account type
+     */
+    public EmailAccountType getEmailAccountType() {
+        return this.emailAccountType;
     }
 
     /**

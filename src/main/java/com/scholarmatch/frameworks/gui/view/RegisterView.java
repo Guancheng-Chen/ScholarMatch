@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.function.Consumer;
 
 /**
  * Registration screen allowing new users to create an account.
@@ -44,6 +45,9 @@ public final class RegisterView extends JPanel {
 
     private final RegisterController controller;
     private final RegisterViewModel viewModel;
+    private final Consumer<String> registerErrorListener;
+    private final Consumer<String> verificationMessageListener;
+    private final Consumer<String> verificationErrorListener;
 
     /**
      * Constructs the RegisterView.
@@ -57,6 +61,12 @@ public final class RegisterView extends JPanel {
         super(new BorderLayout());
         this.controller = controller;
         this.viewModel = viewModel;
+        this.registerErrorListener = message -> showMessage(
+                message, "Register Failed", JOptionPane.ERROR_MESSAGE);
+        this.verificationMessageListener = message -> showMessage(
+                message, "Verification Code", JOptionPane.INFORMATION_MESSAGE);
+        this.verificationErrorListener = message -> showMessage(
+                message, "Send Code Failed", JOptionPane.ERROR_MESSAGE);
         setBackground(Theme.BG_DEFAULT);
 
         final JLabel titleLabel = title("Register");
@@ -64,13 +74,33 @@ public final class RegisterView extends JPanel {
         final JTextField firstNameField = field("First Name", FontAwesomeSolid.USER);
         final JTextField lastNameField = field("Last Name", FontAwesomeSolid.USER);
         final JTextField emailField = field("Email", FontAwesomeSolid.ENVELOPE);
+        final JTextField verificationCodeField = field("Verification Code", FontAwesomeSolid.KEY);
         final JPasswordField passwordField = passwordField("Password");
         final JPasswordField confirmPasswordField = passwordField("Confirm Password");
 
-        viewModel.errorMessageProperty().addListener(message -> {
-            if (message != null && !message.isBlank()) {
-                JOptionPane.showMessageDialog(this, message, "Register Failed", JOptionPane.ERROR_MESSAGE);
-            }
+        viewModel.errorMessageProperty().addListener(this.registerErrorListener);
+        viewModel.verificationMessageProperty().addListener(this.verificationMessageListener);
+        viewModel.verificationErrorProperty().addListener(this.verificationErrorListener);
+
+        final JButton sendCodeButton = new JButton("Send Code");
+        Buttons.outlined(sendCodeButton);
+        sendCodeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sendCodeButton.setPreferredSize(new Dimension(CARD_WIDTH, 38));
+        sendCodeButton.setMaximumSize(new Dimension(CARD_WIDTH, 38));
+        sendCodeButton.addActionListener(evt -> {
+            sendCodeButton.setEnabled(false);
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    controller.sendVerificationCode(emailField.getText().trim());
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    sendCodeButton.setEnabled(true);
+                }
+            }.execute();
         });
 
         final JButton submitButton = new JButton(
@@ -86,6 +116,7 @@ public final class RegisterView extends JPanel {
             final String email = emailField.getText().trim();
             final String password = new String(passwordField.getPassword());
             final String confirmPassword = new String(confirmPasswordField.getPassword());
+            final String verificationCode = verificationCodeField.getText().trim();
 
             if (!password.equals(confirmPassword)) {
                 JOptionPane.showMessageDialog(
@@ -98,7 +129,7 @@ public final class RegisterView extends JPanel {
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() {
-                    controller.execute(firstName, lastName, email, password);
+                    controller.execute(firstName, lastName, email, password, verificationCode);
                     return null;
                 }
 
@@ -114,6 +145,7 @@ public final class RegisterView extends JPanel {
         card.setMaximumSize(new Dimension(CARD_WIDTH + 48, Integer.MAX_VALUE));
         addAll(card, titleLabel, strut(),
             firstNameField, strut(), lastNameField, strut(), emailField, strut(),
+            sendCodeButton, strut(), verificationCodeField, strut(),
             passwordField, strut(), confirmPasswordField, strut(),
             submitButton);
 
@@ -165,5 +197,19 @@ public final class RegisterView extends JPanel {
         for (final Component component : components) {
             panel.add(component);
         }
+    }
+
+    private void showMessage(final String message, final String title, final int messageType) {
+        if (message != null && !message.isBlank()) {
+            JOptionPane.showMessageDialog(this, message, title, messageType);
+        }
+    }
+
+    @Override
+    public void removeNotify() {
+        this.viewModel.errorMessageProperty().removeListener(this.registerErrorListener);
+        this.viewModel.verificationMessageProperty().removeListener(this.verificationMessageListener);
+        this.viewModel.verificationErrorProperty().removeListener(this.verificationErrorListener);
+        super.removeNotify();
     }
 }

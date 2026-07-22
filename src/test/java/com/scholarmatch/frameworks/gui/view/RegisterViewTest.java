@@ -34,7 +34,7 @@ class RegisterViewTest {
         fillForm(view, "Ada", "Lovelace", "ada@example.com", "hunter2", "different-password");
 
         try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
-            SwingTestSupport.find(view, JButton.class, 0).doClick();
+            findButton(view, "Register").doClick();
 
             optionPane.verify(() -> JOptionPane.showMessageDialog(
                     any(), eq("Passwords do not match"), eq("Register Failed"), eq(JOptionPane.ERROR_MESSAGE)));
@@ -49,7 +49,7 @@ class RegisterViewTest {
 
         fillForm(view, "  Ada  ", "  Lovelace  ", "  ada@example.com  ", "hunter2", "hunter2");
 
-        SwingTestSupport.find(view, JButton.class, 0).doClick();
+        findButton(view, "Register").doClick();
 
         final ArgumentCaptor<RegisterInputData> captor = ArgumentCaptor.forClass(RegisterInputData.class);
         verify(interactor, timeout(2000)).execute(captor.capture());
@@ -57,6 +57,13 @@ class RegisterViewTest {
         assertEquals("Lovelace", captor.getValue().getLastName());
         assertEquals("ada@example.com", captor.getValue().getEmail());
         assertEquals("hunter2", captor.getValue().getPassword());
+    }
+
+    private JButton findButton(final RegisterView view, final String text) {
+        return SwingTestSupport.findAll(view, JButton.class).stream()
+                .filter(button -> text.equals(button.getText()))
+                .findFirst()
+                .orElseThrow();
     }
 
     private void fillForm(

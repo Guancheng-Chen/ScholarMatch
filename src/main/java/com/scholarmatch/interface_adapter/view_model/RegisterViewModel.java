@@ -15,6 +15,8 @@ public final class RegisterViewModel {
     private final ObservableValue<String> errorMessage = new ObservableValue<>("");
     private final ObservableValue<String> successMessage = new ObservableValue<>("");
     private final ObservableValue<Boolean> registrationSucceeded = new ObservableValue<>(false);
+    private final ObservableValue<String> verificationMessage = new ObservableValue<>("");
+    private final ObservableValue<String> verificationError = new ObservableValue<>("");
 
 
     /**
@@ -62,6 +64,22 @@ public final class RegisterViewModel {
      */
     public void setRegistrationSucceeded(final boolean succeeded) {
         this.registrationSucceeded.set(succeeded);
+    }
+
+    public ObservableValue<String> verificationMessageProperty() {
+        return this.verificationMessage;
+    }
+
+    public ObservableValue<String> verificationErrorProperty() {
+        return this.verificationError;
+    }
+
+    public void setVerificationMessage(final String message) {
+        this.verificationMessage.set(message);
+    }
+
+    public void setVerificationError(final String message) {
+        this.verificationError.set(message);
     }
 }
 
