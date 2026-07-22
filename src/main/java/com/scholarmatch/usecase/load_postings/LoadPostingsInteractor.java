@@ -11,11 +11,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Interactor for loading postings and owner-visible application data.
+ */
 public final class LoadPostingsInteractor implements LoadPostingsInputBoundary {
 
     private final LoadPostingsDataAccessInterface dataAccessObject;
     private final LoadPostingsOutputBoundary outputBoundary;
 
+    /**
+     * Constructs the load postings interactor.
+     *
+     * @param dataAccessObject the posting data access object
+     * @param outputBoundary the output boundary for presenting results
+     */
     public LoadPostingsInteractor(
             final LoadPostingsDataAccessInterface dataAccessObject,
             final LoadPostingsOutputBoundary outputBoundary) {
@@ -23,6 +32,11 @@ public final class LoadPostingsInteractor implements LoadPostingsInputBoundary {
         this.outputBoundary = outputBoundary;
     }
 
+    /**
+     * Loads postings for the requested scope and prepares the corresponding view.
+     *
+     * @param inputData the load postings input data
+     */
     @Override
     public void execute(final LoadPostingsInputData inputData) {
         try {
