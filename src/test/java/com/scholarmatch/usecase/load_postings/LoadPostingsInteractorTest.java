@@ -21,6 +21,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests for the load postings interactor.
+ */
 class LoadPostingsInteractorTest {
 
     @Test
@@ -67,6 +70,11 @@ class LoadPostingsInteractorTest {
         verify(output).prepareFailView("load failed");
     }
 
+    /**
+     * Creates a posting used by the interactor tests.
+     *
+     * @return a test posting
+     */
     private Posting posting() {
         return new Posting(
                 "posting-1", "poster-1", "Title", "Description",
@@ -74,6 +82,11 @@ class LoadPostingsInteractorTest {
                 null, 1, 0, PostingStatus.OPEN, LocalDateTime.now());
     }
 
+    /**
+     * Creates a posting application used by the interactor tests.
+     *
+     * @return a test posting application
+     */
     private PostingApplication application() {
         return new PostingApplication(
                 "application-1", "posting-1", "applicant-1", "Message",
