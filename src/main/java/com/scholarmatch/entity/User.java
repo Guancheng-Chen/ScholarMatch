@@ -271,6 +271,24 @@ public final class User {
     }
 
     /**
+     * Returns the classification of the user's registered email.
+     *
+     * @return the email account type
+     */
+    public EmailAccountType getEmailAccountType() {
+        return this.emailAccountType;
+    }
+
+    /**
+     * Updates the classification after an email address change.
+     *
+     * @param emailAccountType the new email account type
+     */
+    public void setEmailAccountType(final EmailAccountType emailAccountType) {
+        this.emailAccountType = emailAccountType;
+    }
+
+    /**
      * Updates the user's email address.
      *
      * @param email the new email address
