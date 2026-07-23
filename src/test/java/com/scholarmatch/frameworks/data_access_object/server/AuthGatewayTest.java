@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.data_access_object.server;
 
-import com.scholarmatch.frameworks.data_access_object.server.HttpTestServer;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.exception.InvalidRequestException;

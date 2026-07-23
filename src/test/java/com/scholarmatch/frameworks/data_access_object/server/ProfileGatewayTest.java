@@ -6,7 +6,6 @@ import com.scholarmatch.entity.Education;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
-import com.scholarmatch.frameworks.data_access_object.server.HttpTestServer;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
