@@ -12,6 +12,7 @@ import com.scholarmatch.interface_adapter.controller.DislikeController;
 import com.scholarmatch.interface_adapter.controller.RecommendController;
 import com.scholarmatch.interface_adapter.controller.PaperLookupController;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
@@ -57,6 +58,7 @@ public final class MainView extends JPanel {
     private final DeleteAccountController deleteAccountController;
     private final DeleteAccountViewModel deleteAccountViewModel;
     private final RegisterController registerController;
+    private final RequestEmailVerificationController verificationController;
     private final RegisterViewModel registerViewModel;
     private final PaperLookupController paperLookupController;
     private final PaperLookupViewModel paperLookupViewModel;
@@ -96,6 +98,7 @@ public final class MainView extends JPanel {
      * @param deleteAccountController handles account-deletion confirmation
      * @param deleteAccountViewModel  observable state for a failed deletion attempt
      * @param registerController      handles registration form submission
+     * @param verificationController  handles the registration screen's "Send Code" button
      * @param registerViewModel       observable registration state
      * @param paperLookupController   handles paper/author auto-fill searches
      * @param paperLookupViewModel    observable paper/author auto-fill search state
@@ -115,41 +118,42 @@ public final class MainView extends JPanel {
      * @param currentUserProvider     the shared session (used to check login state)
      */
     public MainView(
-        final LoginController loginController,
-        final LoginViewModel loginViewModel,
-        final LogoutController logoutController,
-        final LogoutViewModel logoutViewModel,
-        final DeleteAccountController deleteAccountController,
-        final DeleteAccountViewModel deleteAccountViewModel,
-        final RegisterController registerController,
-        final RegisterViewModel registerViewModel,
-        final PaperLookupController paperLookupController,
-        final PaperLookupViewModel paperLookupViewModel,
-        final RecommendController recommendController,
-        final ConnectController connectController,
-        final DislikeController dislikeController,
-        final SkipController skipController,
-        final RecommendViewModel recommendViewModel,
-        final LoadMatchesViewModel loadMatchesViewModel,
-        final LoadMatchesController loadMatchesController,
-        final SendMessageController sendMessageController,
-        final LoadMessageController loadMessageController,
-        final ChatViewModel chatViewModel,
-        final UpdateProfileController updateProfileController,
-        final LoadProfileController loadProfileController,
-        final UpdateProfileViewModel updateProfileViewModel,
-        final CreatePostingController createPostingController,
-        final ClosePostingController closePostingController,
-        final LoadPostingsController opportunitiesLoadPostingsController,
-        final LoadPostingsController myPostingsLoadPostingsController,
-        final ApplyToPostingController applyToPostingController,
-        final AcceptApplicationController acceptApplicationController,
-        final DeclineApplicationController declineApplicationController,
-        final LoadMyApplicationsController loadMyApplicationsController,
-        final OpportunitiesViewModel opportunitiesViewModel,
-        final MyPostingsViewModel myPostingsViewModel,
-        final MyApplicationsViewModel myApplicationsViewModel,
-        final CurrentUserProvider currentUserProvider) {
+            final LoginController loginController,
+            final LoginViewModel loginViewModel,
+            final LogoutController logoutController,
+            final LogoutViewModel logoutViewModel,
+            final DeleteAccountController deleteAccountController,
+            final DeleteAccountViewModel deleteAccountViewModel,
+            final RegisterController registerController,
+            final RequestEmailVerificationController verificationController,
+            final RegisterViewModel registerViewModel,
+            final PaperLookupController paperLookupController,
+            final PaperLookupViewModel paperLookupViewModel,
+            final RecommendController recommendController,
+            final ConnectController connectController,
+            final DislikeController dislikeController,
+            final SkipController skipController,
+            final RecommendViewModel recommendViewModel,
+            final LoadMatchesViewModel loadMatchesViewModel,
+            final LoadMatchesController loadMatchesController,
+            final SendMessageController sendMessageController,
+            final LoadMessageController loadMessageController,
+            final ChatViewModel chatViewModel,
+            final UpdateProfileController updateProfileController,
+            final LoadProfileController loadProfileController,
+            final UpdateProfileViewModel updateProfileViewModel,
+            final CreatePostingController createPostingController,
+            final ClosePostingController closePostingController,
+            final LoadPostingsController opportunitiesLoadPostingsController,
+            final LoadPostingsController myPostingsLoadPostingsController,
+            final ApplyToPostingController applyToPostingController,
+            final AcceptApplicationController acceptApplicationController,
+            final DeclineApplicationController declineApplicationController,
+            final LoadMyApplicationsController loadMyApplicationsController,
+            final OpportunitiesViewModel opportunitiesViewModel,
+            final MyPostingsViewModel myPostingsViewModel,
+            final MyApplicationsViewModel myApplicationsViewModel,
+            final CurrentUserProvider currentUserProvider) {
         super(new BorderLayout());
         setBackground(Theme.BG_DEFAULT);
 
@@ -160,6 +164,7 @@ public final class MainView extends JPanel {
         this.deleteAccountController = deleteAccountController;
         this.deleteAccountViewModel = deleteAccountViewModel;
         this.registerController = registerController;
+        this.verificationController = verificationController;
         this.registerViewModel = registerViewModel;
         this.paperLookupController = paperLookupController;
         this.paperLookupViewModel = paperLookupViewModel;
@@ -199,10 +204,10 @@ public final class MainView extends JPanel {
     private void showAuthShell() {
         removeAll();
         add(new AuthShellView(
-            loginController, loginViewModel,
-            registerController, registerViewModel,
-            this::showMainLayout),
-            BorderLayout.CENTER);
+                        loginController, loginViewModel,
+                        registerController, verificationController, registerViewModel,
+                        this::showMainLayout),
+                BorderLayout.CENTER);
         revalidate();
         repaint();
     }
@@ -210,22 +215,22 @@ public final class MainView extends JPanel {
     private void showMainLayout() {
         removeAll();
         add(new MainLayoutView(
-            recommendController, connectController, dislikeController, skipController, recommendViewModel,
-            loadMatchesViewModel, loadMatchesController,
-            sendMessageController, loadMessageController, chatViewModel,
-            updateProfileController, loadProfileController, updateProfileViewModel,
-            paperLookupController, paperLookupViewModel,
-            logoutController, logoutViewModel,
-            deleteAccountController, deleteAccountViewModel,
-            createPostingController,
-            closePostingController,
-            opportunitiesLoadPostingsController, myPostingsLoadPostingsController,
-            applyToPostingController, acceptApplicationController, declineApplicationController,
-            loadMyApplicationsController,
-            opportunitiesViewModel, myPostingsViewModel, myApplicationsViewModel,
-            currentUserProvider,
-            this::showAuthShell),
-            BorderLayout.CENTER);
+                        recommendController, connectController, dislikeController, skipController, recommendViewModel,
+                        loadMatchesViewModel, loadMatchesController,
+                        sendMessageController, loadMessageController, chatViewModel,
+                        updateProfileController, loadProfileController, updateProfileViewModel,
+                        paperLookupController, paperLookupViewModel,
+                        logoutController, logoutViewModel,
+                        deleteAccountController, deleteAccountViewModel,
+                        createPostingController,
+                        closePostingController,
+                        opportunitiesLoadPostingsController, myPostingsLoadPostingsController,
+                        applyToPostingController, acceptApplicationController, declineApplicationController,
+                        loadMyApplicationsController,
+                        opportunitiesViewModel, myPostingsViewModel, myApplicationsViewModel,
+                        currentUserProvider,
+                        this::showAuthShell),
+                BorderLayout.CENTER);
         revalidate();
         repaint();
     }

@@ -2,8 +2,6 @@ package com.scholarmatch.interface_adapter.controller;
 
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputData;
-import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
-import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputData;
 
 /**
  * Controller for the register use case.
@@ -11,11 +9,14 @@ import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificat
  * <p>Translates raw UI strings from the registration form into a
  * RegisterInputData and invokes the use case input boundary.
  * Controllers in CA never call presenters directly.
+ *
+ * <p>Handles registration only — requesting a verification code is a separate use case with
+ * its own controller, RequestEmailVerificationController, even though both are driven from
+ * the same registration screen.
  */
 public final class RegisterController {
 
     private final RegisterInputBoundary registerInteractor;
-    private final RequestEmailVerificationInputBoundary verificationInteractor;
 
     /**
      * Constructs a RegisterController.
@@ -23,14 +24,7 @@ public final class RegisterController {
      * @param registerInteractor the input boundary to invoke
      */
     public RegisterController(final RegisterInputBoundary registerInteractor) {
-        this(registerInteractor, null);
-    }
-
-    public RegisterController(
-            final RegisterInputBoundary registerInteractor,
-            final RequestEmailVerificationInputBoundary verificationInteractor) {
         this.registerInteractor = registerInteractor;
-        this.verificationInteractor = verificationInteractor;
     }
 
     /**
@@ -49,12 +43,5 @@ public final class RegisterController {
             final String verificationCode) {
         this.registerInteractor.execute(
                 new RegisterInputData(firstName, lastName, email, password, verificationCode));
-    }
-
-    public void sendVerificationCode(final String email) {
-        if (this.verificationInteractor == null) {
-            throw new IllegalStateException("Email verification is not configured.");
-        }
-        this.verificationInteractor.execute(new RequestEmailVerificationInputData(email));
     }
 }

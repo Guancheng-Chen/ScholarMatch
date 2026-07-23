@@ -7,6 +7,7 @@ import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -44,6 +45,7 @@ public final class RegisterView extends JPanel {
     private static final int FIELD_HEIGHT = 34;
 
     private final RegisterController controller;
+    private final RequestEmailVerificationController verificationController;
     private final RegisterViewModel viewModel;
     private final Consumer<String> registerErrorListener;
     private final Consumer<String> verificationMessageListener;
@@ -52,14 +54,17 @@ public final class RegisterView extends JPanel {
     /**
      * Constructs the RegisterView.
      *
-     * @param controller the controller that handles form submission
-     * @param viewModel  the observable state for this view
+     * @param controller              the controller that handles form submission
+     * @param verificationController  the controller that handles the "Send Code" button
+     * @param viewModel               the observable state for this view
      */
     public RegisterView(
-        final RegisterController controller,
-        final RegisterViewModel viewModel) {
+            final RegisterController controller,
+            final RequestEmailVerificationController verificationController,
+            final RegisterViewModel viewModel) {
         super(new BorderLayout());
         this.controller = controller;
+        this.verificationController = verificationController;
         this.viewModel = viewModel;
         this.registerErrorListener = message -> showMessage(
                 message, "Register Failed", JOptionPane.ERROR_MESSAGE);
@@ -92,7 +97,7 @@ public final class RegisterView extends JPanel {
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() {
-                    controller.sendVerificationCode(emailField.getText().trim());
+                    verificationController.sendVerificationCode(emailField.getText().trim());
                     return null;
                 }
 
@@ -104,7 +109,7 @@ public final class RegisterView extends JPanel {
         });
 
         final JButton submitButton = new JButton(
-            "Register", Icons.of(FontAwesomeSolid.USER_PLUS, 15, Theme.FG_EMPHASIS));
+                "Register", Icons.of(FontAwesomeSolid.USER_PLUS, 15, Theme.FG_EMPHASIS));
         submitButton.setIconTextGap(8);
         Buttons.accent(submitButton);
         submitButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -120,7 +125,7 @@ public final class RegisterView extends JPanel {
 
             if (!password.equals(confirmPassword)) {
                 JOptionPane.showMessageDialog(
-                    this, "Passwords do not match", "Register Failed", JOptionPane.ERROR_MESSAGE);
+                        this, "Passwords do not match", "Register Failed", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             // execute() blocks on a network call — run it off the EDT so the form doesn't
@@ -144,10 +149,10 @@ public final class RegisterView extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setMaximumSize(new Dimension(CARD_WIDTH + 48, Integer.MAX_VALUE));
         addAll(card, titleLabel, strut(),
-            firstNameField, strut(), lastNameField, strut(), emailField, strut(),
-            sendCodeButton, strut(), verificationCodeField, strut(),
-            passwordField, strut(), confirmPasswordField, strut(),
-            submitButton);
+                firstNameField, strut(), lastNameField, strut(), emailField, strut(),
+                sendCodeButton, strut(), verificationCodeField, strut(),
+                passwordField, strut(), confirmPasswordField, strut(),
+                submitButton);
 
         final CenteringScrollPanel centeringPanel = new CenteringScrollPanel(card);
         centeringPanel.setBorder(new EmptyBorder(24, 0, 24, 0));
@@ -174,7 +179,7 @@ public final class RegisterView extends JPanel {
         textField.setAlignmentX(Component.LEFT_ALIGNMENT);
         textField.putClientProperty("JTextField.placeholderText", placeholder);
         textField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-            Icons.of(leadingGlyph, 14, Theme.FG_SUBTLE));
+                Icons.of(leadingGlyph, 14, Theme.FG_SUBTLE));
         return textField;
     }
 
@@ -185,7 +190,7 @@ public final class RegisterView extends JPanel {
         passwordField.setAlignmentX(Component.LEFT_ALIGNMENT);
         passwordField.putClientProperty("JTextField.placeholderText", placeholder);
         passwordField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_ICON,
-            Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
+                Icons.of(FontAwesomeSolid.LOCK, 14, Theme.FG_SUBTLE));
         return passwordField;
     }
 

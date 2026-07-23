@@ -6,6 +6,7 @@ import com.scholarmatch.frameworks.gui.view.LoginView;
 import com.scholarmatch.frameworks.gui.view.RegisterView;
 import com.scholarmatch.interface_adapter.controller.LoginController;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 
@@ -51,15 +52,17 @@ final class AuthShellView extends JPanel {
      * @param loginController        handles login form submission
      * @param loginViewModel         observable login state
      * @param registerController     handles registration form submission
+     * @param verificationController handles the registration screen's "Send Code" button
      * @param registerViewModel      observable registration state
      * @param onAuthenticated        invoked once login or registration succeeds
      */
     AuthShellView(
-        final LoginController loginController,
-        final LoginViewModel loginViewModel,
-        final RegisterController registerController,
-        final RegisterViewModel registerViewModel,
-        final Runnable onAuthenticated) {
+            final LoginController loginController,
+            final LoginViewModel loginViewModel,
+            final RegisterController registerController,
+            final RequestEmailVerificationController verificationController,
+            final RegisterViewModel registerViewModel,
+            final Runnable onAuthenticated) {
         super(new BorderLayout());
         this.loginViewModel = loginViewModel;
         this.registerViewModel = registerViewModel;
@@ -89,7 +92,8 @@ final class AuthShellView extends JPanel {
         final JMenuItem loginItem = new JMenuItem("Login");
         final JMenuItem registerItem = new JMenuItem("Register");
         loginItem.addActionListener(evt -> showLoginDialog(loginController, authButton));
-        registerItem.addActionListener(evt -> showRegisterDialog(registerController, authButton));
+        registerItem.addActionListener(
+                evt -> showRegisterDialog(registerController, verificationController, authButton));
         authMenu.add(loginItem);
         authMenu.add(registerItem);
         authButton.addActionListener(evt -> authMenu.show(authButton, 0, authButton.getHeight()));
@@ -97,8 +101,8 @@ final class AuthShellView extends JPanel {
         final JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(Theme.BG_SUBTLE);
         topBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER_DEFAULT),
-            BorderFactory.createEmptyBorder(14, 24, 14, 24)));
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER_DEFAULT),
+                BorderFactory.createEmptyBorder(14, 24, 14, 24)));
         topBar.add(authButton, BorderLayout.WEST);
         topBar.add(logoLabel, BorderLayout.EAST);
 
@@ -116,8 +120,8 @@ final class AuthShellView extends JPanel {
      * logging in, and it closes itself automatically once login succeeds.
      */
     private void showLoginDialog(
-        final LoginController loginController,
-        final Component ownerComponent) {
+            final LoginController loginController,
+            final Component ownerComponent) {
         final LoginView loginView = new LoginView(loginController, this.loginViewModel);
 
         final Window ownerWindow = SwingUtilities.getWindowAncestor(ownerComponent);
@@ -149,9 +153,11 @@ final class AuthShellView extends JPanel {
      * separate screens reached from the same entry point.
      */
     private void showRegisterDialog(
-        final RegisterController registerController,
-        final Component ownerComponent) {
-        final RegisterView registerView = new RegisterView(registerController, this.registerViewModel);
+            final RegisterController registerController,
+            final RequestEmailVerificationController verificationController,
+            final Component ownerComponent) {
+        final RegisterView registerView =
+                new RegisterView(registerController, verificationController, this.registerViewModel);
 
         final Window ownerWindow = SwingUtilities.getWindowAncestor(ownerComponent);
         final JDialog dialog = new JDialog(ownerWindow, "Register", Dialog.ModalityType.APPLICATION_MODAL);
