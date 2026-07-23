@@ -16,61 +16,49 @@ import java.net.http.HttpRequest;
 import java.time.Duration;
 
 /**
- * Resend HTTP adapter for registration verification messages.
+ * Asks the ScholarMatch server to generate and email a registration verification code. The
+ * server owns code generation, storage, expiry, and comparison — the desktop client never
+ * sees the Resend credentials or the code itself before the user types it back in.
  */
-public final class ResendVerificationEmailSender
+public final class RemoteVerificationEmailSender
         implements VerificationEmailSenderDataAccessInterface {
 
-    private static final URI SEND_EMAIL_URI = URI.create("https://api.resend.com/emails");
+    private static final String REQUEST_VERIFICATION_CODE_PATH = "/api/auth/request-verification-code";
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
 
     private final HttpSender httpSender;
     private final ObjectMapper objectMapper;
-    private final String apiKey;
-    private final String fromEmail;
+    private final URI requestVerificationCodeUri;
 
     /**
-     * Creates the production sender from environment-backed credentials.
+     * Creates the production sender that posts to the ScholarMatch server.
      *
-     * @param apiKey the Resend API key
-     * @param fromEmail a verified Resend sender
+     * @param serverBaseUrl the ScholarMatch REST API base URL
      */
-    public ResendVerificationEmailSender(final String apiKey, final String fromEmail) {
+    public RemoteVerificationEmailSender(final String serverBaseUrl) {
         this(
                 new JdkHttpSender(HttpClient.newBuilder().connectTimeout(REQUEST_TIMEOUT).build()),
                 new ObjectMapper(),
-                apiKey,
-                fromEmail);
+                serverBaseUrl);
     }
 
-    ResendVerificationEmailSender(
+    RemoteVerificationEmailSender(
             final HttpSender httpSender,
             final ObjectMapper objectMapper,
-            final String apiKey,
-            final String fromEmail) {
+            final String serverBaseUrl) {
         this.httpSender = httpSender;
         this.objectMapper = objectMapper;
-        this.apiKey = apiKey;
-        this.fromEmail = fromEmail;
+        this.requestVerificationCodeUri =
+                URI.create(serverBaseUrl.replaceAll("/$", "") + REQUEST_VERIFICATION_CODE_PATH);
     }
 
     @Override
-    public void sendVerificationCode(final String email, final String code) {
-        if (this.apiKey == null || this.apiKey.isBlank()
-                || this.fromEmail == null || this.fromEmail.isBlank()) {
-            throw new ExternalServiceException(
-                    "Email verification is not configured. Set RESEND_API_KEY and RESEND_FROM_EMAIL.");
-        }
+    public void requestVerificationCode(final String email) {
         final ObjectNode body = this.objectMapper.createObjectNode();
-        body.put("from", this.fromEmail);
-        body.putArray("to").add(email);
-        body.put("subject", "ScholarMatch registration verification code");
-        body.put("text", "Your ScholarMatch verification code is " + code
-                + ". It expires in 10 minutes.");
+        body.put("email", email);
         try {
-            final HttpRequest request = HttpRequest.newBuilder(SEND_EMAIL_URI)
+            final HttpRequest request = HttpRequest.newBuilder(this.requestVerificationCodeUri)
                     .timeout(REQUEST_TIMEOUT)
-                    .header("Authorization", "Bearer " + this.apiKey)
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(
                             this.objectMapper.writeValueAsString(body)))
@@ -85,7 +73,7 @@ public final class ResendVerificationEmailSender
             Thread.currentThread().interrupt();
             throw new ExternalServiceException("Email delivery was interrupted.", exception);
         } catch (final JsonProcessingException exception) {
-            throw new ExternalServiceException("Unable to build the verification email.", exception);
+            throw new ExternalServiceException("Unable to build the verification request.", exception);
         } catch (final IOException exception) {
             throw new ExternalServiceException("Unable to contact the email service.", exception);
         }

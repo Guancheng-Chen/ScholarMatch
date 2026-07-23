@@ -79,10 +79,10 @@ public final class ServerRepository
         CreatePostingDataAccessInterface,
         LoadPostingsDataAccessInterface,
         ApplyToPostingDataAccessInterface,
-               AcceptApplicationDataAccessInterface,
-               DeclineApplicationDataAccessInterface,
-               LoadMyApplicationsDataAccessInterface,
-               ClosePostingDataAccessInterface {
+        AcceptApplicationDataAccessInterface,
+        DeclineApplicationDataAccessInterface,
+        LoadMyApplicationsDataAccessInterface,
+        ClosePostingDataAccessInterface {
 
     private final String baseUrl;
     private final CurrentUserProviderInterface session;
@@ -134,7 +134,7 @@ public final class ServerRepository
         body.put("lastName", data.getLastName());
         body.put("email", data.getEmail());
         body.put("password", data.getPassword());
-        body.put("academicEmailVerified", data.getEmailAccountType() == EmailAccountType.ACADEMIC);
+        body.put("code", data.getVerificationCode());
 
         final JsonNode node = post("/api/auth/register", toJson(body), false);
         return new AuthResult(

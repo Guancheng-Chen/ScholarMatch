@@ -62,24 +62,24 @@ import java.util.UUID;
  * locally-registered account requires a real reciprocal connect, same as the live server.
  */
 public final class LocalServerRepository
-    implements LoginDataAccessInterface,
-               RegisterDataAccessInterface,
-               RecommendDataAccessInterface,
-               ConnectDataAccessInterface,
-               DislikeDataAccessInterface,
-               LoadMatchesDataAccessInterface,
-               LoadProfileDataAccessInterface,
-               UpdateProfileDataAccessInterface,
-               DeleteAccountDataAccessInterface,
-               SendMessageDataAccessInterface,
-               LoadMessageDataAccessInterface,
-               CreatePostingDataAccessInterface,
-               LoadPostingsDataAccessInterface,
-               ApplyToPostingDataAccessInterface,
-               AcceptApplicationDataAccessInterface,
-               DeclineApplicationDataAccessInterface,
-               LoadMyApplicationsDataAccessInterface,
-               ClosePostingDataAccessInterface {
+        implements LoginDataAccessInterface,
+        RegisterDataAccessInterface,
+        RecommendDataAccessInterface,
+        ConnectDataAccessInterface,
+        DislikeDataAccessInterface,
+        LoadMatchesDataAccessInterface,
+        LoadProfileDataAccessInterface,
+        UpdateProfileDataAccessInterface,
+        DeleteAccountDataAccessInterface,
+        SendMessageDataAccessInterface,
+        LoadMessageDataAccessInterface,
+        CreatePostingDataAccessInterface,
+        LoadPostingsDataAccessInterface,
+        ApplyToPostingDataAccessInterface,
+        AcceptApplicationDataAccessInterface,
+        DeclineApplicationDataAccessInterface,
+        LoadMyApplicationsDataAccessInterface,
+        ClosePostingDataAccessInterface {
 
     private final Map<String, User> usersById = new LinkedHashMap<>();
     private final Set<String> seedUserIds = new HashSet<>();
@@ -97,13 +97,13 @@ public final class LocalServerRepository
      * @param session provides the ID of the currently authenticated user
      */
     public LocalServerRepository(
-        final CurrentUserProviderInterface session) {
+            final CurrentUserProviderInterface session) {
         this(session, new ClasspathInstitutionCatalogRepository());
     }
 
     public LocalServerRepository(
-        final CurrentUserProviderInterface session,
-        final InstitutionCatalogDataAccessInterface institutionCatalog) {
+            final CurrentUserProviderInterface session,
+            final InstitutionCatalogDataAccessInterface institutionCatalog) {
         this.session = session;
         this.institutionCatalog = institutionCatalog;
         seedDemoUsers();
@@ -129,21 +129,23 @@ public final class LocalServerRepository
         // field starts blank/null and is filled in later from the Edit Profile screen —
         // see User#isProfileComplete(), which the recommend use case gates on.
         final User user = new User(
-            UUID.randomUUID().toString(),
-            data.getFirstName(),
-            data.getLastName(),
-            data.getEmail(),
-            "",
-            null,
-            null,
-            null,
-            null,
-            "",
-            "",
-            null,
-            null,
-            data.getPassword(),
-            data.getEmailAccountType());
+                UUID.randomUUID().toString(),
+                data.getFirstName(),
+                data.getLastName(),
+                data.getEmail(),
+                "",
+                null,
+                null,
+                null,
+                null,
+                "",
+                "",
+                null,
+                null,
+                data.getPassword(),
+                // Offline mode has no server to check the verification code against, so it can't
+                // legitimately claim ACADEMIC status either — that's the server's call to make.
+                EmailAccountType.REGULAR);
         this.usersById.put(user.getUserId(), user);
         return toAuthResult(user);
     }
@@ -335,8 +337,8 @@ public final class LocalServerRepository
         for (final User user : this.usersById.values()) {
             final String otherId = user.getUserId();
             final boolean mutualMatch = !otherId.equals(currentId)
-                && this.recordedConnections.contains(currentId + "->" + otherId)
-                && this.recordedConnections.contains(otherId + "->" + currentId);
+                    && this.recordedConnections.contains(currentId + "->" + otherId)
+                    && this.recordedConnections.contains(otherId + "->" + currentId);
             if (mutualMatch) {
                 matches.add(user);
             }
@@ -415,7 +417,7 @@ public final class LocalServerRepository
         this.recordedConnections.removeIf(key -> key.contains(currentId));
         this.recordedDislikes.removeIf(key -> key.contains(currentId));
         this.messages.removeIf(message ->
-            message.getSenderId().equals(currentId) || message.getReceiverId().equals(currentId));
+                message.getSenderId().equals(currentId) || message.getReceiverId().equals(currentId));
         final Set<String> removedPostingIds = new HashSet<>();
         this.postingsById.values().removeIf(posting -> {
             final boolean remove = posting.getPosterUserId().equals(currentId);
@@ -444,12 +446,12 @@ public final class LocalServerRepository
     public Message sendMessage(final String receiverId, final String content) {
         final String currentId = this.session.getCurrentUserId();
         final boolean mutualMatch = this.recordedConnections.contains(currentId + "->" + receiverId)
-            && this.recordedConnections.contains(receiverId + "->" + currentId);
+                && this.recordedConnections.contains(receiverId + "->" + currentId);
         if (!mutualMatch) {
             throw new InvalidRequestException("You can only message users you have matched with");
         }
         final Message message = new Message(
-            UUID.randomUUID().toString(), currentId, receiverId, content, LocalDateTime.now());
+                UUID.randomUUID().toString(), currentId, receiverId, content, LocalDateTime.now());
         this.messages.add(message);
         return message;
     }
@@ -460,8 +462,8 @@ public final class LocalServerRepository
         final List<Message> conversation = new ArrayList<>();
         for (final Message message : this.messages) {
             final boolean betweenTheseTwo =
-                (message.getSenderId().equals(currentId) && message.getReceiverId().equals(otherUserId))
-                || (message.getSenderId().equals(otherUserId) && message.getReceiverId().equals(currentId));
+                    (message.getSenderId().equals(currentId) && message.getReceiverId().equals(otherUserId))
+                            || (message.getSenderId().equals(otherUserId) && message.getReceiverId().equals(currentId));
             if (betweenTheseTwo) {
                 conversation.add(message);
             }
@@ -473,30 +475,30 @@ public final class LocalServerRepository
 
     private void seedDemoUsers() {
         addSeedUser("Ada", "Lovelace", "ada@demo.local",
-            this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
-            AcademicLevel.FACULTY, ResearchField.MATHEMATICS, CollaborationType.INTEREST_SHARING,
-            "Looking for collaborators interested in the history and theory of computation.",
-            "Mathematical foundations of computing and algorithmic analysis.",
-            5, FundingStatus.INSTITUTIONAL_FUNDING);
+                this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
+                AcademicLevel.FACULTY, ResearchField.MATHEMATICS, CollaborationType.INTEREST_SHARING,
+                "Looking for collaborators interested in the history and theory of computation.",
+                "Mathematical foundations of computing and algorithmic analysis.",
+                5, FundingStatus.INSTITUTIONAL_FUNDING);
         addSeedUser("Alan", "Turing", "alan@demo.local",
-            this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
-            AcademicLevel.FACULTY, ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
-            "Interested in co-authoring on computability and machine intelligence.",
-            "Computability theory, cryptography, and artificial intelligence.",
-            10, FundingStatus.GOVERNMENT_GRANT);
+                this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
+                AcademicLevel.FACULTY, ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                "Interested in co-authoring on computability and machine intelligence.",
+                "Computability theory, cryptography, and artificial intelligence.",
+                10, FundingStatus.GOVERNMENT_GRANT);
         addSeedUser("Grace", "Hopper", "grace@demo.local",
-            this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
-            AcademicLevel.INDUSTRY_RESEARCHER, ResearchField.SOFTWARE_ENGINEERING, CollaborationType.MENTORSHIP,
-            "Open to mentoring and joint work on programming language design.",
-            "Compilers, programming languages, and software engineering practice.",
-            8, FundingStatus.INDUSTRY_SPONSORED);
+                this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
+                AcademicLevel.INDUSTRY_RESEARCHER, ResearchField.SOFTWARE_ENGINEERING, CollaborationType.MENTORSHIP,
+                "Open to mentoring and joint work on programming language design.",
+                "Compilers, programming languages, and software engineering practice.",
+                8, FundingStatus.INDUSTRY_SPONSORED);
         addSeedUser("Demo", "Student", "demo.student@utoronto.ca",
-            this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
-            AcademicLevel.UNDERGRADUATE, ResearchField.COMPUTER_SCIENCE,
-            CollaborationType.RESEARCH_GROUP,
-            "Looking for University of Toronto classmates to build course projects.",
-            "Interested in software engineering and collaborative student projects.",
-            6, FundingStatus.OTHER, "DemoPass123!", EmailAccountType.ACADEMIC);
+                this.institutionCatalog.findById("UNIVERSITY_OF_TORONTO"),
+                AcademicLevel.UNDERGRADUATE, ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.RESEARCH_GROUP,
+                "Looking for University of Toronto classmates to build course projects.",
+                "Interested in software engineering and collaborative student projects.",
+                6, FundingStatus.OTHER, "DemoPass123!", EmailAccountType.ACADEMIC);
         final String posterId = this.usersById.values().iterator().next().getUserId();
         final Posting posting = new Posting(
                 UUID.randomUUID().toString(), posterId,
@@ -508,44 +510,44 @@ public final class LocalServerRepository
     }
 
     private void addSeedUser(
-        final String firstName,
-        final String lastName,
-        final String email,
-        final Institution institution,
-        final AcademicLevel academicLevel,
-        final ResearchField researchField,
-        final CollaborationType lookingFor,
-        final String collaborationDescription,
-        final String researchDescription,
-        final Integer weeklyAvailabilityHours,
-        final FundingStatus fundingStatus) {
+            final String firstName,
+            final String lastName,
+            final String email,
+            final Institution institution,
+            final AcademicLevel academicLevel,
+            final ResearchField researchField,
+            final CollaborationType lookingFor,
+            final String collaborationDescription,
+            final String researchDescription,
+            final Integer weeklyAvailabilityHours,
+            final FundingStatus fundingStatus) {
         final User user = new User(
-            UUID.randomUUID().toString(), firstName, lastName, email, "",
-            institution, academicLevel, researchField, lookingFor, collaborationDescription,
-            researchDescription, weeklyAvailabilityHours, fundingStatus, "");
+                UUID.randomUUID().toString(), firstName, lastName, email, "",
+                institution, academicLevel, researchField, lookingFor, collaborationDescription,
+                researchDescription, weeklyAvailabilityHours, fundingStatus, "");
         this.usersById.put(user.getUserId(), user);
         this.seedUserIds.add(user.getUserId());
     }
 
     private void addSeedUser(
-        final String firstName,
-        final String lastName,
-        final String email,
-        final Institution institution,
-        final AcademicLevel academicLevel,
-        final ResearchField researchField,
-        final CollaborationType lookingFor,
-        final String collaborationDescription,
-        final String researchDescription,
-        final Integer weeklyAvailabilityHours,
-        final FundingStatus fundingStatus,
-        final String password,
-        final EmailAccountType emailAccountType) {
+            final String firstName,
+            final String lastName,
+            final String email,
+            final Institution institution,
+            final AcademicLevel academicLevel,
+            final ResearchField researchField,
+            final CollaborationType lookingFor,
+            final String collaborationDescription,
+            final String researchDescription,
+            final Integer weeklyAvailabilityHours,
+            final FundingStatus fundingStatus,
+            final String password,
+            final EmailAccountType emailAccountType) {
         final User user = new User(
-            UUID.randomUUID().toString(), firstName, lastName, email, "",
-            institution, academicLevel, researchField, lookingFor, collaborationDescription,
-            researchDescription, weeklyAvailabilityHours, fundingStatus, password,
-            emailAccountType);
+                UUID.randomUUID().toString(), firstName, lastName, email, "",
+                institution, academicLevel, researchField, lookingFor, collaborationDescription,
+                researchDescription, weeklyAvailabilityHours, fundingStatus, password,
+                emailAccountType);
         this.usersById.put(user.getUserId(), user);
         this.seedUserIds.add(user.getUserId());
     }
@@ -568,9 +570,9 @@ public final class LocalServerRepository
 
     private AuthResult toAuthResult(final User user) {
         return new AuthResult(
-            "local-token-" + user.getUserId(),
-            user.getUserId(),
-            user.getFullName());
+                "local-token-" + user.getUserId(),
+                user.getUserId(),
+                user.getFullName());
     }
 
     private AcademicLevel parseAcademicLevel(final String value) {

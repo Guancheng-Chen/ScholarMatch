@@ -1,9 +1,8 @@
 package com.scholarmatch.usecase.register;
 
-import com.scholarmatch.entity.EmailAccountType;
-
 /**
- * Validated and classified account data passed to the registration gateway.
+ * Validated account data passed to the registration gateway. The email verification code is
+ * forwarded as-is; the server is the one that checks it and classifies the email domain.
  */
 public final class RegisterAccountData {
 
@@ -11,28 +10,28 @@ public final class RegisterAccountData {
     private final String lastName;
     private final String email;
     private final String password;
-    private final EmailAccountType emailAccountType;
+    private final String verificationCode;
 
     /**
-     * Constructs classified registration data.
+     * Constructs registration data ready to send to the server.
      *
-     * @param firstName       given name
-     * @param lastName        family name
-     * @param email           email address
-     * @param password        plain-text password
-     * @param emailAccountType classification derived from the email domain
+     * @param firstName        given name
+     * @param lastName         family name
+     * @param email            email address
+     * @param password         plain-text password
+     * @param verificationCode the code the user typed in, for the server to check
      */
     public RegisterAccountData(
             final String firstName,
             final String lastName,
             final String email,
             final String password,
-            final EmailAccountType emailAccountType) {
+            final String verificationCode) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.emailAccountType = emailAccountType;
+        this.verificationCode = verificationCode;
     }
 
     /**
@@ -64,9 +63,9 @@ public final class RegisterAccountData {
     }
 
     /**
-     * @return the classified email account type
+     * @return the verification code the user typed in
      */
-    public EmailAccountType getEmailAccountType() {
-        return this.emailAccountType;
+    public String getVerificationCode() {
+        return this.verificationCode;
     }
 }
