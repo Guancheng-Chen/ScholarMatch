@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.sun.net.httpserver.HttpServer;
 

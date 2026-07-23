@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 /**
  * Tiny shared helper for parsing a server-sent enum value, used by both ScholarUserMapper

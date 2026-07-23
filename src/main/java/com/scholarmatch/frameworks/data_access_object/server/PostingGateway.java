@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.scholarmatch.entity.CollaborationType;

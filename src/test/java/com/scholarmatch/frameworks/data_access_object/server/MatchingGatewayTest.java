@@ -1,6 +1,8 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.scholarmatch.entity.User;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.server.HttpTestServer;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 
 import org.junit.jupiter.api.AfterEach;

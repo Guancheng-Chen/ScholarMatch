@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.Posting;
@@ -6,6 +6,7 @@ import com.scholarmatch.entity.PostingApplication;
 import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.entity.PostingStatus;
 import com.scholarmatch.entity.ResearchField;
+import com.scholarmatch.frameworks.data_access_object.server.HttpTestServer;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.load_postings.PostingScope;
 
