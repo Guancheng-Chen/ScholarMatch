@@ -12,6 +12,7 @@ import com.scholarmatch.interface_adapter.controller.LogoutController;
 import com.scholarmatch.interface_adapter.controller.PaperLookupController;
 import com.scholarmatch.interface_adapter.controller.RecommendController;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
@@ -45,6 +46,7 @@ import com.scholarmatch.usecase.logout.LogoutInputBoundary;
 import com.scholarmatch.usecase.paper_lookup.PaperLookupInputBoundary;
 import com.scholarmatch.usecase.recommend.RecommendInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
 import com.scholarmatch.usecase.send_message.SendMessageInputBoundary;
 import com.scholarmatch.usecase.skip.SkipInputBoundary;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputBoundary;
@@ -93,40 +95,41 @@ class MainViewTest {
      */
     private MainView buildMainView(final CurrentUserProvider session) {
         return new MainView(
-            new LoginController(mock(LoginInputBoundary.class)),
-            new LoginViewModel(),
-            new LogoutController(mock(LogoutInputBoundary.class)),
-            new LogoutViewModel(),
-            new DeleteAccountController(mock(DeleteAccountInputBoundary.class)),
-            new DeleteAccountViewModel(),
-            new RegisterController(mock(RegisterInputBoundary.class)),
-            new RegisterViewModel(),
-            new PaperLookupController(mock(PaperLookupInputBoundary.class)),
-            new PaperLookupViewModel(),
-            new RecommendController(mock(RecommendInputBoundary.class)),
-            new ConnectController(mock(ConnectInputBoundary.class)),
-            new DislikeController(mock(DislikeInputBoundary.class)),
-            new SkipController(mock(SkipInputBoundary.class)),
-            new RecommendViewModel(),
-            new LoadMatchesViewModel(),
-            new LoadMatchesController(mock(LoadMatchesInputBoundary.class)),
-            new SendMessageController(mock(SendMessageInputBoundary.class)),
-            new LoadMessageController(mock(LoadMessageInputBoundary.class)),
-            new ChatViewModel(),
-            new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
-            new LoadProfileController(mock(LoadProfileInputBoundary.class)),
-            new UpdateProfileViewModel(),
-            new CreatePostingController(mock(CreatePostingInputBoundary.class)),
-            new ClosePostingController(mock(ClosePostingInputBoundary.class)),
-            new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
-            new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
-            new ApplyToPostingController(mock(ApplyToPostingInputBoundary.class)),
-            new AcceptApplicationController(mock(AcceptApplicationInputBoundary.class)),
-            new DeclineApplicationController(mock(DeclineApplicationInputBoundary.class)),
-            new LoadMyApplicationsController(mock(LoadMyApplicationsInputBoundary.class)),
-            new OpportunitiesViewModel(),
-            new MyPostingsViewModel(),
-            new MyApplicationsViewModel(),
-            session);
+                new LoginController(mock(LoginInputBoundary.class)),
+                new LoginViewModel(),
+                new LogoutController(mock(LogoutInputBoundary.class)),
+                new LogoutViewModel(),
+                new DeleteAccountController(mock(DeleteAccountInputBoundary.class)),
+                new DeleteAccountViewModel(),
+                new RegisterController(mock(RegisterInputBoundary.class)),
+                new RequestEmailVerificationController(mock(RequestEmailVerificationInputBoundary.class)),
+                new RegisterViewModel(),
+                new PaperLookupController(mock(PaperLookupInputBoundary.class)),
+                new PaperLookupViewModel(),
+                new RecommendController(mock(RecommendInputBoundary.class)),
+                new ConnectController(mock(ConnectInputBoundary.class)),
+                new DislikeController(mock(DislikeInputBoundary.class)),
+                new SkipController(mock(SkipInputBoundary.class)),
+                new RecommendViewModel(),
+                new LoadMatchesViewModel(),
+                new LoadMatchesController(mock(LoadMatchesInputBoundary.class)),
+                new SendMessageController(mock(SendMessageInputBoundary.class)),
+                new LoadMessageController(mock(LoadMessageInputBoundary.class)),
+                new ChatViewModel(),
+                new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
+                new LoadProfileController(mock(LoadProfileInputBoundary.class)),
+                new UpdateProfileViewModel(),
+                new CreatePostingController(mock(CreatePostingInputBoundary.class)),
+                new ClosePostingController(mock(ClosePostingInputBoundary.class)),
+                new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
+                new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
+                new ApplyToPostingController(mock(ApplyToPostingInputBoundary.class)),
+                new AcceptApplicationController(mock(AcceptApplicationInputBoundary.class)),
+                new DeclineApplicationController(mock(DeclineApplicationInputBoundary.class)),
+                new LoadMyApplicationsController(mock(LoadMyApplicationsInputBoundary.class)),
+                new OpportunitiesViewModel(),
+                new MyPostingsViewModel(),
+                new MyApplicationsViewModel(),
+                session);
     }
 }

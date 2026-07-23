@@ -2,9 +2,11 @@ package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputData;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +31,10 @@ class RegisterViewTest {
     @Test
     void testMismatchedPasswordsShowsErrorDialogAndDoesNotCallController() {
         final RegisterInputBoundary interactor = mock(RegisterInputBoundary.class);
-        final RegisterView view = new RegisterView(new RegisterController(interactor), new RegisterViewModel());
+        final RegisterView view = new RegisterView(
+                new RegisterController(interactor),
+                new RequestEmailVerificationController(mock(RequestEmailVerificationInputBoundary.class)),
+                new RegisterViewModel());
 
         fillForm(view, "Ada", "Lovelace", "ada@example.com", "hunter2", "different-password");
 
@@ -45,7 +50,10 @@ class RegisterViewTest {
     @Test
     void testMatchingPasswordsSubmitRegistrationWithTrimmedFields() {
         final RegisterInputBoundary interactor = mock(RegisterInputBoundary.class);
-        final RegisterView view = new RegisterView(new RegisterController(interactor), new RegisterViewModel());
+        final RegisterView view = new RegisterView(
+                new RegisterController(interactor),
+                new RequestEmailVerificationController(mock(RequestEmailVerificationInputBoundary.class)),
+                new RegisterViewModel());
 
         fillForm(view, "  Ada  ", "  Lovelace  ", "  ada@example.com  ", "hunter2", "hunter2");
 
