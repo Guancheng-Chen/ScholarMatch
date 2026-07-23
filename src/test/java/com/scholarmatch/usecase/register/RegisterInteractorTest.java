@@ -1,23 +1,13 @@
 package com.scholarmatch.usecase.register;
 
-import com.scholarmatch.entity.EmailAccountType;
-import com.scholarmatch.entity.EmailVerificationChallenge;
-import com.scholarmatch.frameworks.data_access_object.InMemoryEmailVerificationChallengeRepository;
-import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.SessionWriterInterface;
-
-import org.junit.jupiter.api.BeforeEach;
+import com.scholarmatch.usecase.exception.InvalidRequestException;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,96 +15,87 @@ import static org.mockito.Mockito.when;
 
 class RegisterInteractorTest {
 
-    private RegisterDataAccessInterface gateway;
-    private SessionWriterInterface session;
-    private RegisterOutputBoundary outputBoundary;
-    private AcademicEmailDomainDataAccessInterface academicEmailDomains;
-    private RegisterInteractor interactor;
-    private InMemoryEmailVerificationChallengeRepository challenges;
-    private Clock clock;
+    @Test
+    void testSuccessStoresSessionAndPreparesSuccessView() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+        when(dao.register(any())).thenReturn(new AuthResult("jwt-token", "user-1", "Ada Lovelace"));
 
-    @BeforeEach
-    void setUp() {
-        gateway = mock(RegisterDataAccessInterface.class);
-        session = mock(SessionWriterInterface.class);
-        outputBoundary = mock(RegisterOutputBoundary.class);
-        academicEmailDomains = mock(AcademicEmailDomainDataAccessInterface.class);
-        challenges = new InMemoryEmailVerificationChallengeRepository();
-        clock = Clock.fixed(Instant.parse("2026-07-21T12:00:00Z"), ZoneOffset.UTC);
-        interactor = new RegisterInteractor(
-                gateway, session, outputBoundary, academicEmailDomains, challenges, clock);
-        when(gateway.register(any())).thenReturn(new AuthResult("token-1", "user-1", "Ada Lovelace"));
+        new RegisterInteractor(dao, sessionManager, output).execute(input());
+
+        verify(sessionManager).setCurrentUserId("user-1");
+        verify(sessionManager).setToken("jwt-token");
+        verify(output).prepareSuccessView(any());
     }
 
     @Test
-    void testAcademicEmailCreatesAcademicAccount() {
-        when(academicEmailDomains.isAcademicEmail("ada@mit.edu")).thenReturn(true);
-        saveChallenge("ada@mit.edu");
+    void testDaoFailureIsPresentedAndSessionIsNotWritten() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+        doThrow(new InvalidRequestException("email already registered")).when(dao).register(any());
 
-        interactor.execute(new RegisterInputData(
-                "Ada", "Lovelace", "ada@mit.edu", "password1", "123456"));
+        new RegisterInteractor(dao, sessionManager, output).execute(input());
 
-        assertEquals(EmailAccountType.ACADEMIC, captureAccountData().getEmailAccountType());
-        verify(session).setCurrentUserId("user-1");
-        verify(session).setToken("token-1");
-        verify(outputBoundary).prepareSuccessView(any());
+        verify(output).prepareFailView("email already registered");
+        verify(sessionManager, never()).setCurrentUserId(any());
+        verify(sessionManager, never()).setToken(any());
     }
 
     @Test
-    void testUnknownDomainCreatesRegularAccount() {
-        when(academicEmailDomains.isAcademicEmail("ada@example.com")).thenReturn(false);
-        saveChallenge("ada@example.com");
+    void testBlankNamesFailValidationWithoutCallingDao() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
 
-        interactor.execute(new RegisterInputData(
-                "Ada", "Lovelace", "ada@example.com", "password1", "123456"));
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("", "", "ada@example.com", "supersecret", "123456"));
 
-        assertEquals(EmailAccountType.REGULAR, captureAccountData().getEmailAccountType());
+        verify(output).prepareFailView("First name is required.\nLast name is required.");
+        verify(dao, never()).register(any());
     }
 
     @Test
-    void testInvalidEmailIsNotClassifiedOrRegistered() {
-        interactor.execute(new RegisterInputData(
-                "Ada", "Lovelace", "invalid", "password1", ""));
+    void testInvalidEmailFormatFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
 
-        verify(academicEmailDomains, never()).isAcademicEmail(any());
-        verify(gateway, never()).register(any());
-        verify(outputBoundary).prepareFailView(any());
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "not-an-email", "supersecret", "123456"));
+
+        verify(output).prepareFailView("Email format is invalid, e.g. name@example.com.");
+        verify(dao, never()).register(any());
     }
 
     @Test
-    void testMissingChallengeCannotRegister() {
-        interactor.execute(new RegisterInputData(
-                "Ada", "Lovelace", "ada@example.com", "password1", "123456"));
+    void testPasswordTooShortFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
 
-        verify(gateway, never()).register(any());
-        verify(outputBoundary).prepareFailView(
-                "Request a verification code for this email before registering.");
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "ada@example.com", "short", "123456"));
+
+        verify(output).prepareFailView("Password must be between 8 and 64 characters (currently 5).");
+        verify(dao, never()).register(any());
     }
 
     @Test
-    void testThirdWrongCodeShowsRegistrationFailure() {
-        saveChallenge("ada@example.com");
-        final RegisterInputData input = new RegisterInputData(
-                "Ada", "Lovelace", "ada@example.com", "password1", "000000");
+    void testBlankPasswordFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
 
-        interactor.execute(input);
-        interactor.execute(input);
-        interactor.execute(input);
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "ada@example.com", "", "123456"));
 
-        verify(gateway, never()).register(any());
-        verify(outputBoundary).prepareFailView(
-                "Registration failed: verification code is incorrect. "
-                        + "No attempts remaining. Request a new code.");
+        verify(output).prepareFailView("Password is required.");
+        verify(dao, never()).register(any());
     }
 
-    private RegisterAccountData captureAccountData() {
-        final ArgumentCaptor<RegisterAccountData> captor = ArgumentCaptor.forClass(RegisterAccountData.class);
-        verify(gateway).register(captor.capture());
-        return captor.getValue();
-    }
-
-    private void saveChallenge(final String email) {
-        challenges.save(new EmailVerificationChallenge(
-                email, "123456", clock.instant().plusSeconds(600)));
+    private RegisterInputData input() {
+        return new RegisterInputData("Ada", "Lovelace", "ada@example.com", "supersecret", "123456");
     }
 }
