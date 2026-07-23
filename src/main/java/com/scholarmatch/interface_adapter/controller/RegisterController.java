@@ -2,6 +2,8 @@ package com.scholarmatch.interface_adapter.controller;
 
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputData;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputData;
 
 /**
  * Controller for the register use case.
@@ -13,6 +15,7 @@ import com.scholarmatch.usecase.register.RegisterInputData;
 public final class RegisterController {
 
     private final RegisterInputBoundary registerInteractor;
+    private final RequestEmailVerificationInputBoundary verificationInteractor;
 
     /**
      * Constructs a RegisterController.
@@ -20,7 +23,14 @@ public final class RegisterController {
      * @param registerInteractor the input boundary to invoke
      */
     public RegisterController(final RegisterInputBoundary registerInteractor) {
+        this(registerInteractor, null);
+    }
+
+    public RegisterController(
+            final RegisterInputBoundary registerInteractor,
+            final RequestEmailVerificationInputBoundary verificationInteractor) {
         this.registerInteractor = registerInteractor;
+        this.verificationInteractor = verificationInteractor;
     }
 
     /**
@@ -32,10 +42,19 @@ public final class RegisterController {
      * @param password  plain-text password
      */
     public void execute(
-        final String firstName,
-        final String lastName,
-        final String email,
-        final String password) {
-        this.registerInteractor.execute(new RegisterInputData(firstName, lastName, email, password));
+            final String firstName,
+            final String lastName,
+            final String email,
+            final String password,
+            final String verificationCode) {
+        this.registerInteractor.execute(
+                new RegisterInputData(firstName, lastName, email, password, verificationCode));
+    }
+
+    public void sendVerificationCode(final String email) {
+        if (this.verificationInteractor == null) {
+            throw new IllegalStateException("Email verification is not configured.");
+        }
+        this.verificationInteractor.execute(new RequestEmailVerificationInputData(email));
     }
 }

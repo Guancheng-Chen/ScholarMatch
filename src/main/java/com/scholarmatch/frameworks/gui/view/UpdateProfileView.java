@@ -2,6 +2,7 @@ package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
@@ -17,6 +18,7 @@ import com.scholarmatch.interface_adapter.controller.PaperLookupController;
 import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
 import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.view_model.support.ObservableValue;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -38,8 +40,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * Profile-editing screen.
@@ -59,6 +64,7 @@ public final class UpdateProfileView extends JPanel {
     private static final int COLUMN_GAP = 20;
     private static final int ROW_WIDTH = COLUMN_OUTER_WIDTH * 3 + COLUMN_GAP * 2;
     private static final int FIELD_HEIGHT = 34;
+    private final List<Runnable> listenerRemovers = new ArrayList<>();
 
     /**
      * Constructs the UpdateProfileView.
@@ -84,8 +90,14 @@ public final class UpdateProfileView extends JPanel {
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         final JTextField emailField = field("Email");
+        final JLabel emailAccountTypeLabel = new JLabel("Regular email");
+        emailAccountTypeLabel.setName("emailAccountType");
+        emailAccountTypeLabel.setForeground(Theme.FG_MUTED);
+        emailAccountTypeLabel.setFont(emailAccountTypeLabel.getFont().deriveFont(Font.BOLD, 11f));
+        emailAccountTypeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        final JComboBox<Institution> institutionCombo = new JComboBox<>(sortedInstitutions());
+        final JComboBox<Institution> institutionCombo =
+                new JComboBox<>(sortedInstitutions(viewModel.getInstitutions()));
         styleInstitutionCombo(institutionCombo);
 
         final JComboBox<AcademicLevel> academicLevelCombo = new JComboBox<>(AcademicLevel.values());
@@ -119,11 +131,15 @@ public final class UpdateProfileView extends JPanel {
         final EducationEditorPanel educationEditorPanel = new EducationEditorPanel(COLUMN_WIDTH);
 
         // Pre-fill every field once the current profile loads, instead of starting blank.
-        viewModel.currentUserProperty().addListener(user -> {
+        listen(viewModel.currentUserProperty(), user -> {
             if (user == null) {
                 return;
             }
             emailField.setText(user.getEmail());
+            final boolean academic = user.getEmailAccountType() == EmailAccountType.ACADEMIC;
+            emailAccountTypeLabel.setText(academic
+                ? "Verified university email" : "Regular email");
+            emailAccountTypeLabel.setForeground(academic ? Theme.ACCENT_FG : Theme.FG_MUTED);
             institutionCombo.setSelectedItem(user.getInstitution());
             academicLevelCombo.setSelectedItem(user.getAcademicLevel());
             lookingForCombo.setSelectedItem(user.getLookingFor());
@@ -141,13 +157,13 @@ public final class UpdateProfileView extends JPanel {
             publicationEditorPanel.setPublications(user.getPublications());
         });
 
-        viewModel.errorMessageProperty().addListener(message -> {
+        listen(viewModel.errorMessageProperty(), message -> {
             if (message != null && !message.isBlank()) {
                 JOptionPane.showMessageDialog(this, message, "Save Profile Failed", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        viewModel.saveSuccessMessageProperty().addListener(message -> {
+        listen(viewModel.saveSuccessMessageProperty(), message -> {
             if (message != null && !message.isBlank()) {
                 JOptionPane.showMessageDialog(this, message, "Save Profile", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -209,7 +225,7 @@ public final class UpdateProfileView extends JPanel {
         });
 
         final RoundedPanel basicInfoCard = buildColumnCard("Basic Info",
-            labeled("Email"), emailField, strut(),
+            labeled("Email"), emailField, emailAccountTypeLabel, strut(),
             labeled("Institution"), institutionCombo, strut(),
             labeled("Academic Level"), academicLevelCombo, strut(),
             labeled("Research Field"), researchFieldCombo, strut(),
@@ -343,10 +359,10 @@ public final class UpdateProfileView extends JPanel {
      * 600-entry list for their own school. {@link Institution#OTHER} is pinned last as the
      * fallback choice rather than sorted in around "O".
      */
-    private static Institution[] sortedInstitutions() {
-        final Institution[] sorted = Institution.values().clone();
+    private static Institution[] sortedInstitutions(final java.util.List<Institution> institutions) {
+        final Institution[] sorted = institutions.toArray(Institution[]::new);
         Arrays.sort(sorted, Comparator
-            .comparing((Institution institution) -> institution == Institution.OTHER)
+            .comparing((Institution institution) -> institution.equals(Institution.OTHER))
             .thenComparing(Institution::getDisplayName, String.CASE_INSENSITIVE_ORDER));
         return sorted;
     }
@@ -418,5 +434,21 @@ public final class UpdateProfileView extends JPanel {
         for (final Component component : components) {
             panel.add(component);
         }
+    }
+
+    private <T> void listen(
+            final ObservableValue<T> observable,
+            final Consumer<T> listener) {
+        observable.addListener(listener);
+        this.listenerRemovers.add(() -> observable.removeListener(listener));
+    }
+
+    @Override
+    public void removeNotify() {
+        for (final Runnable removeListener : this.listenerRemovers) {
+            removeListener.run();
+        }
+        this.listenerRemovers.clear();
+        super.removeNotify();
     }
 }
