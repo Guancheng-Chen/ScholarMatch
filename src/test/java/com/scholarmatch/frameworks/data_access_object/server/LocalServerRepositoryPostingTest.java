@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.EmailAccountType;
@@ -7,6 +7,9 @@ import com.scholarmatch.entity.PostingApplication;
 import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.entity.PostingStatus;
 import com.scholarmatch.entity.ResearchField;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
+import com.scholarmatch.frameworks.data_access_object.LocalServerRepository;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.load_postings.PostingScope;

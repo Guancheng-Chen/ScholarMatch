@@ -1,18 +1,18 @@
 package com.scholarmatch.app;
 
-import com.scholarmatch.frameworks.data_access_object.AuthGateway;
+import com.scholarmatch.frameworks.data_access_object.server.AuthGateway;
 import com.scholarmatch.frameworks.data_access_object.FallbackUserApiGateway;
 import com.scholarmatch.frameworks.data_access_object.LocalUserApiGateway;
 import com.scholarmatch.frameworks.data_access_object.LocalServerRepository;
-import com.scholarmatch.frameworks.data_access_object.MatchingGateway;
-import com.scholarmatch.frameworks.data_access_object.MessagingGateway;
-import com.scholarmatch.frameworks.data_access_object.PostingGateway;
-import com.scholarmatch.frameworks.data_access_object.ProfileGateway;
+import com.scholarmatch.frameworks.data_access_object.server.MatchingGateway;
+import com.scholarmatch.frameworks.data_access_object.server.MessagingGateway;
+import com.scholarmatch.frameworks.data_access_object.server.PostingGateway;
+import com.scholarmatch.frameworks.data_access_object.server.ProfileGateway;
 import com.scholarmatch.frameworks.data_access_object.SemanticScholarGateway;
-import com.scholarmatch.frameworks.data_access_object.ServerHttpClient;
+import com.scholarmatch.frameworks.data_access_object.server.ServerHttpClient;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
-import com.scholarmatch.frameworks.data_access_object.RemoteVerificationEmailSender;
+import com.scholarmatch.frameworks.data_access_object.server.RemoteVerificationEmailSender;
 import com.scholarmatch.frameworks.gui.MainView;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;

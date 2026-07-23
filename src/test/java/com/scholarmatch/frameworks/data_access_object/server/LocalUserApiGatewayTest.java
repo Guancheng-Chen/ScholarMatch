@@ -1,6 +1,7 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.server;
 
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.frameworks.data_access_object.LocalUserApiGateway;
 import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 
