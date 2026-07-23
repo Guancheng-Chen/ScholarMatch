@@ -1,16 +1,13 @@
 package com.scholarmatch.app;
 
 import com.scholarmatch.frameworks.data_access_object.FallbackUserApiGateway;
-import com.scholarmatch.frameworks.data_access_object.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.LocalUserApiGateway;
 import com.scholarmatch.frameworks.data_access_object.LocalServerRepository;
 import com.scholarmatch.frameworks.data_access_object.SemanticScholarGateway;
 import com.scholarmatch.frameworks.data_access_object.ServerRepository;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
-import com.scholarmatch.frameworks.data_access_object.InMemoryEmailVerificationChallengeRepository;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
-import com.scholarmatch.frameworks.data_access_object.ResendVerificationEmailSender;
-import com.scholarmatch.frameworks.data_access_object.SecureVerificationCodeGenerator;
+import com.scholarmatch.frameworks.data_access_object.RemoteVerificationEmailSender;
 import com.scholarmatch.frameworks.gui.MainView;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
@@ -22,6 +19,7 @@ import com.scholarmatch.interface_adapter.controller.DislikeController;
 import com.scholarmatch.interface_adapter.controller.RecommendController;
 import com.scholarmatch.interface_adapter.controller.PaperLookupController;
 import com.scholarmatch.interface_adapter.controller.RegisterController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.SendMessageController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
@@ -68,7 +66,6 @@ import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
@@ -116,7 +113,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.Clock;
 
 /**
  * Composition root — the only class that instantiates concrete types across layers.
@@ -167,10 +163,6 @@ public final class Config {
                 || !isServerReachable(SERVER_URL);
         final InstitutionCatalogDataAccessInterface institutionCatalog =
                 new ClasspathInstitutionCatalogRepository();
-        final AcademicEmailDomainDataAccessInterface academicEmailDomains =
-                new ClasspathAcademicEmailDomainRepository(institutionCatalog);
-        final InMemoryEmailVerificationChallengeRepository verificationChallenges =
-                new InMemoryEmailVerificationChallengeRepository();
         final ServerRepository serverRepo =
                 new ServerRepository(SERVER_URL, currentUserProvider, institutionCatalog);
         final LocalServerRepository localRepo =
@@ -258,17 +250,11 @@ public final class Config {
         final DeleteAccountInteractor deleteAccountInteractor =
                 new DeleteAccountInteractor(deleteAccountDataAccessObject, currentUserProvider, deleteAccountPresenter);
         final RegisterInteractor registerInteractor =
-                new RegisterInteractor(
-                        registerDataAccessObject, currentUserProvider, registerPresenter, academicEmailDomains,
-                        verificationChallenges, Clock.systemUTC());
+                new RegisterInteractor(registerDataAccessObject, currentUserProvider, registerPresenter);
         final RequestEmailVerificationInteractor verificationInteractor =
                 new RequestEmailVerificationInteractor(
-                        new ResendVerificationEmailSender(
-                                System.getenv("RESEND_API_KEY"), System.getenv("RESEND_FROM_EMAIL")),
-                        verificationChallenges,
-                        new SecureVerificationCodeGenerator(),
-                        verificationPresenter,
-                        Clock.systemUTC());
+                        new RemoteVerificationEmailSender(SERVER_URL),
+                        verificationPresenter);
         final PaperLookupInteractor paperLookupInteractor =
                 new PaperLookupInteractor(userApiGateway, paperLookupPresenter);
         final RecommendInteractor recommendInteractor =
@@ -316,8 +302,9 @@ public final class Config {
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         final DeleteAccountController deleteAccountController =
                 new DeleteAccountController(deleteAccountInteractor);
-        final RegisterController registerController =
-                new RegisterController(registerInteractor, verificationInteractor);
+        final RegisterController registerController = new RegisterController(registerInteractor);
+        final RequestEmailVerificationController requestEmailVerificationController =
+                new RequestEmailVerificationController(verificationInteractor);
         final PaperLookupController paperLookupController = new PaperLookupController(paperLookupInteractor);
         final RecommendController recommendController = new RecommendController(recommendInteractor);
         final ConnectController connectController = new ConnectController(connectInteractor);
@@ -351,7 +338,7 @@ public final class Config {
                 loginController, loginViewModel,
                 logoutController, logoutViewModel,
                 deleteAccountController, deleteAccountViewModel,
-                registerController, registerViewModel,
+                registerController, requestEmailVerificationController, registerViewModel,
                 paperLookupController, paperLookupViewModel,
                 recommendController, connectController, dislikeController, skipController, recommendViewModel,
                 loadMatchesViewModel, loadMatchesController,
