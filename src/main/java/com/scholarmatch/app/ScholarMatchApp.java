@@ -2,6 +2,7 @@ package com.scholarmatch.app;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;
+import com.scholarmatch.frameworks.gui.MainView;
 import com.scholarmatch.frameworks.gui.style.Theme;
 
 import javax.swing.JFrame;
@@ -14,7 +15,7 @@ import java.util.Locale;
 
 /**
  * Bootstraps ScholarMatch: applies the FlatLaf theme, delegates wiring to
- * Config, and opens the main window.
+ * AppBuilder, and opens the main window.
  */
 public final class ScholarMatchApp {
 
@@ -48,10 +49,17 @@ public final class ScholarMatchApp {
     public void start() {
         installTheme();
 
-        final Config builder = new Config();
+        final MainView mainView = new AppBuilder()
+                .addSession()
+                .addRepositories()
+                .addViewModels()
+                .addPresenters()
+                .addInteractors()
+                .addControllers()
+                .build();
         final JFrame frame = new JFrame("ScholarMatch");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.getContentPane().add(builder.build());
+        frame.getContentPane().add(mainView);
         frame.getContentPane().setBackground(Theme.BG_DEFAULT);
         frame.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         frame.setLocationRelativeTo(null);
