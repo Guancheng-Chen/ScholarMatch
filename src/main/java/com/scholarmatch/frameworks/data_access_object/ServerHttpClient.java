@@ -2,6 +2,9 @@ package com.scholarmatch.frameworks.data_access_object;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSender;
+import com.scholarmatch.frameworks.data_access_object.http.HttpSenderResponse;
+import com.scholarmatch.frameworks.data_access_object.http.JdkHttpSender;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
@@ -11,7 +14,6 @@ import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 /**
  * Shared HTTP transport for every server-facing gateway (AuthGateway, ProfileGateway,
@@ -19,18 +21,26 @@ import java.net.http.HttpResponse;
  * and JSON error translation are the same regardless of which feature is calling the server,
  * so this is the one piece of the old ServerRepository god class that legitimately stays
  * shared rather than being split per feature.
+ *
+ * <p>Depends on {@link HttpSender} rather than {@link HttpClient} directly — the same seam
+ * SemanticScholarGateway and RemoteVerificationEmailSender already use — so tests can mock the
+ * transport instead of standing up a real server.
  */
 public final class ServerHttpClient {
 
     private final String baseUrl;
     private final CurrentUserProviderInterface session;
-    private final HttpClient http;
+    private final HttpSender httpSender;
     private final ObjectMapper mapper;
 
     public ServerHttpClient(final String baseUrl, final CurrentUserProviderInterface session) {
+        this(baseUrl, session, new JdkHttpSender(HttpClient.newHttpClient()));
+    }
+
+    ServerHttpClient(final String baseUrl, final CurrentUserProviderInterface session, final HttpSender httpSender) {
         this.baseUrl = baseUrl.replaceAll("/$", "");
         this.session = session;
-        this.http = HttpClient.newHttpClient();
+        this.httpSender = httpSender;
         this.mapper = new ObjectMapper();
     }
 
@@ -41,7 +51,7 @@ public final class ServerHttpClient {
                     .header("Authorization", "Bearer " + this.session.getToken())
                     .GET()
                     .build();
-            return parseResponse(this.http.send(request, HttpResponse.BodyHandlers.ofString()));
+            return parseResponse(this.httpSender.send(request));
         } catch (final DataAccessException e) {
             throw e;
         } catch (final Exception e) {
@@ -58,7 +68,7 @@ public final class ServerHttpClient {
             if (authenticated) {
                 builder.header("Authorization", "Bearer " + this.session.getToken());
             }
-            return parseResponse(this.http.send(builder.build(), HttpResponse.BodyHandlers.ofString()));
+            return parseResponse(this.httpSender.send(builder.build()));
         } catch (final DataAccessException e) {
             throw e;
         } catch (final Exception e) {
@@ -74,7 +84,7 @@ public final class ServerHttpClient {
                     .header("Authorization", "Bearer " + this.session.getToken())
                     .PUT(HttpRequest.BodyPublishers.ofString(body))
                     .build();
-            return parseResponse(this.http.send(request, HttpResponse.BodyHandlers.ofString()));
+            return parseResponse(this.httpSender.send(request));
         } catch (final DataAccessException e) {
             throw e;
         } catch (final Exception e) {
@@ -94,7 +104,7 @@ public final class ServerHttpClient {
                     .header("Authorization", "Bearer " + this.session.getToken())
                     .DELETE()
                     .build();
-            final HttpResponse<String> response = this.http.send(request, HttpResponse.BodyHandlers.ofString());
+            final HttpSenderResponse response = this.httpSender.send(request);
             final int statusCode = response.statusCode();
             if (statusCode >= 400) {
                 String error = null;
@@ -136,7 +146,7 @@ public final class ServerHttpClient {
     }
 
     /**
-     * Translates a low-level transport failure (a thrown Exception from HttpClient#send)
+     * Translates a low-level transport failure (a thrown Exception from HttpSender#send)
      * into a message a user can actually act on, instead of a raw Java exception message
      * (e.g. "nodename nor servname provided, or not known") or a bare status code.
      */
@@ -177,7 +187,7 @@ public final class ServerHttpClient {
         };
     }
 
-    private JsonNode parseResponse(final HttpResponse<String> response) {
+    private JsonNode parseResponse(final HttpSenderResponse response) {
         try {
             final JsonNode node = this.mapper.readTree(response.body());
             final int statusCode = response.statusCode();
