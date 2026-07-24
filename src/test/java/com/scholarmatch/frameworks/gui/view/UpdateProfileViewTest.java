@@ -30,6 +30,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import java.util.List;
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -152,6 +154,64 @@ class UpdateProfileViewTest {
         assertEquals("Verified university email", emailAccountTypeLabel(view).getText());
     }
 
+    @Test
+    void testNullStateDialogsNullSelectionsRenderersAndRemoval() throws Exception {
+        final UpdateProfileInputBoundary interactor = mock(UpdateProfileInputBoundary.class);
+        final UpdateProfileViewModel viewModel = new UpdateProfileViewModel();
+        viewModel.setInstitutions(List.of(Institution.MIT, Institution.OTHER));
+        final UpdateProfileView view = new UpdateProfileView(
+                new UpdateProfileController(interactor),
+                new LoadProfileController(mock(LoadProfileInputBoundary.class)), viewModel,
+                new PaperLookupController(mock(PaperLookupInputBoundary.class)),
+                new PaperLookupViewModel());
+        SwingUtilities.invokeAndWait(() -> {
+            viewModel.currentUserProperty().set(null);
+            viewModel.setCurrentUser(emptyUser());
+            viewModel.setCurrentUser(metricsUser());
+            try {
+                final Method format = UpdateProfileView.class.getDeclaredMethod("formatEnum", Enum.class);
+                format.setAccessible(true);
+                assertEquals("", format.invoke(view, new Object[] {null}));
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalStateException(ex);
+            }
+            try (MockedStatic<JOptionPane> dialogs = mockStatic(JOptionPane.class)) {
+                viewModel.setErrorMessage(null);
+                viewModel.setErrorMessage(" ");
+                viewModel.setSaveSuccessMessage(null);
+                viewModel.setSaveSuccessMessage(" ");
+                viewModel.setErrorMessage("save failed");
+                viewModel.setSaveSuccessMessage("saved");
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), org.mockito.ArgumentMatchers.eq("save failed"),
+                        org.mockito.ArgumentMatchers.eq("Save Profile Failed"),
+                        org.mockito.ArgumentMatchers.eq(JOptionPane.ERROR_MESSAGE)));
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), org.mockito.ArgumentMatchers.eq("saved"),
+                        org.mockito.ArgumentMatchers.eq("Save Profile"),
+                        org.mockito.ArgumentMatchers.eq(JOptionPane.INFORMATION_MESSAGE)));
+            }
+
+            final List<JComboBox> combos = SwingTestSupport.findAll(view, JComboBox.class);
+            render(combos.get(0), "plain");
+            render(combos.get(1), "plain");
+            weeklyAvailabilityField(view).setText("-1");
+            try (MockedStatic<JOptionPane> dialogs = mockStatic(JOptionPane.class)) {
+                saveButton(view).doClick();
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), any(), org.mockito.ArgumentMatchers.eq("Save Profile Failed"),
+                        org.mockito.ArgumentMatchers.eq(JOptionPane.ERROR_MESSAGE)));
+            }
+            weeklyAvailabilityField(view).setText("");
+            for (int i = 0; i < 5; i++) {
+                combos.get(i).setSelectedItem(null);
+            }
+            saveButton(view).doClick();
+            view.removeNotify();
+        });
+        verify(interactor, timeout(2000)).execute(any());
+    }
+
     private UpdateProfileView buildView(final UpdateProfileInputBoundary interactor) {
         final UpdateProfileViewModel viewModel = new UpdateProfileViewModel();
         viewModel.setInstitutions(
@@ -214,5 +274,25 @@ class UpdateProfileViewTest {
             CollaborationType.CO_AUTHOR, "Looking for co-authors", "Algorithms",
             8, FundingStatus.INSTITUTIONAL_FUNDING, "hash", EmailAccountType.ACADEMIC);
         return UserData.from(user);
+    }
+
+    private UserData emptyUser() {
+        return new UserData(
+                "user-2", "", "", "", "", null, null, null, null,
+                "", "", null, null, List.of(), List.of(), List.of(), null, null);
+    }
+
+    private UserData metricsUser() {
+        return new UserData(
+                "user-3", "Ada", "Lovelace", "ada@example.com", "", Institution.MIT,
+                AcademicLevel.FACULTY, ResearchField.MACHINE_LEARNING,
+                CollaborationType.CO_AUTHOR, "", "", 5,
+                FundingStatus.INSTITUTIONAL_FUNDING, List.of(), List.of(), List.of(), 12, 300);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void render(final JComboBox combo, final Object value) {
+        combo.getRenderer().getListCellRendererComponent(
+                new javax.swing.JList<>(), value, 0, false, false);
     }
 }

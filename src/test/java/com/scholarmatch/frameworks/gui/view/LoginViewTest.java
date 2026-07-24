@@ -13,6 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,5 +84,14 @@ class LoginViewTest {
         verify(interactor, timeout(2000)).execute(captor.capture());
         assertEquals("person@example.com", captor.getValue().getEmail());
         assertEquals("hunter2", captor.getValue().getPassword());
+    }
+
+    @Test
+    void testAttachedViewInstallsLoginAsDefaultButton() throws Exception {
+        final JRootPane root = new JRootPane();
+        SwingUtilities.invokeAndWait(() -> root.setContentPane(new LoginView(
+                new LoginController(mock(LoginInputBoundary.class)), new LoginViewModel())));
+        SwingUtilities.invokeAndWait(() -> { });
+        assertEquals("Login", root.getDefaultButton().getText());
     }
 }

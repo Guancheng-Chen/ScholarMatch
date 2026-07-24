@@ -118,6 +118,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.function.BooleanSupplier;
 
 /**
  * Composition root — the only class that instantiates concrete types across layers.
@@ -155,6 +156,7 @@ public final class AppBuilder {
     // process, so retry a few times with a short gap instead of judging on one attempt.
     private static final int HEALTH_CHECK_ATTEMPTS = 3;
     private static final Duration HEALTH_CHECK_RETRY_DELAY = Duration.ofSeconds(2);
+    private final Boolean offlineOverride;
 
     // ── Session ───────────────────────────────────────────────────────────────
     private CurrentUserProvider currentUserProvider;
@@ -273,6 +275,17 @@ public final class AppBuilder {
     private boolean controllersAdded;
 
     /**
+     * Constructs a builder using environment and health-check based repository selection.
+     */
+    public AppBuilder() {
+        this(null);
+    }
+
+    AppBuilder(final Boolean offlineOverride) {
+        this.offlineOverride = offlineOverride;
+    }
+
+    /**
      * Step 1: creates the shared session object every later step depends on.
      *
      * @return this, for chaining
@@ -290,8 +303,11 @@ public final class AppBuilder {
     public AppBuilder addRepositories() {
         requireStep(this.currentUserProvider != null, "addSession");
 
-        final boolean offline = "true".equalsIgnoreCase(System.getenv("OFFLINE_MODE"))
-                || !isServerReachable(SERVER_URL);
+        final boolean offline = this.offlineOverride != null
+                ? this.offlineOverride
+                : selectOffline(
+                        System.getenv("OFFLINE_MODE"),
+                        () -> isServerReachable(SERVER_URL));
         this.institutionCatalog = new ClasspathInstitutionCatalogRepository();
 
         final ServerHttpClient httpClient = new ServerHttpClient(SERVER_URL, this.currentUserProvider);
@@ -512,6 +528,10 @@ public final class AppBuilder {
             throw new IllegalStateException(
                     "AppBuilder." + missingStepName + "() must be called before this step.");
         }
+    }
+
+    static boolean selectOffline(final String offlineMode, final BooleanSupplier serverReachable) {
+        return "true".equalsIgnoreCase(offlineMode) || !serverReachable.getAsBoolean();
     }
 
     private boolean isServerReachable(final String baseUrl) {

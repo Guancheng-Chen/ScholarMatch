@@ -111,4 +111,21 @@ class NavigationBarTest {
             }
         });
     }
+
+    @Test
+    void testNullAndBlankErrorsAreIgnoredAndRemoveNotifyDetachesListener() throws Exception {
+        final DeleteAccountViewModel viewModel = new DeleteAccountViewModel();
+        SwingUtilities.invokeAndWait(() -> {
+            final NavigationBar navBar = new NavigationBar(
+                    target -> { }, () -> { },
+                    new DeleteAccountController(mock(DeleteAccountInputBoundary.class)), viewModel);
+            try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
+                viewModel.setErrorMessage(null);
+                viewModel.setErrorMessage(" ");
+                optionPane.verifyNoInteractions();
+            }
+            navBar.removeNotify();
+            viewModel.setErrorMessage("detached");
+        });
+    }
 }

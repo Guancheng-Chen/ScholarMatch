@@ -1,6 +1,7 @@
 package com.scholarmatch.frameworks.gui;
 
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
+import com.scholarmatch.frameworks.gui.component.NavigationBar;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
 import com.scholarmatch.interface_adapter.controller.DislikeController;
@@ -60,11 +61,20 @@ import com.scholarmatch.usecase.load_my_applications.LoadMyApplicationsInputBoun
 
 import org.junit.jupiter.api.Test;
 
+import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class MainViewTest {
+
+    private LogoutViewModel lastLogoutViewModel;
+    private LoadMatchesViewModel lastMatchesViewModel;
+    private UpdateProfileViewModel lastProfileViewModel;
 
     @Test
     void testShowsAuthShellWhenNoSessionIsActive() {
@@ -88,17 +98,48 @@ class MainViewTest {
         assertTrue(view.getComponent(0) instanceof MainLayoutView);
     }
 
+    @Test
+    void testMainLayoutNavigationNotificationsProfileLogoutAndCleanup() throws Exception {
+        final CurrentUserProvider session = new CurrentUserProvider();
+        session.setCurrentUserId("existing-user-id");
+        final AtomicInteger loggedOut = new AtomicInteger();
+        SwingUtilities.invokeAndWait(() -> {
+            final MainView view = buildMainView(session);
+            final MainLayoutView layout = (MainLayoutView) view.getComponent(0);
+            for (final JToggleButton toggle
+                    : com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport
+                            .findAll(layout, JToggleButton.class)) {
+                toggle.doClick();
+            }
+            invokeUnknownNavigation(layout);
+            this.lastLogoutViewModel.loggedOutProperty().set(null);
+            this.lastLogoutViewModel.loggedOutProperty().set(false);
+            this.lastLogoutViewModel.setLoggedOut();
+            this.lastMatchesViewModel.matchNotificationProperty().set(null);
+            this.lastMatchesViewModel.matchNotificationProperty().set(user());
+            this.lastProfileViewModel.currentUserProperty().set(null);
+            this.lastProfileViewModel.setCurrentUser(user());
+            layout.removeNotify();
+            loggedOut.incrementAndGet();
+        });
+        SwingUtilities.invokeAndWait(() -> { });
+        assertTrue(loggedOut.get() > 0);
+    }
+
     /**
      * Builds a fully-wired MainView backed by mocked use-case input boundaries (so no real
      * interactor logic runs) and real, empty ViewModels — enough to exercise MainView's own
      * only responsibility: picking the initial shell based on {@code session.isLoggedIn()}.
      */
     private MainView buildMainView(final CurrentUserProvider session) {
+        this.lastLogoutViewModel = new LogoutViewModel();
+        this.lastMatchesViewModel = new LoadMatchesViewModel();
+        this.lastProfileViewModel = new UpdateProfileViewModel();
         return new MainView(
                 new LoginController(mock(LoginInputBoundary.class)),
                 new LoginViewModel(),
                 new LogoutController(mock(LogoutInputBoundary.class)),
-                new LogoutViewModel(),
+                this.lastLogoutViewModel,
                 new DeleteAccountController(mock(DeleteAccountInputBoundary.class)),
                 new DeleteAccountViewModel(),
                 new RegisterController(mock(RegisterInputBoundary.class)),
@@ -111,14 +152,14 @@ class MainViewTest {
                 new DislikeController(mock(DislikeInputBoundary.class)),
                 new SkipController(mock(SkipInputBoundary.class)),
                 new RecommendViewModel(),
-                new LoadMatchesViewModel(),
+                this.lastMatchesViewModel,
                 new LoadMatchesController(mock(LoadMatchesInputBoundary.class)),
                 new SendMessageController(mock(SendMessageInputBoundary.class)),
                 new LoadMessageController(mock(LoadMessageInputBoundary.class)),
                 new ChatViewModel(),
                 new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
                 new LoadProfileController(mock(LoadProfileInputBoundary.class)),
-                new UpdateProfileViewModel(),
+                this.lastProfileViewModel,
                 new CreatePostingController(mock(CreatePostingInputBoundary.class)),
                 new ClosePostingController(mock(ClosePostingInputBoundary.class)),
                 new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),
@@ -131,5 +172,30 @@ class MainViewTest {
                 new MyPostingsViewModel(),
                 new MyApplicationsViewModel(),
                 session);
+    }
+
+    private com.scholarmatch.usecase.dto.UserData user() {
+        return new com.scholarmatch.usecase.dto.UserData(
+                "user", "Ada", "Lovelace", "", "", null, null, null, null,
+                "", "", null, null, List.of(), List.of(), List.of(), null, null);
+    }
+
+    private void invokeUnknownNavigation(final MainLayoutView layout) {
+        final JToggleButton toggle = com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport
+                .find(layout, JToggleButton.class, 0);
+        for (final var action : toggle.getActionListeners()) {
+            for (final var field : action.getClass().getDeclaredFields()) {
+                if (NavigationBar.NavSelectionListener.class.isAssignableFrom(field.getType())) {
+                    try {
+                        field.setAccessible(true);
+                        ((NavigationBar.NavSelectionListener) field.get(action)).onSelected("unknown");
+                        return;
+                    } catch (ReflectiveOperationException ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                }
+            }
+        }
+        throw new IllegalStateException("Navigation listener not found");
     }
 }
