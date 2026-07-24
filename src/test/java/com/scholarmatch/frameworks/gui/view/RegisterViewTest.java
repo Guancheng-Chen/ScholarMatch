@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,6 +66,47 @@ class RegisterViewTest {
         assertEquals("Lovelace", captor.getValue().getLastName());
         assertEquals("ada@example.com", captor.getValue().getEmail());
         assertEquals("hunter2", captor.getValue().getPassword());
+    }
+
+    @Test
+    void testSendCodeMessagesAndListenerRemoval() throws Exception {
+        final RequestEmailVerificationInputBoundary verification =
+                mock(RequestEmailVerificationInputBoundary.class);
+        final RegisterViewModel viewModel = new RegisterViewModel();
+        final RegisterView[] holder = new RegisterView[1];
+        SwingUtilities.invokeAndWait(() -> {
+            holder[0] = new RegisterView(
+                    new RegisterController(mock(RegisterInputBoundary.class)),
+                    new RequestEmailVerificationController(verification), viewModel);
+            SwingTestSupport.find(holder[0], JTextField.class, 2).setText("  ada@example.com  ");
+            findButton(holder[0], "Send Code").doClick();
+        });
+        verify(verification, timeout(2000)).execute(
+                org.mockito.ArgumentMatchers.argThat(data ->
+                        "ada@example.com".equals(data.email())));
+        SwingUtilities.invokeAndWait(() -> {
+            try (MockedStatic<JOptionPane> dialogs = mockStatic(JOptionPane.class)) {
+                viewModel.setErrorMessage(null);
+                viewModel.setErrorMessage(" ");
+                viewModel.setVerificationMessage(null);
+                viewModel.setVerificationMessage(" ");
+                viewModel.setVerificationError(null);
+                viewModel.setVerificationError(" ");
+                viewModel.setErrorMessage("register error");
+                viewModel.setVerificationMessage("code sent");
+                viewModel.setVerificationError("send failed");
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), eq("register error"), eq("Register Failed"),
+                        eq(JOptionPane.ERROR_MESSAGE)));
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), eq("code sent"), eq("Verification Code"),
+                        eq(JOptionPane.INFORMATION_MESSAGE)));
+                dialogs.verify(() -> JOptionPane.showMessageDialog(
+                        any(), eq("send failed"), eq("Send Code Failed"),
+                        eq(JOptionPane.ERROR_MESSAGE)));
+            }
+            holder[0].removeNotify();
+        });
     }
 
     private JButton findButton(final RegisterView view, final String text) {
