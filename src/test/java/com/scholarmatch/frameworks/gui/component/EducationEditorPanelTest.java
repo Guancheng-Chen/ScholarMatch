@@ -11,6 +11,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Month;
 import java.util.List;
 
@@ -101,6 +105,64 @@ class EducationEditorPanelTest {
         removeButton(panel).doClick();
 
         assertTrue(panel.getEducations().isEmpty());
+    }
+
+    @Test
+    void testRemainingValidationRendererAndRemovalBranches() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                final EducationEditorPanel panel = new EducationEditorPanel(600);
+                final Education ongoing = new Education(
+                        "Oxford", DegreeType.PHD, 1800, Month.OCTOBER, null, null);
+                panel.setEducations(List.of(ongoing));
+                assertTrue(SwingTestSupport.find(panel, JCheckBox.class, 0).isSelected());
+
+                final JComboBox<?> degreeCombo = SwingTestSupport.find(panel, JComboBox.class, 0);
+                render(degreeCombo, "plain text");
+                degreeCombo.setSelectedItem(null);
+                assertEquals(DegreeType.BACHELOR, panel.getEducations().get(0).getDegreeType());
+
+                final JComboBox<?> startMonth = SwingTestSupport.find(panel, JComboBox.class, 1);
+                startMonth.setSelectedItem(null);
+                assertTrue(panel.getEducations().isEmpty());
+
+                final Object card = cards(panel).get(0);
+                final Method formatEnum = card.getClass().getDeclaredMethod("formatEnum", Enum.class);
+                formatEnum.setAccessible(true);
+                assertEquals("", formatEnum.invoke(card, new Object[] {null}));
+
+                final JPanel cardList = cardList(panel);
+                cardList.remove(cardList.getComponentCount() - 1);
+                removeButton(panel).doClick();
+
+                final Method removeCard = EducationEditorPanel.class
+                        .getDeclaredMethod("removeCard", card.getClass());
+                removeCard.setAccessible(true);
+                cardList.add(new JPanel());
+                removeCard.invoke(panel, card);
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalStateException(ex);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Object> cards(final EducationEditorPanel panel) throws ReflectiveOperationException {
+        final Field field = EducationEditorPanel.class.getDeclaredField("cards");
+        field.setAccessible(true);
+        return (List<Object>) field.get(panel);
+    }
+
+    private JPanel cardList(final EducationEditorPanel panel) throws ReflectiveOperationException {
+        final Field field = EducationEditorPanel.class.getDeclaredField("cardList");
+        field.setAccessible(true);
+        return (JPanel) field.get(panel);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void render(final JComboBox<?> combo, final Object value) {
+        ((javax.swing.ListCellRenderer) combo.getRenderer()).getListCellRendererComponent(
+                new javax.swing.JList<>(), value, 0, false, false);
     }
 
     /**
