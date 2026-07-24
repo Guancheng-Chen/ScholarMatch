@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
@@ -37,13 +35,22 @@ public final class CenteringScrollPanel extends JPanel implements Scrollable {
         super(new GridBagLayout());
         setOpaque(false);
         add(child);
+    }
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(final ComponentEvent evt) {
-                notifyReflowable(CenteringScrollPanel.this);
-            }
-        });
+    /**
+     * Reflows descendants synchronously whenever this panel's own size actually changes,
+     * whether from an explicit setSize/setBounds call or from a layout manager (e.g. the
+     * enclosing JScrollPane's viewport) resizing this component. Doing this here — instead
+     * of via an asynchronous ComponentListener — avoids a stale-layout frame and keeps
+     * reflow ordering deterministic relative to the call that triggered the resize.
+     */
+    @Override
+    public void setBounds(final int x, final int y, final int width, final int height) {
+        final boolean sizeChanged = width != getWidth() || height != getHeight();
+        super.setBounds(x, y, width, height);
+        if (sizeChanged) {
+            notifyReflowable(this);
+        }
     }
 
     /**

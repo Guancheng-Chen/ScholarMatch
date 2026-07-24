@@ -22,19 +22,17 @@
         <jackson.version>2.16.1</jackson.version>
         <junit.version>5.10.1</junit.version>
         <checkstyle.version>10.12.5</checkstyle.version>
-        <!-- 添加了 Kordamp Ikonli 的版本号 -->
-        <ikonli.version>12.3.1</ikonli.version>
     </properties>
 
     <dependencies>
-        <!-- FlatLaf – modern flat Look and Feel for Swing -->
+        <!-- FlatLaf - modern flat Look and Feel for Swing -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
             <version>${flatlaf.version}</version>
         </dependency>
 
-        <!-- Ikonli – scalable vector icon fonts for Swing (FontAwesome pack) -->
+        <!-- Ikonli - scalable vector icon fonts for Swing (FontAwesome pack) -->
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-swing</artifactId>
@@ -46,25 +44,11 @@
             <version>${ikonli.version}</version>
         </dependency>
 
-        <!-- Jackson Databind – JSON parsing for Semantic Scholar API responses -->
+        <!-- Jackson Databind - JSON parsing for API responses -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
-        </dependency>
-
-        <!-- Kordamp Ikonli 核心库（支持 Swing） -->
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-swing</artifactId>
-            <version>${ikonli.version}</version>
-        </dependency>
-
-        <!-- Kordamp Ikonli 图标包：FontAwesome 5 -->
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-fontawesome5-pack</artifactId>
-            <version>${ikonli.version}</version>
         </dependency>
 
         <!-- JUnit 5 -->
@@ -75,10 +59,11 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Mockito (Upgraded to 5.14.0 for Java 26 support) -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.12.0</version>
+            <version>5.14.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -96,7 +81,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Exec Maven Plugin – `mvn exec:java` launches the Swing app -->
+            <!-- Exec Maven Plugin - mvn exec:java launches the Swing app -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -106,17 +91,30 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin (JUnit 5) -->
+            <!-- Maven Surefire Plugin (JUnit 5) with JVM args for Mockito, JaCoCo, and Java 21+ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <argLine>@{argLine} --add-opens java.net.http/java.net.http=ALL-UNNAMED -XX:+EnableDynamicAgentLoading</argLine>
+                    <argLine>
+                        @{argLine}
+                        -Xshare:off
+                        -XX:+EnableDynamicAgentLoading
+                        -Djdk.attach.allowAttachSelf=true
+                        -Dnet.bytebuddy.experimental=true
+                        --add-opens java.desktop/javax.swing=ALL-UNNAMED
+                        --add-opens java.desktop/java.awt=ALL-UNNAMED
+                        --add-opens java.desktop/java.awt.image=ALL-UNNAMED
+                        --add-opens java.desktop/javax.accessibility=ALL-UNNAMED
+                        --add-opens java.net.http/java.net.http=ALL-UNNAMED
+                        --add-opens java.base/java.lang=ALL-UNNAMED
+                        --add-opens java.base/java.io=ALL-UNNAMED
+                    </argLine>
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo – test coverage reports -->
+            <!-- JaCoCo - test coverage reports -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -173,7 +171,7 @@
                 </dependencies>
             </plugin>
 
-            <!-- Maven JAR Plugin – executable jar -->
+            <!-- Maven JAR Plugin - executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

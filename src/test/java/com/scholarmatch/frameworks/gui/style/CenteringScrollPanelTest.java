@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.ComponentEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,7 +35,9 @@ class CenteringScrollPanelTest {
             panel.reflowNow();
         });
 
-        assertEquals(1, child.reflowCallCount);
+        // setSize() itself already reflows synchronously (see CenteringScrollPanel#setBounds),
+        // so the explicit reflowNow() call right after it reflows a second time with the same width.
+        assertEquals(2, child.reflowCallCount);
         assertEquals(500, child.lastWidth);
     }
 
@@ -52,7 +53,7 @@ class CenteringScrollPanelTest {
             panel.reflowNow();
         });
 
-        assertEquals(1, nested.reflowCallCount);
+        assertEquals(2, nested.reflowCallCount);
         assertEquals(640, nested.lastWidth);
     }
 
@@ -67,19 +68,16 @@ class CenteringScrollPanelTest {
             panel.reflowNow();
         });
 
-        assertEquals(2, child.reflowCallCount);
+        assertEquals(4, child.reflowCallCount);
         assertEquals(300, child.lastWidth);
     }
 
     @Test
-    void testComponentAdapterReflowsAfterResize() throws Exception {
+    void testResizeReflowsAutomatically() throws Exception {
         final FakeReflowable child = onEdt(FakeReflowable::new);
         onEdt(() -> {
             final CenteringScrollPanel panel = new CenteringScrollPanel(child);
             panel.setSize(420, 200);
-            for (final var listener : panel.getComponentListeners()) {
-                listener.componentResized(new ComponentEvent(panel, ComponentEvent.COMPONENT_RESIZED));
-            }
         });
 
         assertEquals(1, child.reflowCallCount);
