@@ -159,6 +159,10 @@ public final class MyPostingsView extends JPanel {
                 this, form, "New Posting", JOptionPane.OK_CANCEL_OPTION)
                 == JOptionPane.OK_OPTION) {
             try {
+                if (title.getText().isBlank()) {
+                    show("Title is required.", true);
+                    return;
+                }
                 final Integer maximum = capacity.getText().isBlank()
                         ? null : Integer.valueOf(capacity.getText().trim());
                 if (maximum != null && maximum <= 0) {

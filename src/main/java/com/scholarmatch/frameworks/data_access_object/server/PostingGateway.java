@@ -58,7 +58,7 @@ public final class PostingGateway
         if (collaborationType != null) {
             body.put("collaborationType", collaborationType.name());
         }
-        body.put("capacity", capacity);
+        body.put("maxApplicants", capacity);
         return postingFromJson(this.http.post("/api/postings", this.http.toJson(body), true));
     }
 
@@ -140,7 +140,9 @@ public final class PostingGateway
                 ? node.get("capacity") : node.get("maxApplicants");
         final Integer capacity = capacityNode == null || capacityNode.isNull()
                 ? null : capacityNode.asInt();
-        final PostingStatus status = JsonEnumSupport.safeParseEnum(
+        final PostingStatus status = node.path("closed").asBoolean(false)
+                ? PostingStatus.CLOSED
+                : JsonEnumSupport.safeParseEnum(
                 PostingStatus.class,
                 node.has("status") ? node.get("status").asText(null) : null,
                 PostingStatus.OPEN);
