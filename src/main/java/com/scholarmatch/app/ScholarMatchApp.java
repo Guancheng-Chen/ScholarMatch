@@ -67,7 +67,11 @@ public final class ScholarMatchApp {
     }
 
     private void installTheme() {
-        try (InputStream in = getClass().getResourceAsStream("/themes/scholarmatch-light.properties")) {
+        installTheme(getClass().getResourceAsStream("/themes/scholarmatch-light.properties"));
+    }
+
+    static void installTheme(final InputStream themeProperties) {
+        try (InputStream in = themeProperties) {
             FlatLaf.setup(new FlatPropertiesLaf("ScholarMatch Light", in));
         } catch (final IOException e) {
             throw new IllegalStateException("Failed to load ScholarMatch theme", e);

@@ -81,6 +81,19 @@ class RecommendViewTest {
     }
 
     @Test
+    void testNullErrorAlsoShowsEmptyState() throws Exception {
+        final RecommendViewModel viewModel = new RecommendViewModel();
+        final RecommendView view = new RecommendView(
+                new RecommendController(mock(RecommendInputBoundary.class)),
+                new ConnectController(mock(ConnectInputBoundary.class)),
+                new DislikeController(mock(DislikeInputBoundary.class)),
+                new SkipController(mock(SkipInputBoundary.class)), viewModel);
+        SwingUtilities.invokeAndWait(() -> viewModel.errorMessageProperty().set(null));
+        assertEquals("No more recommendations right now.",
+                SwingTestSupport.find(view, JLabel.class, 0).getText());
+    }
+
+    @Test
     void testDislikeCallsDislikeControllerAndPermanentlyExcludesTheUser() {
         final DislikeInputBoundary interactor = mock(DislikeInputBoundary.class);
         final RecommendViewModel viewModel = new RecommendViewModel();
