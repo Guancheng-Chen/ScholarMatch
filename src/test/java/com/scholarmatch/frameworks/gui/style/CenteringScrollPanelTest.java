@@ -85,6 +85,39 @@ class CenteringScrollPanelTest {
     }
 
     @Test
+    void testSetBoundsReflowsWhenOnlyHeightChanges() throws Exception {
+        final FakeReflowable child = onEdt(FakeReflowable::new);
+
+        onEdt(() -> {
+            final CenteringScrollPanel panel = new CenteringScrollPanel(child);
+
+            panel.setBounds(0, 0, 400, 200);
+            child.reset();
+
+            panel.setBounds(0, 0, 400, 300);
+        });
+
+        assertEquals(1, child.reflowCallCount);
+        assertEquals(400, child.lastWidth);
+    }
+
+    @Test
+    void testSetBoundsDoesNotReflowWhenSizeDoesNotChange() throws Exception {
+        final FakeReflowable child = onEdt(FakeReflowable::new);
+
+        onEdt(() -> {
+            final CenteringScrollPanel panel = new CenteringScrollPanel(child);
+
+            panel.setBounds(0, 0, 400, 200);
+            child.reset();
+
+            panel.setBounds(10, 20, 400, 200);
+        });
+
+        assertEquals(0, child.reflowCallCount);
+    }
+
+    @Test
     void testScrollableContract() throws Exception {
         onEdt(() -> {
             final CenteringScrollPanel panel = new CenteringScrollPanel(new JPanel());
@@ -135,6 +168,11 @@ class CenteringScrollPanelTest {
         public void reflow(final int width) {
             this.reflowCallCount++;
             this.lastWidth = width;
+        }
+
+        private void reset() {
+            this.reflowCallCount = 0;
+            this.lastWidth = 0;
         }
     }
 
