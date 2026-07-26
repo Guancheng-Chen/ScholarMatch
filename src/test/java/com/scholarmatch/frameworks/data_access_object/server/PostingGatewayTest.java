@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -129,5 +130,71 @@ class PostingGatewayTest {
         final var result = this.gateway.loadApplicationsForOwnedPostings(PostingScope.ALL_ACTIVE, List.of());
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void testLoadApplicationsForOwnedPostingsParsesEmbeddedApplications() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"postingId":"p-1","applications":[%s]},
+                 {"postingId":"p-2"},
+                 {"postingId":"p-3","applications":{}}]
+                """.formatted(APPLICATION_JSON));
+
+        final Map<String, List<PostingApplication>> applications =
+                this.gateway.loadApplicationsForOwnedPostings(PostingScope.MINE, List.of());
+
+        assertEquals(1, applications.get("p-1").size());
+        assertEquals(List.of(), applications.get("p-2"));
+        assertEquals(List.of(), applications.get("p-3"));
+    }
+
+    @Test
+    void testSparsePostingUsesDefaultsAndLegacyCapacity() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"postingId":"p-1","posterUserId":"u-1","title":"Title",
+                  "maxApplicants":null,"applicantCount":0,
+                  "createdAt":"2026-07-26T12:00:00"}]
+                """);
+
+        final Posting posting = this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
+
+        assertEquals("", posting.getDescription());
+        assertEquals(ResearchField.OTHER, posting.getResearchField());
+        assertEquals(CollaborationType.INTEREST_SHARING, posting.getCollaborationType());
+        assertEquals(null, posting.getCapacity());
+        assertEquals(PostingStatus.OPEN, posting.getStatus());
+        assertEquals(0, posting.getAcceptedCount());
+    }
+
+    @Test
+    void testClosedFlagOverridesStatusAndAcceptedCountIsParsed() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"postingId":"p-1","posterUserId":"u-1","title":"Title",
+                  "maxApplicants":2,"applicantCount":1,"acceptedCount":1,
+                  "status":"OPEN","closed":true,"createdAt":"2026-07-26T12:00:00"}]
+                """);
+
+        final Posting posting = this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
+
+        assertEquals(2, posting.getCapacity());
+        assertEquals(1, posting.getAcceptedCount());
+        assertEquals(PostingStatus.CLOSED, posting.getStatus());
+    }
+
+    @Test
+    void testApplyNullMessageAndSparseApplicationUseDefaults() {
+        this.fakeServer.bodyToReturn().set("""
+                {"applicationId":"a-1","postingId":"p-1","applicantUserId":"u-2",
+                 "appliedAt":"2026-07-26T12:00:00",
+                 "postingTitle":"Posting","applicantName":"Ada"}
+                """);
+
+        final PostingApplication application = this.gateway.applyToPosting("p-1", null);
+
+        assertTrue(this.fakeServer.lastRequestBody().get().contains("\"message\":\"\""));
+        assertEquals("", application.getMessage());
+        assertEquals(PostingApplicationStatus.PENDING, application.getStatus());
+        assertEquals("Posting", application.getPostingTitle());
+        assertEquals("Ada", application.getApplicantName());
     }
 }
