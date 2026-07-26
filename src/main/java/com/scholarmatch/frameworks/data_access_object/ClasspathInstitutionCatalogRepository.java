@@ -44,6 +44,7 @@ public final class ClasspathInstitutionCatalogRepository
         this.institutionsById = load(stream);
     }
 
+    // Package-private constructor used only by tests; production loads a classpath resource.
     ClasspathInstitutionCatalogRepository(final InputStream stream) {
         this.institutionsById = load(stream);
     }
