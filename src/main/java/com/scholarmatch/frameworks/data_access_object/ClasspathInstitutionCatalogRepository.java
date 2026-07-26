@@ -36,7 +36,16 @@ public final class ClasspathInstitutionCatalogRepository
      * @param resourceName classpath resource name
      */
     public ClasspathInstitutionCatalogRepository(final String resourceName) {
-        this.institutionsById = load(resourceName);
+        final InputStream stream = ClasspathInstitutionCatalogRepository.class
+                .getClassLoader().getResourceAsStream(resourceName);
+        if (stream == null) {
+            throw new IllegalStateException("Institution catalog not found: " + resourceName);
+        }
+        this.institutionsById = load(stream);
+    }
+
+    ClasspathInstitutionCatalogRepository(final InputStream stream) {
+        this.institutionsById = load(stream);
     }
 
     @Override
@@ -53,12 +62,7 @@ public final class ClasspathInstitutionCatalogRepository
                 normalizeId(institutionId), Institution.OTHER);
     }
 
-    private Map<String, Institution> load(final String resourceName) {
-        final InputStream stream = ClasspathInstitutionCatalogRepository.class
-                .getClassLoader().getResourceAsStream(resourceName);
-        if (stream == null) {
-            throw new IllegalStateException("Institution catalog not found: " + resourceName);
-        }
+    private Map<String, Institution> load(final InputStream stream) {
         final Map<String, Institution> result = new LinkedHashMap<>();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(stream, StandardCharsets.UTF_8))) {
