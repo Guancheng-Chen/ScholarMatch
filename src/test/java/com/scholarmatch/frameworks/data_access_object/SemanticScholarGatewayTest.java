@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scholarmatch.frameworks.data_access_object.http.HttpSender;
 import com.scholarmatch.frameworks.data_access_object.http.HttpSenderResponse;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
+import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.http.HttpRequest;
+import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -147,5 +150,96 @@ class SemanticScholarGatewayTest {
         assertEquals(
                 "test-api-key",
                 requestCaptor.getValue().headers().firstValue("x-api-key").orElseThrow());
+    }
+
+    @Test
+    void missingAuthorIsReported() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, "{}"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertThrows(ResourceNotFoundException.class, () -> gateway.getAuthor("missing"));
+    }
+
+    @Test
+    void notFoundSearchReturnsEmptyResults() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(404, "{}"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertEquals(List.of(), gateway.searchAuthors("Missing Author"));
+    }
+
+    @Test
+    void mapsNullAndMissingAuthorMetrics() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, """
+                {"authorId":"1","name":"Ada","paperCount":null,"citationCount":4}
+                """));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        final var author = gateway.getAuthor("1");
+
+        assertEquals(null, author.getPaperCount());
+        assertEquals(null, author.getHIndex());
+    }
+
+    @Test
+    void mapsExplicitlyNullDoi() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, """
+                {"data":[{"title":"Paper","externalIds":{"DOI":null}}]}
+                """));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertEquals("", gateway.getAuthorPapers("1").getFirst().getDoi());
+    }
+
+    @Test
+    void mapsPresentDoi() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, """
+                {"data":[{"title":"Paper","externalIds":{"DOI":"10.1/example"}}]}
+                """));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertEquals("10.1/example", gateway.getAuthorPapers("1").getFirst().getDoi());
+    }
+
+    @Test
+    void productionConstructorCanBeCreated() {
+        assertTrue(new SemanticScholarGateway() instanceof SemanticScholarGateway);
+    }
+
+    @Test
+    void interruptedRequestIsTranslated() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenThrow(new InterruptedException("interrupted"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        try {
+            assertThrows(ExternalServiceException.class,
+                    () -> gateway.searchAuthors("Ada Lovelace"));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    void ioFailureIsTranslated() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenThrow(new IOException("offline"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertThrows(ExternalServiceException.class,
+                () -> gateway.searchAuthors("Ada Lovelace"));
     }
 }
