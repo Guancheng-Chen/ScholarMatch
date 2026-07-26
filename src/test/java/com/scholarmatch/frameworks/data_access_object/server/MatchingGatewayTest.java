@@ -79,4 +79,14 @@ class MatchingGatewayTest {
 
         assertEquals(1, matches.size());
     }
+
+    @Test
+    void testGetProfileParsesCurrentUser() {
+        this.fakeServer.bodyToReturn().set(
+                "{\"scholarId\":\"u-1\",\"firstName\":\"Ada\",\"lastName\":\"Lovelace\"}");
+
+        final User profile = this.gateway.getProfile();
+
+        assertEquals("u-1", profile.getUserId());
+    }
 }
