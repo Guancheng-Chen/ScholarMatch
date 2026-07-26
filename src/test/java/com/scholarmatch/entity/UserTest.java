@@ -69,4 +69,41 @@ class UserTest {
         );
         assertFalse(user.isProfileComplete());
     }
+
+    @Test
+    void testMutableProfileFieldsAndPublications() {
+        final User user = buildCompleteUser();
+        final Publication publication = new Publication(
+                "10.1000/example", "Example Paper", 2026, 12);
+
+        user.addPublication(publication);
+        assertTrue(user.removePublication("10.1000/example"));
+        assertFalse(user.removePublication("missing-doi"));
+
+        user.setEmailAccountType(EmailAccountType.ACADEMIC);
+        user.setEmail("new@example.edu");
+        user.setPhoneNumber("987-654-3210");
+        user.setInstitution(Institution.MIT);
+        user.setAcademicLevel(AcademicLevel.GRADUATE_STUDENT);
+        user.setResearchField(ResearchField.COMPUTER_SCIENCE);
+        user.setLookingFor(CollaborationType.CO_AUTHOR);
+        user.setCollaborationDescription("New collaboration description");
+        user.setResearchDescription("New research description");
+        user.setWeeklyAvailabilityHours(20);
+        user.setFundingStatus(FundingStatus.SELF_FUNDED);
+        user.setPasswordHash("new-hash");
+
+        assertEquals(EmailAccountType.ACADEMIC, user.getEmailAccountType());
+        assertEquals("new@example.edu", user.getEmail());
+        assertEquals("987-654-3210", user.getPhoneNumber());
+        assertEquals(Institution.MIT, user.getInstitution());
+        assertEquals(AcademicLevel.GRADUATE_STUDENT, user.getAcademicLevel());
+        assertEquals(ResearchField.COMPUTER_SCIENCE, user.getResearchField());
+        assertEquals(CollaborationType.CO_AUTHOR, user.getLookingFor());
+        assertEquals("New collaboration description", user.getCollaborationDescription());
+        assertEquals("New research description", user.getResearchDescription());
+        assertEquals(20, user.getWeeklyAvailabilityHours());
+        assertEquals(FundingStatus.SELF_FUNDED, user.getFundingStatus());
+        assertEquals("new-hash", user.getPasswordHash());
+    }
 }

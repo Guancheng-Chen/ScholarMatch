@@ -4,7 +4,9 @@ import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalo
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class InstitutionTest {
 
@@ -29,5 +31,20 @@ class InstitutionTest {
         assertEquals(
                 "Massachusetts Institute of Technology",
                 Institution.MIT.getDisplayName());
+    }
+
+    @Test
+    void testIdentityUsesInstitutionId() {
+        final Institution institution = new Institution("CUSTOM", "Custom Institution");
+        final Institution sameInstitution = new Institution("CUSTOM", "Other Display Name");
+
+        assertEquals("CUSTOM", institution.getInstitutionId());
+        assertEquals("CUSTOM", institution.name());
+        assertEquals("Custom Institution", institution.toString());
+        assertEquals(institution, sameInstitution);
+        assertEquals(institution.hashCode(), sameInstitution.hashCode());
+        assertNotEquals(institution, "CUSTOM");
+        assertThrows(NullPointerException.class,
+                () -> new Institution(null, "Missing identifier"));
     }
 }
