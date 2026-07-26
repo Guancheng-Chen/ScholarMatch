@@ -30,12 +30,16 @@ class LocalServerRepositoryMatchingTest {
     void testSeedUsersMatchImmediatelyAndCanExchangeMessages() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
-        final User seedUser = this.repository.getRecommendations().getFirst();
+        final List<User> recommendations = this.repository.getRecommendations();
+        final User seedUser = recommendations.getFirst();
+        final User otherSeedUser = recommendations.get(1);
 
         assertTrue(this.repository.connect(seedUser.getUserId()));
-        assertEquals(List.of(seedUser), this.repository.getMatches());
+        assertTrue(this.repository.connect(otherSeedUser.getUserId()));
+        assertTrue(this.repository.getMatches().containsAll(List.of(seedUser, otherSeedUser)));
 
         final Message message = this.repository.sendMessage(seedUser.getUserId(), "Hello");
+        this.repository.sendMessage(otherSeedUser.getUserId(), "Other conversation");
         assertEquals("Hello", message.getContent());
         assertEquals(List.of(message),
                 this.repository.getConversation(seedUser.getUserId()));
