@@ -384,6 +384,15 @@ class UpdateProfileInteractorTest {
         assertTrue(captureFailMessage(params.build()).contains("Education #2 (Cambridge)"));
     }
 
+    @Test
+    void testEducationErrorLabelOmitsBlankInstitution() {
+        final Params params = new Params();
+        params.educations = new ArrayList<>(List.of(
+                new Education("", DegreeType.BACHELOR, 1800, Month.SEPTEMBER, null, null)));
+
+        assertTrue(captureFailMessage(params.build()).contains("Education #1: start year"));
+    }
+
     // ----- multiple errors reported together -----
 
     @Test
@@ -402,4 +411,3 @@ class UpdateProfileInteractorTest {
         assertTrue(message.contains("At least one research interest is required."));
     }
 }
-

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +41,20 @@ class CreatePostingInteractorTest {
         new CreatePostingInteractor(dao, output).execute(input());
 
         verify(output).prepareFailView("invalid posting");
+    }
+
+    @Test
+    void testInvalidCapacityFailsBeforeCallingDao() {
+        final CreatePostingDataAccessInterface dao = mock(CreatePostingDataAccessInterface.class);
+        final CreatePostingOutputBoundary output = mock(CreatePostingOutputBoundary.class);
+        final CreatePostingInputData input = new CreatePostingInputData(
+                "Title", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 0);
+
+        new CreatePostingInteractor(dao, output).execute(input);
+
+        verify(output).prepareFailView("Team capacity must be greater than zero.");
+        verify(dao, never()).createPosting(any(), any(), any(), any(), any());
     }
 
     private CreatePostingInputData input() {
