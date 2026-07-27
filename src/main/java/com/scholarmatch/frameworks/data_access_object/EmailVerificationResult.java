@@ -1,4 +1,4 @@
-package com.scholarmatch.entity;
+package com.scholarmatch.frameworks.data_access_object;
 
 /**
  * Result from one verification-code attempt.

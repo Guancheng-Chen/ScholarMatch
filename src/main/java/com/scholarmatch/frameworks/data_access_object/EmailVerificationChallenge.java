@@ -1,4 +1,4 @@
-package com.scholarmatch.entity;
+package com.scholarmatch.frameworks.data_access_object;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -8,7 +8,8 @@ import java.util.HexFormat;
 import java.util.Locale;
 
 /**
- * Purpose-bound verification state for one normalized replacement email.
+ * Verification-code state for one normalized email, as tracked by {@link LocalServerRepository}'s
+ * offline simulation of the server's own code-expiry and attempt-limit rules.
  */
 public final class EmailVerificationChallenge {
 

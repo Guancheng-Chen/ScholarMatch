@@ -3,9 +3,6 @@ package com.scholarmatch.frameworks.data_access_object;
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.EmailAccountType;
-import com.scholarmatch.entity.EmailVerificationChallenge;
-import com.scholarmatch.entity.EmailVerificationOutcome;
-import com.scholarmatch.entity.EmailVerificationResult;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Message;
@@ -23,7 +20,6 @@ import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterfa
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.EmailChangeCodeDeliveryDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.EmailVerificationChallengeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
@@ -107,7 +103,7 @@ public final class LocalServerRepository
     private final Map<String, PostingApplication> applicationsById = new LinkedHashMap<>();
     private final CurrentUserProviderInterface session;
     private final InstitutionCatalogDataAccessInterface institutionCatalog;
-    private final EmailVerificationChallengeDataAccessInterface emailChallenges;
+    private final InMemoryEmailVerificationChallengeRepository emailChallenges;
     private final VerificationCodeGeneratorInterface codeGenerator;
     private final EmailChangeCodeDeliveryDataAccessInterface codeDelivery;
     private final AcademicEmailDomainDataAccessInterface academicEmailDomains;
@@ -139,7 +135,7 @@ public final class LocalServerRepository
     public LocalServerRepository(
             final CurrentUserProviderInterface session,
             final InstitutionCatalogDataAccessInterface institutionCatalog,
-            final EmailVerificationChallengeDataAccessInterface emailChallenges,
+            final InMemoryEmailVerificationChallengeRepository emailChallenges,
             final VerificationCodeGeneratorInterface codeGenerator,
             final EmailChangeCodeDeliveryDataAccessInterface codeDelivery,
             final AcademicEmailDomainDataAccessInterface academicEmailDomains,

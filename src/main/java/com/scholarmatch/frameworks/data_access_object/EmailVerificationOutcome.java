@@ -1,4 +1,4 @@
-package com.scholarmatch.entity;
+package com.scholarmatch.frameworks.data_access_object;
 
 /**
  * Possible outcomes from checking an email verification code.
