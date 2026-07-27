@@ -70,13 +70,14 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
         this.header.add(title, BorderLayout.CENTER);
         this.header.add(status, BorderLayout.EAST);
 
-        final String ownerName = posting.getPosterName().isBlank()
-                ? posting.getPosterUserId() : posting.getPosterName();
-        final JLabel owner = new JLabel("Posted by " + ownerName
-                + "  •  " + posting.getCreatedAt().format(DATE_FORMAT));
-        owner.setName("postingOwner");
-        owner.setForeground(Theme.FG_MUTED);
-        owner.setAlignmentX(Component.LEFT_ALIGNMENT);
+        final JLabel date = new JLabel(
+                "Posted " + posting.getCreatedAt().format(DATE_FORMAT));
+        date.setName("postingDate");
+        date.setForeground(Theme.FG_MUTED);
+        date.setAlignmentX(Component.LEFT_ALIGNMENT);
+        final PostingOwnerSummary owner = new PostingOwnerSummary(
+                posting.getPosterName(),
+                posting.isPosterAcademicEmailVerified());
 
         final JTextArea description = bodyText(posting.getDescription());
         description.setName("postingDescription");
@@ -105,11 +106,9 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
 
         add(this.header);
         add(Box.createVerticalStrut(6));
+        add(date);
+        add(Box.createVerticalStrut(5));
         add(owner);
-        if (posting.isPosterAcademicEmailVerified()) {
-            add(Box.createVerticalStrut(5));
-            add(verificationBadge());
-        }
         add(Box.createVerticalStrut(16));
         add(description);
         add(Box.createVerticalStrut(16));
@@ -151,15 +150,6 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
     private static String format(final String value) {
         final String lower = value.toLowerCase(Locale.ROOT).replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
-    }
-
-    private static JLabel verificationBadge() {
-        final JLabel badge = new JLabel("Verified university email");
-        badge.setName("academicVerificationBadge");
-        badge.setForeground(Theme.ACCENT_FG);
-        badge.setFont(badge.getFont().deriveFont(Font.BOLD));
-        badge.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return badge;
     }
 
     @FunctionalInterface
