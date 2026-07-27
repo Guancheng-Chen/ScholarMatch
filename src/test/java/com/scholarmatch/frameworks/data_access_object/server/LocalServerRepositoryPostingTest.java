@@ -257,8 +257,7 @@ class LocalServerRepositoryPostingTest {
         session.setCurrentUserId(applicant.userId());
         repository.applyToPosting(posting.getPostingId(), "message");
         final String seedId = repository.getRecommendations().getFirst().getUserId();
-        repository.connect(seedId);
-        repository.sendMessage(seedId, "Hello");
+        assertFalse(repository.connect(seedId));
         repository.dislike(seedId);
 
         session.setCurrentUserId(poster.userId());

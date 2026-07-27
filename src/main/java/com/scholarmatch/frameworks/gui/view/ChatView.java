@@ -203,6 +203,10 @@ public final class ChatView extends JPanel {
     }
 
     private void rebuildMatchList() {
+        if (this.selectedPartner != null && this.loadMatchesViewModel.getMatchedUsers().stream()
+                .noneMatch(match -> match.getUserId().equals(this.selectedPartner.getUserId()))) {
+            clearConversationSelection();
+        }
         this.matchList.removeAll();
         for (final UserData match : this.loadMatchesViewModel.getMatchedUsers()) {
             this.matchList.add(buildMatchRow(match));
@@ -228,6 +232,15 @@ public final class ChatView extends JPanel {
         this.messageField.setEnabled(true);
         this.sendButton.setEnabled(true);
         this.loadMessageController.loadMessages(partner.getUserId());
+    }
+
+    private void clearConversationSelection() {
+        this.selectedPartner = null;
+        this.conversationTitle.setText("Select a match to start chatting");
+        this.messageField.setText("");
+        this.messageField.setEnabled(false);
+        this.sendButton.setEnabled(false);
+        this.chatViewModel.getMessages().clear();
     }
 
     private void sendCurrentMessage() {

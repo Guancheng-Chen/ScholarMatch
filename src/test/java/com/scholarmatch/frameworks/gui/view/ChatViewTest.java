@@ -23,10 +23,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class ChatViewTest {
 
@@ -72,6 +75,37 @@ class ChatViewTest {
         verify(loadMatches).execute();
         verify(loadMessages, atLeastOnce()).execute(any());
         verify(send).execute(any());
+    }
+
+    @Test
+    void testPendingConnectionCannotRemainSelected() throws Exception {
+        final SendMessageInputBoundary send = mock(SendMessageInputBoundary.class);
+        final LoadMessageInputBoundary loadMessages = mock(LoadMessageInputBoundary.class);
+        final LoadMatchesInputBoundary loadMatches = mock(LoadMatchesInputBoundary.class);
+        final ChatViewModel chatVm = new ChatViewModel();
+        final LoadMatchesViewModel matchesVm = new LoadMatchesViewModel();
+        final CurrentUserProvider currentUser = new CurrentUserProvider();
+        currentUser.setCurrentUserId("me");
+        SwingUtilities.invokeAndWait(() -> {
+            final ChatView view = new ChatView(
+                    new SendMessageController(send), new LoadMessageController(loadMessages),
+                    new LoadMatchesController(loadMatches), chatVm, matchesVm, currentUser);
+            matchesVm.getMatchedUsers().setAll(List.of(user("partner", "Ada", "Lovelace")));
+            button(view, "Ada Lovelace").doClick();
+
+            final JButton sendButton = button(view, "Send");
+            final JTextField message = SwingTestSupport.find(view, JTextField.class, 0);
+            assertTrue(sendButton.isEnabled());
+            assertTrue(message.isEnabled());
+
+            matchesVm.getMatchedUsers().clear();
+            assertFalse(sendButton.isEnabled());
+            assertFalse(message.isEnabled());
+            message.setText("blocked");
+            sendButton.doClick();
+            view.removeNotify();
+        });
+        verifyNoInteractions(send);
     }
 
     private static JButton button(final ChatView view, final String text) {
