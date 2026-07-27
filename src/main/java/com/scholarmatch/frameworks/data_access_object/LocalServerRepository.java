@@ -27,7 +27,6 @@ import com.scholarmatch.usecase.data_access_interface.EmailVerificationChallenge
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.LoadPublicProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoginDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RecommendDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterface;
@@ -84,7 +83,6 @@ public final class LocalServerRepository
         DislikeDataAccessInterface,
         LoadMatchesDataAccessInterface,
         LoadProfileDataAccessInterface,
-        LoadPublicProfileDataAccessInterface,
         UpdateProfileDataAccessInterface,
         RequestEmailChangeVerificationDataAccessInterface,
         ChangeEmailDataAccessInterface,
@@ -323,15 +321,6 @@ public final class LocalServerRepository
         return this.applicationsById.values().stream()
                 .filter(application -> application.getApplicantUserId().equals(currentId))
                 .toList();
-    }
-
-    @Override
-    public synchronized User getPublicProfile(final String userId) {
-        final User user = this.usersById.get(userId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Public profile not found");
-        }
-        return user;
     }
 
     private PostingApplication reviewApplication(
