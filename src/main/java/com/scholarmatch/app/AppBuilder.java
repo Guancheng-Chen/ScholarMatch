@@ -11,8 +11,8 @@ import com.scholarmatch.frameworks.data_access_object.server.ProfileGateway;
 import com.scholarmatch.frameworks.data_access_object.SemanticScholarGateway;
 import com.scholarmatch.frameworks.data_access_object.server.ServerHttpClient;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
-import com.scholarmatch.frameworks.data_access_object.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.InMemoryEmailVerificationChallengeRepository;
 import com.scholarmatch.frameworks.data_access_object.ResendEmailChangeCodeSender;
 import com.scholarmatch.frameworks.data_access_object.SecureVerificationCodeGenerator;
@@ -41,6 +41,9 @@ import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
 import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
 import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
+import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
+import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
 import com.scholarmatch.interface_adapter.presenter.DeleteAccountPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMatchesPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMessagePresenter;
@@ -63,6 +66,7 @@ import com.scholarmatch.interface_adapter.presenter.ApplyToPostingPresenter;
 import com.scholarmatch.interface_adapter.presenter.AcceptApplicationPresenter;
 import com.scholarmatch.interface_adapter.presenter.DeclineApplicationPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMyApplicationsPresenter;
+import com.scholarmatch.interface_adapter.presenter.AccountSettingsPresenter;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
@@ -75,6 +79,7 @@ import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
 import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 import com.scholarmatch.usecase.data_access_interface.ChangeEmailDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.ChangePasswordDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
@@ -98,6 +103,8 @@ import com.scholarmatch.usecase.data_access_interface.DeclineApplicationDataAcce
 import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
+import com.scholarmatch.usecase.change_email.ChangeEmailInteractor;
+import com.scholarmatch.usecase.change_password.ChangePasswordInteractor;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInteractor;
 import com.scholarmatch.usecase.load_profile.LoadProfileInteractor;
 import com.scholarmatch.usecase.login.LoginInteractor;
@@ -120,13 +127,14 @@ import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInteractor;
 import com.scholarmatch.usecase.accept_application.AcceptApplicationInteractor;
 import com.scholarmatch.usecase.decline_application.DeclineApplicationInteractor;
 import com.scholarmatch.usecase.load_my_applications.LoadMyApplicationsInteractor;
+import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationInteractor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Clock;
 import java.time.Duration;
+import java.time.Clock;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -208,6 +216,7 @@ public final class AppBuilder {
     private OpportunitiesViewModel opportunitiesViewModel;
     private MyPostingsViewModel myPostingsViewModel;
     private MyApplicationsViewModel myApplicationsViewModel;
+    private AccountSettingsViewModel accountSettingsViewModel;
 
     // ── Presenters (layer 3) ─────────────────────────────────────────────────
     private LoginPresenter loginPresenter;
@@ -233,6 +242,7 @@ public final class AppBuilder {
     private AcceptApplicationPresenter acceptApplicationPresenter;
     private DeclineApplicationPresenter declineApplicationPresenter;
     private LoadMyApplicationsPresenter loadMyApplicationsPresenter;
+    private AccountSettingsPresenter accountSettingsPresenter;
 
     // ── Interactors (layer 2) ────────────────────────────────────────────────
     private LoginInteractor loginInteractor;
@@ -258,6 +268,9 @@ public final class AppBuilder {
     private AcceptApplicationInteractor acceptApplicationInteractor;
     private DeclineApplicationInteractor declineApplicationInteractor;
     private LoadMyApplicationsInteractor loadMyApplicationsInteractor;
+    private RequestEmailChangeVerificationInteractor requestEmailChangeInteractor;
+    private ChangeEmailInteractor changeEmailInteractor;
+    private ChangePasswordInteractor changePasswordInteractor;
 
     // ── Controllers (layer 3) ────────────────────────────────────────────────
     private LoginController loginController;
@@ -283,6 +296,9 @@ public final class AppBuilder {
     private AcceptApplicationController acceptApplicationController;
     private DeclineApplicationController declineApplicationController;
     private LoadMyApplicationsController loadMyApplicationsController;
+    private RequestEmailChangeVerificationController requestEmailChangeController;
+    private ChangeEmailController changeEmailController;
+    private ChangePasswordController changePasswordController;
 
     private boolean controllersAdded;
 
@@ -392,6 +408,7 @@ public final class AppBuilder {
         this.opportunitiesViewModel = new OpportunitiesViewModel();
         this.myPostingsViewModel = new MyPostingsViewModel();
         this.myApplicationsViewModel = new MyApplicationsViewModel();
+        this.accountSettingsViewModel = new AccountSettingsViewModel();
         return this;
     }
 
@@ -428,6 +445,8 @@ public final class AppBuilder {
         this.acceptApplicationPresenter = new AcceptApplicationPresenter(this.myPostingsViewModel);
         this.declineApplicationPresenter = new DeclineApplicationPresenter(this.myPostingsViewModel);
         this.loadMyApplicationsPresenter = new LoadMyApplicationsPresenter(this.myApplicationsViewModel);
+        this.accountSettingsPresenter = new AccountSettingsPresenter(
+                this.accountSettingsViewModel, this.updateProfileViewModel);
         return this;
     }
 
@@ -481,6 +500,14 @@ public final class AppBuilder {
                 this.declineApplicationDataAccessObject, this.declineApplicationPresenter);
         this.loadMyApplicationsInteractor = new LoadMyApplicationsInteractor(
                 this.loadMyApplicationsDataAccessObject, this.loadMyApplicationsPresenter);
+        this.requestEmailChangeInteractor =
+                new RequestEmailChangeVerificationInteractor(
+                        this.requestEmailChangeDataAccessObject,
+                        this.accountSettingsPresenter);
+        this.changeEmailInteractor = new ChangeEmailInteractor(
+                this.changeEmailDataAccessObject, this.accountSettingsPresenter);
+        this.changePasswordInteractor = new ChangePasswordInteractor(
+                this.changePasswordDataAccessObject, this.accountSettingsPresenter);
         return this;
     }
 
@@ -518,6 +545,13 @@ public final class AppBuilder {
         this.acceptApplicationController = new AcceptApplicationController(this.acceptApplicationInteractor);
         this.declineApplicationController = new DeclineApplicationController(this.declineApplicationInteractor);
         this.loadMyApplicationsController = new LoadMyApplicationsController(this.loadMyApplicationsInteractor);
+        this.requestEmailChangeController =
+                new RequestEmailChangeVerificationController(
+                        this.requestEmailChangeInteractor);
+        this.changeEmailController =
+                new ChangeEmailController(this.changeEmailInteractor);
+        this.changePasswordController =
+                new ChangePasswordController(this.changePasswordInteractor);
         this.controllersAdded = true;
         return this;
     }
@@ -542,6 +576,8 @@ public final class AppBuilder {
                 this.loadMatchesViewModel, this.loadMatchesController,
                 this.sendMessageController, this.loadMessageController, this.chatViewModel,
                 this.updateProfileController, this.loadProfileController, this.updateProfileViewModel,
+                this.requestEmailChangeController, this.changeEmailController,
+                this.changePasswordController, this.accountSettingsViewModel,
                 this.createPostingController,
                 this.closePostingController,
                 this.opportunitiesLoadPostingsController, this.myPostingsLoadPostingsController,

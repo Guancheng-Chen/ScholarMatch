@@ -106,7 +106,7 @@ class UpdateProfileInteractorTest {
     @Test
     void testValidationFailurePreventsDataAccessCall() {
         final Params params = new Params();
-        params.email = "";
+        params.phoneNumber = "";
 
         interactor.execute(params.build());
 
@@ -126,19 +126,25 @@ class UpdateProfileInteractorTest {
     // ----- required-field validation -----
 
     @Test
-    void testFailsWhenEmailBlank() {
+    void testDoesNotValidateBlankAccountEmail() {
         final Params params = new Params();
         params.email = "";
+        when(dataAccessObject.updateProfile(any())).thenReturn(updatedUser());
 
-        assertTrue(captureFailMessage(params.build()).contains("Email is required."));
+        interactor.execute(params.build());
+
+        verify(dataAccessObject).updateProfile(any());
     }
 
     @Test
-    void testFailsWhenEmailFormatInvalid() {
+    void testDoesNotValidateAccountEmailFormat() {
         final Params params = new Params();
         params.email = "not-an-email";
+        when(dataAccessObject.updateProfile(any())).thenReturn(updatedUser());
 
-        assertTrue(captureFailMessage(params.build()).contains("Email format is invalid"));
+        interactor.execute(params.build());
+
+        verify(dataAccessObject).updateProfile(any());
     }
 
     @Test
@@ -405,7 +411,6 @@ class UpdateProfileInteractorTest {
 
         final String message = captureFailMessage(params.build());
 
-        assertTrue(message.contains("Email is required."));
         assertTrue(message.contains("Phone number is required."));
         assertTrue(message.contains("h-index is required."));
         assertTrue(message.contains("At least one research interest is required."));

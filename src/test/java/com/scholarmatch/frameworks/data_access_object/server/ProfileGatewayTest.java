@@ -163,7 +163,7 @@ class ProfileGatewayTest {
 
         assertEquals("u-1", result.getUserId());
         assertEquals("PUT", this.fakeServer.lastMethod().get());
-        assertTrue(this.fakeServer.lastRequestBody().get().contains("new@example.com"));
+        assertFalse(this.fakeServer.lastRequestBody().get().contains("new@example.com"));
         assertTrue(this.fakeServer.lastRequestBody().get().contains("Paper X"));
         assertTrue(this.fakeServer.lastRequestBody().get().contains("MIT"));
         assertTrue(this.fakeServer.lastRequestBody().get().contains("PHD"));

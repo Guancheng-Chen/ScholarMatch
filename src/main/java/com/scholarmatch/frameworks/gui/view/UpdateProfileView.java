@@ -90,6 +90,7 @@ public final class UpdateProfileView extends JPanel {
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         final JTextField emailField = field("Email");
+        emailField.setEditable(false);
         final JLabel emailAccountTypeLabel = new JLabel("Regular email");
         emailAccountTypeLabel.setName("emailAccountType");
         emailAccountTypeLabel.setForeground(Theme.FG_MUTED);

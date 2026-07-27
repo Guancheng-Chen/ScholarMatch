@@ -160,6 +160,14 @@ class MainViewTest {
                 new UpdateProfileController(mock(UpdateProfileInputBoundary.class)),
                 new LoadProfileController(mock(LoadProfileInputBoundary.class)),
                 this.lastProfileViewModel,
+                new com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController(
+                        mock(com.scholarmatch.usecase.request_email_change_verification
+                                .RequestEmailChangeVerificationInputBoundary.class)),
+                new com.scholarmatch.interface_adapter.controller.ChangeEmailController(
+                        mock(com.scholarmatch.usecase.change_email.ChangeEmailInputBoundary.class)),
+                new com.scholarmatch.interface_adapter.controller.ChangePasswordController(
+                        mock(com.scholarmatch.usecase.change_password.ChangePasswordInputBoundary.class)),
+                new com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel(),
                 new CreatePostingController(mock(CreatePostingInputBoundary.class)),
                 new ClosePostingController(mock(ClosePostingInputBoundary.class)),
                 new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),

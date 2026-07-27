@@ -37,9 +37,6 @@ public final class ProfileGateway
     @Override
     public User updateProfile(final UpdateProfileInputData data) {
         final Map<String, Object> body = new HashMap<>();
-        if (data.getEmail() != null) {
-            body.put("email", data.getEmail());
-        }
         if (data.getInstitution() != null) {
             body.put("institution", data.getInstitution());
         }

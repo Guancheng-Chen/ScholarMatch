@@ -24,6 +24,9 @@ import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
 import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
 import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
+import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
+import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
@@ -36,6 +39,7 @@ import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
 import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
@@ -75,6 +79,10 @@ public final class MainView extends JPanel {
     private final UpdateProfileController updateProfileController;
     private final LoadProfileController loadProfileController;
     private final UpdateProfileViewModel updateProfileViewModel;
+    private final RequestEmailChangeVerificationController requestEmailChangeController;
+    private final ChangeEmailController changeEmailController;
+    private final ChangePasswordController changePasswordController;
+    private final AccountSettingsViewModel accountSettingsViewModel;
     private final CurrentUserProvider currentUserProvider;
     private final CreatePostingController createPostingController;
     private final ClosePostingController closePostingController;
@@ -142,6 +150,10 @@ public final class MainView extends JPanel {
             final UpdateProfileController updateProfileController,
             final LoadProfileController loadProfileController,
             final UpdateProfileViewModel updateProfileViewModel,
+            final RequestEmailChangeVerificationController requestEmailChangeController,
+            final ChangeEmailController changeEmailController,
+            final ChangePasswordController changePasswordController,
+            final AccountSettingsViewModel accountSettingsViewModel,
             final CreatePostingController createPostingController,
             final ClosePostingController closePostingController,
             final LoadPostingsController opportunitiesLoadPostingsController,
@@ -181,6 +193,10 @@ public final class MainView extends JPanel {
         this.updateProfileController = updateProfileController;
         this.loadProfileController = loadProfileController;
         this.updateProfileViewModel = updateProfileViewModel;
+        this.requestEmailChangeController = requestEmailChangeController;
+        this.changeEmailController = changeEmailController;
+        this.changePasswordController = changePasswordController;
+        this.accountSettingsViewModel = accountSettingsViewModel;
         this.createPostingController = createPostingController;
         this.closePostingController = closePostingController;
         this.opportunitiesLoadPostingsController = opportunitiesLoadPostingsController;
@@ -219,6 +235,8 @@ public final class MainView extends JPanel {
                         loadMatchesViewModel, loadMatchesController,
                         sendMessageController, loadMessageController, chatViewModel,
                         updateProfileController, loadProfileController, updateProfileViewModel,
+                        requestEmailChangeController, changeEmailController,
+                        changePasswordController, accountSettingsViewModel,
                         paperLookupController, paperLookupViewModel,
                         logoutController, logoutViewModel,
                         deleteAccountController, deleteAccountViewModel,

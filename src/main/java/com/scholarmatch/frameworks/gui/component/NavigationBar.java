@@ -111,6 +111,7 @@ public final class NavigationBar extends JPanel {
         final JToggleButton myPostingsButton = navToggle("My Postings", FontAwesomeSolid.CLIPBOARD_LIST);
         final JToggleButton myApplicationsButton = navToggle("My Applications", FontAwesomeSolid.INBOX);
         final JToggleButton profileButton = navToggle("Profile", FontAwesomeSolid.USER_CIRCLE);
+        final JToggleButton settingsButton = navToggle("Account Settings", FontAwesomeSolid.COG);
 
         for (final JToggleButton button
             : new JToggleButton[] {recommendButton, matchedButton, chatButton, opportunitiesButton,
@@ -126,6 +127,9 @@ public final class NavigationBar extends JPanel {
         myPostingsButton.addActionListener(evt -> listener.onSelected("my-postings"));
         myApplicationsButton.addActionListener(evt -> listener.onSelected("my-applications"));
         profileButton.addActionListener(evt -> listener.onSelected("profile"));
+        settingsButton.addActionListener(evt -> listener.onSelected("settings"));
+        navGroup.add(settingsButton);
+        settingsButton.putClientProperty(FlatClientProperties.STYLE, TOGGLE_STYLE);
 
         final JButton deleteAccountButton = new JButton(
             "Delete Account", Icons.of(FontAwesomeSolid.TRASH_ALT, TRAILING_ICON_SIZE, Theme.FG_EMPHASIS));
@@ -167,6 +171,8 @@ public final class NavigationBar extends JPanel {
         add(Box.createVerticalStrut(4));
         add(profileButton);
         add(Box.createVerticalGlue());
+        add(settingsButton);
+        add(Box.createVerticalStrut(8));
         add(logoutButton);
         add(Box.createVerticalStrut(8));
         add(deleteAccountButton);
