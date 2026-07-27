@@ -70,6 +70,19 @@ class RegisterInteractorTest {
     }
 
     @Test
+    void testBlankEmailFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "", "supersecret", "123456"));
+
+        verify(output).prepareFailView("Email is required.");
+        verify(dao, never()).register(any());
+    }
+
+    @Test
     void testPasswordTooShortFailsValidation() {
         final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
         final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);

@@ -13,6 +13,7 @@ import com.scholarmatch.frameworks.data_access_object.LocalServerRepository;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.load_postings.PostingScope;
+import com.scholarmatch.usecase.register.RegisterAccountData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -136,5 +137,168 @@ class LocalServerRepositoryPostingTest {
 
         assertTrue(repository.loadApplicationsForOwnedPostings(
                 PostingScope.ALL_ACTIVE, postings).isEmpty());
+    }
+
+    @Test
+    void testPostingCreationAndCloseValidation() {
+        session.setCurrentUserId("poster-1");
+        assertThrows(InvalidRequestException.class, () -> repository.createPosting(
+                "Project", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 0));
+        assertThrows(InvalidRequestException.class,
+                () -> repository.closePosting("missing"));
+
+        final Posting posting = repository.createPosting(
+                "Project", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+        repository.closePosting(posting.getPostingId());
+
+        assertThrows(InvalidRequestException.class,
+                () -> repository.closePosting(posting.getPostingId()));
+    }
+
+    @Test
+    void testPostingScopesAndOwnedApplicationFiltering() {
+        session.setCurrentUserId("poster-1");
+        final Posting mine = repository.createPosting(
+                "Mine", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+        session.setCurrentUserId("poster-2");
+        final Posting other = repository.createPosting(
+                "Other", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+
+        session.setCurrentUserId("poster-1");
+        assertTrue(repository.loadPostings(PostingScope.MINE).contains(mine));
+        assertFalse(repository.loadPostings(PostingScope.MINE).contains(other));
+        assertTrue(repository.loadPostings(PostingScope.ALL_ACTIVE).contains(other));
+        assertFalse(repository.loadPostings(PostingScope.ALL_ACTIVE).contains(mine));
+        assertEquals(1, repository.loadApplicationsForOwnedPostings(
+                PostingScope.MINE, List.of(mine, other)).size());
+
+        session.setCurrentUserId("poster-2");
+        repository.closePosting(other.getPostingId());
+        session.setCurrentUserId("poster-1");
+        assertFalse(repository.loadPostings(PostingScope.ALL_ACTIVE).contains(other));
+    }
+
+    @Test
+    void testApplicationValidationAndReviewStates() {
+        session.setCurrentUserId("poster-1");
+        final Posting posting = repository.createPosting(
+                "Project", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+        assertThrows(InvalidRequestException.class,
+                () -> repository.applyToPosting("missing", "message"));
+
+        session.setCurrentUserId("applicant-1");
+        final PostingApplication application =
+                repository.applyToPosting(posting.getPostingId(), null);
+        assertEquals("", application.getMessage());
+        assertEquals(1, repository.getMyApplications().size());
+        assertThrows(InvalidRequestException.class,
+                () -> repository.acceptApplication(application.getApplicationId()));
+
+        session.setCurrentUserId("poster-1");
+        assertThrows(InvalidRequestException.class,
+                () -> repository.acceptApplication("missing"));
+        repository.declineApplication(application.getApplicationId());
+        assertThrows(InvalidRequestException.class,
+                () -> repository.declineApplication(application.getApplicationId()));
+    }
+
+    @Test
+    void testClosedAndFullPostingsRejectAcceptance() {
+        session.setCurrentUserId("poster-1");
+        final Posting closed = repository.createPosting(
+                "Closed", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+        session.setCurrentUserId("applicant-1");
+        final PostingApplication closedApplication =
+                repository.applyToPosting(closed.getPostingId(), "message");
+        session.setCurrentUserId("poster-1");
+        repository.closePosting(closed.getPostingId());
+        session.setCurrentUserId("applicant-2");
+        final InvalidRequestException applyClosedError = assertThrows(
+                InvalidRequestException.class,
+                () -> repository.applyToPosting(closed.getPostingId(), "late"));
+        assertTrue(applyClosedError.getMessage().contains("closed"));
+        session.setCurrentUserId("poster-1");
+        final InvalidRequestException closedError = assertThrows(
+                InvalidRequestException.class,
+                () -> repository.acceptApplication(closedApplication.getApplicationId()));
+        assertTrue(closedError.getMessage().contains("closed"));
+
+        final Posting full = repository.createPosting(
+                "Full", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 1);
+        session.setCurrentUserId("applicant-1");
+        final PostingApplication accepted = repository.applyToPosting(full.getPostingId(), "first");
+        session.setCurrentUserId("applicant-2");
+        final PostingApplication pending = repository.applyToPosting(full.getPostingId(), "second");
+        session.setCurrentUserId("poster-1");
+        repository.acceptApplication(accepted.getApplicationId());
+
+        final InvalidRequestException fullError = assertThrows(
+                InvalidRequestException.class,
+                () -> repository.acceptApplication(pending.getApplicationId()));
+        assertTrue(fullError.getMessage().contains("full"));
+    }
+
+    @Test
+    void testDeletingApplicantAndPosterCleansRelatedData() {
+        final AuthResult poster = register("Poster", "poster@example.com");
+        final AuthResult applicant = register("Applicant", "applicant@example.com");
+        session.setCurrentUserId(poster.userId());
+        final Posting posting = repository.createPosting(
+                "Project", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+
+        session.setCurrentUserId(applicant.userId());
+        repository.applyToPosting(posting.getPostingId(), "message");
+        final String seedId = repository.getRecommendations().getFirst().getUserId();
+        repository.connect(seedId);
+        repository.sendMessage(seedId, "Hello");
+        repository.dislike(seedId);
+
+        session.setCurrentUserId(poster.userId());
+        assertFalse(repository.connect(applicant.userId()));
+        session.setCurrentUserId(applicant.userId());
+        assertTrue(repository.connect(poster.userId()));
+        session.setCurrentUserId(poster.userId());
+        repository.sendMessage(applicant.userId(), "Received by applicant");
+
+        final AuthResult unrelatedPoster = register("Unrelated", "unrelated@example.com");
+        final AuthResult unrelatedApplicant = register("Third", "third@example.com");
+        session.setCurrentUserId(unrelatedPoster.userId());
+        final Posting unrelatedPosting = repository.createPosting(
+                "Unrelated", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 2);
+        session.setCurrentUserId(unrelatedApplicant.userId());
+        repository.applyToPosting(unrelatedPosting.getPostingId(), "unrelated application");
+        assertFalse(repository.connect(unrelatedPoster.userId()));
+        session.setCurrentUserId(unrelatedPoster.userId());
+        assertTrue(repository.connect(unrelatedApplicant.userId()));
+        repository.sendMessage(unrelatedApplicant.userId(), "Unrelated message");
+
+        session.setCurrentUserId(applicant.userId());
+        repository.deleteAccount();
+
+        session.setCurrentUserId(poster.userId());
+        assertEquals(0, posting.getApplicantCount());
+        assertTrue(repository.loadApplicationsForOwnedPostings(
+                PostingScope.MINE, List.of(posting)).get(posting.getPostingId()).isEmpty());
+
+        final AuthResult secondApplicant = register("Second", "second@example.com");
+        session.setCurrentUserId(secondApplicant.userId());
+        repository.applyToPosting(posting.getPostingId(), "message");
+        session.setCurrentUserId(poster.userId());
+        repository.deleteAccount();
+        assertTrue(repository.loadPostings(PostingScope.MINE).isEmpty());
+    }
+
+    private AuthResult register(final String firstName, final String email) {
+        return repository.register(new RegisterAccountData(
+                firstName, "User", email, "password", "123456"));
     }
 }

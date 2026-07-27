@@ -13,7 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.net.http.HttpTimeoutException;
 import java.net.http.HttpRequest;
+import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -256,6 +261,32 @@ class ServerHttpClientTest {
     }
 
     @Test
+    void testNetworkFailureDescriptionsCoverTransportTypes() throws Exception {
+        final Map<Exception, String> expectedMessages = Map.of(
+                new UnknownHostException("unknown"), "Could not reach the server",
+                new HttpTimeoutException("timeout"), "request timed out",
+                new SocketTimeoutException("timeout"), "request timed out",
+                new InterruptedException("interrupted"), "request was interrupted",
+                new IOException("io"), "network error occurred");
+
+        for (final Map.Entry<Exception, String> entry : expectedMessages.entrySet()) {
+            doThrow(entry.getKey()).when(this.httpSender).send(any());
+
+            final ExternalServiceException thrown = assertThrows(
+                    ExternalServiceException.class, () -> this.http.get("/api/profile"));
+            assertTrue(thrown.getMessage().contains(entry.getValue()));
+        }
+    }
+
+    @Test
+    void testToJsonTranslatesSerializationFailure() {
+        final ExternalServiceException thrown = assertThrows(
+                ExternalServiceException.class, () -> this.http.toJson(new BrokenJson()));
+
+        assertEquals("JSON serialization failed", thrown.getMessage());
+    }
+
+    @Test
     void testToJsonSerializesObject() {
         assertEquals("{\"a\":\"b\"}", this.http.toJson(Map.of("a", "b")));
     }
@@ -264,5 +295,11 @@ class ServerHttpClientTest {
         final ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
         verify(this.httpSender).send(captor.capture());
         return captor.getValue();
+    }
+
+    private static final class BrokenJson {
+        public String getValue() {
+            throw new IllegalStateException("cannot serialize");
+        }
     }
 }

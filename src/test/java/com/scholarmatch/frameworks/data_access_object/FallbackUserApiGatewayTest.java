@@ -87,6 +87,22 @@ class FallbackUserApiGatewayTest {
     }
 
     @Test
+    void getAuthorReturnsPrimaryResultWithoutCallingFallback() {
+        final AuthorCandidateDataAccessInterface primaryResult = authorCandidate("primary");
+        final RecordingGateway primary = new RecordingGateway();
+        final RecordingGateway fallback = new RecordingGateway();
+        primary.authorResult = List.of(primaryResult);
+        fallback.authorResult = List.of(authorCandidate("fallback"));
+        final FallbackUserApiGateway gateway = new FallbackUserApiGateway(primary, fallback);
+
+        final AuthorCandidateDataAccessInterface actual = gateway.getAuthor("1695689");
+
+        assertSame(primaryResult, actual);
+        assertEquals(1, primary.getAuthorCallCount);
+        assertEquals(0, fallback.getAuthorCallCount);
+    }
+
+    @Test
     void getAuthorPapersReturnsPrimaryResultWithoutCallingFallback() {
         final List<Publication> primaryResult = List.of(publication("primary"));
         final RecordingGateway primary = new RecordingGateway();

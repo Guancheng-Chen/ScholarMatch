@@ -124,6 +124,24 @@ class ProfileGatewayTest {
     }
 
     @Test
+    void testGetProfileMapsAcademicEmailAndSparseNestedObjects() {
+        this.fakeServer.bodyToReturn().set("""
+            {"scholarId": "u-1", "firstName": "Ada", "lastName": "Lovelace",
+             "academicEmailVerified": true,
+             "papers": [{}, {"doi": "10.1/x"}, {"title": "Paper"}],
+             "educations": [{}, {"degree": "PHD"}, {"school": "MIT"}]}
+            """);
+
+        final User user = this.gateway.getProfile();
+
+        assertEquals(EmailAccountType.ACADEMIC, user.getEmailAccountType());
+        assertEquals("", user.getPublications().getFirst().getDoi());
+        assertEquals("", user.getPublications().getFirst().getTitle());
+        assertEquals("", user.getEducations().getFirst().getInstitution());
+        assertEquals(DegreeType.BACHELOR, user.getEducations().getFirst().getDegreeType());
+    }
+
+    @Test
     void testGetProfileThrowsResourceNotFoundOn404WithErrorField() {
         this.fakeServer.statusToReturn().set(404);
         this.fakeServer.bodyToReturn().set("{\"error\": \"Profile not found\"}");

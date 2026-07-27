@@ -4,6 +4,7 @@ import com.scholarmatch.entity.Publication;
 import com.scholarmatch.frameworks.data_access_object.AuthorCandidateDto;
 import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
+import com.scholarmatch.usecase.exception.InvalidRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -112,10 +113,44 @@ class PaperLookupInteractorTest {
         assertEquals("Select an author from the current search results.", this.presenter.errorMessage);
     }
 
+    @Test
+    void presentsAuthorSearchFailure() {
+        this.gateway.searchFailure = new InvalidRequestException("search unavailable");
+
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Ada Lovelace"));
+
+        assertEquals("search unavailable", this.presenter.errorMessage);
+    }
+
+    @Test
+    void presentsPaperImportFailure() {
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Zhijie Yuan"));
+        this.gateway.paperFailure = new InvalidRequestException("papers unavailable");
+
+        this.interactor.selectAuthor(new SelectAuthorInputData("2112339906"));
+
+        assertEquals("papers unavailable", this.presenter.errorMessage);
+    }
+
+    @Test
+    void treatsMissingCitationCountAsZeroWhenRankingExactNames() {
+        this.gateway.authorCandidates = List.of(
+                new AuthorCandidateDto("exact-low", "Ada Lovelace", List.of(), 1, 1, null),
+                new AuthorCandidateDto("different", "A. Lovelace", List.of(), 1, 1, 100),
+                new AuthorCandidateDto("exact-high", "Lovelace Ada", List.of(), 1, 1, 10));
+
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Ada Lovelace"));
+
+        assertEquals(List.of("exact-high", "exact-low", "different"),
+                this.presenter.candidates.stream().map(AuthorCandidateData::getAuthorId).toList());
+    }
+
     private static final class FakeGateway implements UserAPIGatewayInterface {
 
         private String lastQuery;
         private String lastAuthorId;
+        private InvalidRequestException searchFailure;
+        private InvalidRequestException paperFailure;
         private List<AuthorCandidateDataAccessInterface> authorCandidates = List.of(new AuthorCandidateDto(
                 "2112339906",
                 "Zhijie Yuan",
@@ -126,6 +161,9 @@ class PaperLookupInteractorTest {
 
         @Override
         public List<AuthorCandidateDataAccessInterface> searchAuthors(final String authorName) {
+            if (this.searchFailure != null) {
+                throw this.searchFailure;
+            }
             this.lastQuery = authorName;
             return this.authorCandidates;
         }
@@ -144,6 +182,9 @@ class PaperLookupInteractorTest {
 
         @Override
         public List<Publication> getAuthorPapers(final String authorId) {
+            if (this.paperFailure != null) {
+                throw this.paperFailure;
+            }
             return List.of(new Publication(
                     "10.0000/verification",
                     "A Verification Paper",
