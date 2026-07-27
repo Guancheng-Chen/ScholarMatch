@@ -1,16 +1,20 @@
 package com.scholarmatch.interface_adapter.presenter;
 
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
+import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
 import com.scholarmatch.interface_adapter.view_model.LogoutViewModel;
 import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
 import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
 import com.scholarmatch.usecase.dto.UserData;
+import com.scholarmatch.usecase.change_email.ChangeEmailOutputData;
+import com.scholarmatch.usecase.change_password.ChangePasswordOutputData;
 import com.scholarmatch.usecase.load_profile.LoadProfileOutputData;
 import com.scholarmatch.usecase.login.LoginOutputData;
 import com.scholarmatch.usecase.logout.LogoutOutputData;
 import com.scholarmatch.usecase.register.RegisterOutputData;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationOutputData;
+import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationOutputData;
 import com.scholarmatch.usecase.update_profile.UpdateProfileOutputData;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AccountPresenterTest {
 
@@ -113,5 +118,34 @@ class AccountPresenterTest {
         assertEquals("", viewModel.errorMessageProperty().get());
         assertEquals("Profile saved successfully.",
                 viewModel.saveSuccessMessageProperty().get());
+    }
+
+    @Test
+    void testAccountSettingsReportsEachOutcome() {
+        final AccountSettingsViewModel viewModel = new AccountSettingsViewModel();
+        final UpdateProfileViewModel profileViewModel = new UpdateProfileViewModel();
+        final AccountSettingsPresenter presenter =
+                new AccountSettingsPresenter(viewModel, profileViewModel);
+        final UserData user = mock(UserData.class);
+        when(user.getEmail()).thenReturn("new@example.com");
+
+        presenter.prepareFailView("cannot update");
+        assertEquals("cannot update", viewModel.errorMessageProperty().get());
+
+        presenter.prepareSuccessView(
+                new RequestEmailChangeVerificationOutputData("new@example.com"));
+        assertEquals("", viewModel.errorMessageProperty().get());
+        assertEquals("Verification code sent to new@example.com.",
+                viewModel.successMessageProperty().get());
+
+        presenter.prepareSuccessView(new ChangeEmailOutputData(user));
+        assertEquals("new@example.com", viewModel.currentEmailProperty().get());
+        assertSame(user, profileViewModel.currentUserProperty().get());
+        assertEquals("Email changed successfully.",
+                viewModel.successMessageProperty().get());
+
+        presenter.prepareSuccessView(new ChangePasswordOutputData());
+        assertEquals("Password changed successfully.",
+                viewModel.successMessageProperty().get());
     }
 }

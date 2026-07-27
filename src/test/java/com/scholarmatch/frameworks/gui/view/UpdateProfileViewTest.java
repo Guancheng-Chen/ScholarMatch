@@ -34,6 +34,7 @@ import java.util.List;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,7 +137,9 @@ class UpdateProfileViewTest {
 
         SwingUtilities.invokeAndWait(() -> viewModel.setCurrentUser(savedProfile));
 
-        assertEquals("ada@example.com", SwingTestSupport.find(view, JTextField.class, 0).getText());
+        final JTextField emailField = SwingTestSupport.find(view, JTextField.class, 0);
+        assertEquals("ada@example.com", emailField.getText());
+        assertFalse(emailField.isEditable());
     }
 
     @Test

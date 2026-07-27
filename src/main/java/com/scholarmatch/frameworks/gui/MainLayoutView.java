@@ -12,6 +12,7 @@ import com.scholarmatch.frameworks.gui.view.UpdateProfileView;
 import com.scholarmatch.frameworks.gui.view.OpportunitiesView;
 import com.scholarmatch.frameworks.gui.view.MyPostingsView;
 import com.scholarmatch.frameworks.gui.view.MyApplicationsView;
+import com.scholarmatch.frameworks.gui.view.AccountSettingsView;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
@@ -32,6 +33,9 @@ import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
 import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
 import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
+import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
+import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
@@ -42,6 +46,7 @@ import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
 import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.support.ObservableValue;
 
 import javax.swing.BorderFactory;
@@ -110,6 +115,10 @@ final class MainLayoutView extends JPanel {
         final UpdateProfileController updateProfileController,
         final LoadProfileController loadProfileController,
         final UpdateProfileViewModel updateProfileViewModel,
+        final RequestEmailChangeVerificationController requestEmailChangeController,
+        final ChangeEmailController changeEmailController,
+        final ChangePasswordController changePasswordController,
+        final AccountSettingsViewModel accountSettingsViewModel,
         final PaperLookupController paperLookupController,
         final PaperLookupViewModel paperLookupViewModel,
         final LogoutController logoutController,
@@ -174,6 +183,11 @@ final class MainLayoutView extends JPanel {
                     new UpdateProfileView(updateProfileController, loadProfileController, updateProfileViewModel,
                         paperLookupController, paperLookupViewModel),
                     BorderLayout.CENTER);
+                case "settings" -> centerHolder.add(
+                    new AccountSettingsView(
+                        requestEmailChangeController, changeEmailController,
+                        changePasswordController, accountSettingsViewModel),
+                    BorderLayout.CENTER);
                 default -> { }
             }
             centerHolder.revalidate();
@@ -182,6 +196,16 @@ final class MainLayoutView extends JPanel {
 
         final JPanel topBar = buildTopBar(updateProfileViewModel);
         loadProfileController.execute();
+        final com.scholarmatch.usecase.dto.UserData currentUser =
+            updateProfileViewModel.currentUserProperty().get();
+        if (currentUser != null) {
+            accountSettingsViewModel.setCurrentEmail(currentUser.getEmail());
+        }
+        listen(updateProfileViewModel.currentUserProperty(), user -> {
+            if (user != null) {
+                accountSettingsViewModel.setCurrentEmail(user.getEmail());
+            }
+        });
 
         final JPanel contentColumn = new JPanel(new BorderLayout());
         contentColumn.setOpaque(false);

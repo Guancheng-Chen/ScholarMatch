@@ -8,7 +8,6 @@ import com.scholarmatch.usecase.exception.DataAccessException;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Interactor implementing the update-profile use case.
@@ -23,7 +22,6 @@ import java.util.regex.Pattern;
  */
 public final class UpdateProfileInteractor implements UpdateProfileInputBoundary {
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final int MAX_DESCRIPTION_LENGTH = 2000;
     private static final int MAX_INTEREST_LENGTH = 60;
     private static final int MIN_EDUCATION_YEAR = 1900;
@@ -67,13 +65,6 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
      */
     private List<String> validate(final UpdateProfileInputData inputData) {
         final List<String> errors = new ArrayList<>();
-
-        final String email = inputData.getEmail();
-        if (email == null || email.isBlank()) {
-            errors.add("Email is required.");
-        } else if (!isValidEmail(email)) {
-            errors.add("Email format is invalid, e.g. name@example.com.");
-        }
 
         requireText(errors, "Phone number", inputData.getPhoneNumber());
         requireText(errors, "Institution", inputData.getInstitution());
@@ -167,7 +158,4 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
         return "Education #" + (index + 1) + suffix;
     }
 
-    private boolean isValidEmail(final String email) {
-        return EMAIL_PATTERN.matcher(email).matches();
-    }
 }
