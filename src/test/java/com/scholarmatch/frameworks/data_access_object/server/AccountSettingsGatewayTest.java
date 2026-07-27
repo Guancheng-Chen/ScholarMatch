@@ -40,7 +40,7 @@ class AccountSettingsGatewayTest {
     void testRequestEmailChangeCodeUsesAuthenticatedEndpoint() {
         this.fakeServer.bodyToReturn().set("{}");
 
-        this.gateway.requestEmailChangeVerification("new@example.com");
+        this.gateway.requestVerificationCode("new@example.com");
 
         assertEquals("POST", this.fakeServer.lastMethod().get());
         assertEquals(

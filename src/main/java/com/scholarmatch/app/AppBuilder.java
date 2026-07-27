@@ -43,7 +43,6 @@ import com.scholarmatch.interface_adapter.controller.DeclineApplicationControlle
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
 import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
 import com.scholarmatch.interface_adapter.presenter.DeleteAccountPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMatchesPresenter;
 import com.scholarmatch.interface_adapter.presenter.LoadMessagePresenter;
@@ -102,7 +101,7 @@ import com.scholarmatch.usecase.data_access_interface.AcceptApplicationDataAcces
 import com.scholarmatch.usecase.data_access_interface.DeclineApplicationDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.VerificationEmailSenderDataAccessInterface;
 import com.scholarmatch.usecase.change_email.ChangeEmailInteractor;
 import com.scholarmatch.usecase.change_password.ChangePasswordInteractor;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInteractor;
@@ -127,7 +126,6 @@ import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInteractor;
 import com.scholarmatch.usecase.accept_application.AcceptApplicationInteractor;
 import com.scholarmatch.usecase.decline_application.DeclineApplicationInteractor;
 import com.scholarmatch.usecase.load_my_applications.LoadMyApplicationsInteractor;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationInteractor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -188,7 +186,7 @@ public final class AppBuilder {
     private LoadMatchesDataAccessInterface loadMatchesDataAccessObject;
     private LoadProfileDataAccessInterface loadProfileDataAccessObject;
     private UpdateProfileDataAccessInterface updateProfileDataAccessObject;
-    private RequestEmailChangeVerificationDataAccessInterface requestEmailChangeDataAccessObject;
+    private VerificationEmailSenderDataAccessInterface requestEmailChangeDataAccessObject;
     private ChangeEmailDataAccessInterface changeEmailDataAccessObject;
     private ChangePasswordDataAccessInterface changePasswordDataAccessObject;
     private DeleteAccountDataAccessInterface deleteAccountDataAccessObject;
@@ -268,7 +266,7 @@ public final class AppBuilder {
     private AcceptApplicationInteractor acceptApplicationInteractor;
     private DeclineApplicationInteractor declineApplicationInteractor;
     private LoadMyApplicationsInteractor loadMyApplicationsInteractor;
-    private RequestEmailChangeVerificationInteractor requestEmailChangeInteractor;
+    private RequestEmailVerificationInteractor requestEmailChangeInteractor;
     private ChangeEmailInteractor changeEmailInteractor;
     private ChangePasswordInteractor changePasswordInteractor;
 
@@ -296,7 +294,7 @@ public final class AppBuilder {
     private AcceptApplicationController acceptApplicationController;
     private DeclineApplicationController declineApplicationController;
     private LoadMyApplicationsController loadMyApplicationsController;
-    private RequestEmailChangeVerificationController requestEmailChangeController;
+    private RequestEmailVerificationController requestEmailChangeController;
     private ChangeEmailController changeEmailController;
     private ChangePasswordController changePasswordController;
 
@@ -501,7 +499,7 @@ public final class AppBuilder {
         this.loadMyApplicationsInteractor = new LoadMyApplicationsInteractor(
                 this.loadMyApplicationsDataAccessObject, this.loadMyApplicationsPresenter);
         this.requestEmailChangeInteractor =
-                new RequestEmailChangeVerificationInteractor(
+                new RequestEmailVerificationInteractor(
                         this.requestEmailChangeDataAccessObject,
                         this.accountSettingsPresenter);
         this.changeEmailInteractor = new ChangeEmailInteractor(
@@ -546,7 +544,7 @@ public final class AppBuilder {
         this.declineApplicationController = new DeclineApplicationController(this.declineApplicationInteractor);
         this.loadMyApplicationsController = new LoadMyApplicationsController(this.loadMyApplicationsInteractor);
         this.requestEmailChangeController =
-                new RequestEmailChangeVerificationController(
+                new RequestEmailVerificationController(
                         this.requestEmailChangeInteractor);
         this.changeEmailController =
                 new ChangeEmailController(this.changeEmailInteractor);
