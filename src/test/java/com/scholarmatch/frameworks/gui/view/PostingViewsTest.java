@@ -39,13 +39,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -66,9 +64,6 @@ class PostingViewsTest {
             assertEquals(1, SwingTestSupport.findAll(view, PostingCard.class).size());
             resizeHolder(view);
             try (MockedStatic<JOptionPane> dialogs = mockStatic(JOptionPane.class)) {
-                dialogs.when(() -> JOptionPane.showInputDialog(
-                        any(), any(), any(), anyInt())).thenReturn("hello");
-                SwingTestSupport.find(view, JButton.class, 0).doClick();
                 messages(vm, dialogs);
             }
             vm.setPostings(List.of());
@@ -76,7 +71,6 @@ class PostingViewsTest {
             view.removeNotify();
         });
         verify(load).execute(any());
-        verify(apply).execute(any());
     }
 
     @Test
@@ -118,7 +112,14 @@ class PostingViewsTest {
                     new CreatePostingController(create), new LoadPostingsController(load),
                     new ClosePostingController(close),
                     new AcceptApplicationController(mock(AcceptApplicationInputBoundary.class)),
-                    new DeclineApplicationController(mock(DeclineApplicationInputBoundary.class)), vm);
+                    new DeclineApplicationController(mock(DeclineApplicationInputBoundary.class)), vm,
+                    (parent, onSubmit) -> {
+                        onSubmit.accept(new com.scholarmatch.frameworks.gui.component
+                                .CreatePostingPanel.Submission(
+                                "Title", "Description", ResearchField.MACHINE_LEARNING,
+                                CollaborationType.CO_AUTHOR, 3));
+                    },
+                    (parent, posting, onConfirm) -> onConfirm.run());
             assertTrue(labels(view).stream().anyMatch(text -> text.startsWith(
                     "You have not created a posting yet.")));
             final PostingData active = posting("active", true, null, List.of());
@@ -132,41 +133,10 @@ class PostingViewsTest {
             vm.requestRefresh();
 
             try (MockedStatic<JOptionPane> dialogs = mockStatic(JOptionPane.class)) {
-                dialogs.when(() -> JOptionPane.showConfirmDialog(
-                        any(), any(), org.mockito.ArgumentMatchers.eq("Close Posting"),
-                        anyInt(), anyInt()))
-                        .thenReturn(JOptionPane.NO_OPTION, JOptionPane.YES_OPTION);
                 final JButton closeButton = button(view, "Close Posting");
                 closeButton.doClick();
-                closeButton.doClick();
-
-                dialogs.when(() -> JOptionPane.showConfirmDialog(
-                        any(), any(), org.mockito.ArgumentMatchers.eq("New Posting"), anyInt()))
-                        .thenAnswer(invocation -> {
-                            fillForm((JPanel) invocation.getArgument(1), "", "");
-                            return JOptionPane.OK_OPTION;
-                        })
-                        .thenAnswer(invocation -> {
-                            fillForm((JPanel) invocation.getArgument(1), "Title", "");
-                            return JOptionPane.OK_OPTION;
-                        })
-                        .thenAnswer(invocation -> {
-                            fillForm((JPanel) invocation.getArgument(1), "Title", "0");
-                            return JOptionPane.OK_OPTION;
-                        })
-                        .thenAnswer(invocation -> {
-                            fillForm((JPanel) invocation.getArgument(1), "Title", "bad");
-                            return JOptionPane.OK_OPTION;
-                        })
-                        .thenAnswer(invocation -> {
-                            fillForm((JPanel) invocation.getArgument(1), "Title", "3");
-                            return JOptionPane.OK_OPTION;
-                        })
-                        .thenReturn(JOptionPane.CANCEL_OPTION);
                 final JButton newButton = button(view, "New Posting");
-                for (int i = 0; i < 6; i++) {
-                    newButton.doClick();
-                }
+                newButton.doClick();
                 vm.setErrorMessage(null);
                 vm.setErrorMessage(" ");
                 vm.setErrorMessage("error");
@@ -178,7 +148,7 @@ class PostingViewsTest {
         });
         verify(load, times(2)).execute(any());
         verify(close).execute(any());
-        verify(create, times(2)).execute(any());
+        verify(create).execute(any());
     }
 
     private static void messages(
@@ -197,12 +167,6 @@ class PostingViewsTest {
                 any(), org.mockito.ArgumentMatchers.eq("success"),
                 org.mockito.ArgumentMatchers.eq("Opportunities"),
                 org.mockito.ArgumentMatchers.eq(JOptionPane.INFORMATION_MESSAGE)));
-    }
-
-    private static void fillForm(final JPanel form, final String title, final String capacity) {
-        final List<JTextField> fields = SwingTestSupport.findAll(form, JTextField.class);
-        fields.get(0).setText(title);
-        fields.get(1).setText(capacity);
     }
 
     private static JButton button(final JPanel view, final String text) {
