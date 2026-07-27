@@ -27,6 +27,8 @@ public record PostingData(
         List<PostingApplicationData> applications) {
 
     public PostingData {
+        posterUserId = posterUserId == null ? "" : posterUserId;
+        posterName = posterName == null ? "" : posterName;
         applications = List.copyOf(applications);
     }
 

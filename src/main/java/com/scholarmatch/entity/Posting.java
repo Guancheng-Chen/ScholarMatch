@@ -64,7 +64,7 @@ public final class Posting {
             throw new IllegalArgumentException("Posting counts are inconsistent");
         }
         this.postingId = Objects.requireNonNull(postingId);
-        this.posterUserId = Objects.requireNonNull(posterUserId);
+        this.posterUserId = posterUserId == null ? "" : posterUserId;
         this.posterName = posterName == null ? "" : posterName;
         this.posterAcademicEmailVerified = posterAcademicEmailVerified;
         this.title = Objects.requireNonNull(title);

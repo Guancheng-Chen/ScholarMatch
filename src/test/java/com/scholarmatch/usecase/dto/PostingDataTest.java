@@ -13,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PostingDataTest {
 
@@ -27,6 +28,8 @@ class PostingDataTest {
 
         assertEquals("posting-1", data.getPostingId());
         assertEquals("poster-1", data.getPosterUserId());
+        assertEquals("Grace Hopper", data.getPosterName());
+        assertTrue(data.isPosterAcademicEmailVerified());
         assertEquals("Title", data.getTitle());
         assertEquals("Description", data.getDescription());
         assertEquals(ResearchField.COMPUTER_SCIENCE, data.getResearchField());
@@ -57,7 +60,8 @@ class PostingDataTest {
 
     private Posting posting(final String id, final LocalDateTime createdAt) {
         return new Posting(
-                id, "poster-1", "Title", "Description", ResearchField.COMPUTER_SCIENCE,
-                CollaborationType.CO_AUTHOR, 2, 1, 0, PostingStatus.OPEN, createdAt);
+                id, "poster-1", "Grace Hopper", true, "Title", "Description",
+                ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                2, 1, 0, PostingStatus.OPEN, createdAt);
     }
 }
