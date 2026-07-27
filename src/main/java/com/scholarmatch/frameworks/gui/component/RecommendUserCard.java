@@ -1,6 +1,7 @@
 package com.scholarmatch.frameworks.gui.component;
 
 import com.scholarmatch.entity.Education;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Format;
@@ -157,6 +158,18 @@ public final class RecommendUserCard extends RoundedPanel implements Reflowable 
         textBlock.setOpaque(false);
         textBlock.setBorder(new EmptyBorder(0, 14, 0, 0));
         textBlock.add(nameLabel);
+        if (user.getEmailAccountType() == EmailAccountType.ACADEMIC) {
+            final JLabel badge = new JLabel(
+                    "Verified university email",
+                    Icons.of(FontAwesomeSolid.CHECK_CIRCLE, 13, Theme.ACCENT_FG),
+                    JLabel.LEFT);
+            badge.setName("academicVerificationBadge");
+            badge.setForeground(Theme.ACCENT_FG);
+            badge.setFont(badge.getFont().deriveFont(Font.BOLD, 13f));
+            badge.setAlignmentX(Component.LEFT_ALIGNMENT);
+            textBlock.add(verticalStrut(4));
+            textBlock.add(badge);
+        }
         textBlock.add(verticalStrut(4));
         textBlock.add(institutionLabel);
         textBlock.add(verticalStrut(2));

@@ -93,7 +93,7 @@ public final class UserData  {
                 publications, hIndex, totalCitations, EmailAccountType.REGULAR);
     }
 
-    private UserData(
+    public UserData(
             final String userId,
             final String firstName,
             final String lastName,
