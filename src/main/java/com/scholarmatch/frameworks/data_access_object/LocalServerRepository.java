@@ -445,9 +445,7 @@ public final class LocalServerRepository
     @Override
     public Message sendMessage(final String receiverId, final String content) {
         final String currentId = this.session.getCurrentUserId();
-        final boolean mutualMatch = this.recordedConnections.contains(currentId + "->" + receiverId)
-                && this.recordedConnections.contains(receiverId + "->" + currentId);
-        if (!mutualMatch) {
+        if (!hasMutualConnection(currentId, receiverId)) {
             throw new InvalidRequestException("You can only message users you have matched with");
         }
         final Message message = new Message(
@@ -459,6 +457,9 @@ public final class LocalServerRepository
     @Override
     public List<Message> getConversation(final String otherUserId) {
         final String currentId = this.session.getCurrentUserId();
+        if (!hasMutualConnection(currentId, otherUserId)) {
+            throw new InvalidRequestException("You can only message users you have matched with");
+        }
         final List<Message> conversation = new ArrayList<>();
         for (final Message message : this.messages) {
             final boolean betweenTheseTwo =
@@ -570,7 +571,9 @@ public final class LocalServerRepository
 
     private boolean hasMutualConnection(final String firstUserId, final String secondUserId) {
         return this.recordedConnections.contains(firstUserId + "->" + secondUserId)
-                && this.recordedConnections.contains(secondUserId + "->" + firstUserId);
+                && this.recordedConnections.contains(secondUserId + "->" + firstUserId)
+                && !this.recordedDislikes.contains(firstUserId + "->" + secondUserId)
+                && !this.recordedDislikes.contains(secondUserId + "->" + firstUserId);
     }
 
     private AuthResult toAuthResult(final User user) {
