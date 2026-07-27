@@ -4,6 +4,7 @@ import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.DegreeType;
 import com.scholarmatch.entity.Education;
+import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Publication;
@@ -22,9 +23,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserCardsBranchTest {
 
@@ -91,6 +95,23 @@ class UserCardsBranchTest {
         });
     }
 
+    @Test
+    void testRecommendCardShowsBadgeOnlyForVerifiedAcademicEmail() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            final RecommendUserCard verified = new RecommendUserCard(
+                    academicUser(), listener());
+            final RecommendUserCard regular = new RecommendUserCard(
+                    fullUser(), listener());
+
+            assertTrue(SwingTestSupport.findAll(verified, JLabel.class).stream()
+                    .anyMatch(label -> "Verified university email"
+                            .equals(label.getText())));
+            assertFalse(SwingTestSupport.findAll(regular, JLabel.class).stream()
+                    .anyMatch(label -> "Verified university email"
+                            .equals(label.getText())));
+        });
+    }
+
     private static UserData fullUser() {
         return new UserData(
                 "user-1", "Ada", "Lovelace", "ada&test@example.com", "555<0000",
@@ -112,6 +133,39 @@ class UserCardsBranchTest {
         return new UserData(
                 "user-2", firstName, lastName, "", "", null, null, null, null,
                 "", "", null, null, List.of(), List.of(), List.of(), null, null);
+    }
+
+    private static UserData academicUser() {
+        final UserData regular = fullUser();
+        return new UserData(
+                regular.getUserId(), regular.getFirstName(),
+                regular.getLastName(), regular.getEmail(),
+                regular.getPhoneNumber(), regular.getInstitution(),
+                regular.getAcademicLevel(), regular.getResearchField(),
+                regular.getLookingFor(),
+                regular.getCollaborationDescription(),
+                regular.getResearchDescription(),
+                regular.getWeeklyAvailabilityHours(),
+                regular.getFundingStatus(), regular.getResearchInterests(),
+                regular.getEducations(), regular.getPublications(),
+                regular.gethIndex(), regular.getTotalCitations(),
+                EmailAccountType.ACADEMIC);
+    }
+
+    private static RecommendUserCard.ConnectListener listener() {
+        return new RecommendUserCard.ConnectListener() {
+            @Override
+            public void onDislike() {
+            }
+
+            @Override
+            public void onSkip() {
+            }
+
+            @Override
+            public void onConnect() {
+            }
+        };
     }
 
     private static void paintNestedCustomComponents(final JComponent root) {
