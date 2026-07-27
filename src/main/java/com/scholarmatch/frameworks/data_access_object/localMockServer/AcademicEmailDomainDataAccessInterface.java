@@ -1,4 +1,4 @@
-package com.scholarmatch.usecase.data_access_interface;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 /**
  * Boundary for identifying configured academic email domains.

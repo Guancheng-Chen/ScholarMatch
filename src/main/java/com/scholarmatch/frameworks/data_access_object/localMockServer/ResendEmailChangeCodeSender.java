@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.scholarmatch.frameworks.data_access_object.http.HttpSender;
 import com.scholarmatch.frameworks.data_access_object.http.HttpSenderResponse;
 import com.scholarmatch.frameworks.data_access_object.http.JdkHttpSender;
-import com.scholarmatch.usecase.data_access_interface.EmailChangeCodeDeliveryDataAccessInterface;
 import com.scholarmatch.usecase.exception.ExternalServiceException;
 
 import java.io.IOException;

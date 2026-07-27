@@ -1,7 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
-
-import com.scholarmatch.entity.EmailVerificationChallenge;
-import com.scholarmatch.usecase.data_access_interface.EmailVerificationChallengeDataAccessInterface;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import java.util.Locale;
 import java.util.Map;
@@ -11,23 +8,19 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Process-local storage for pending email verification challenges.
  */
-public final class InMemoryEmailVerificationChallengeRepository
-        implements EmailVerificationChallengeDataAccessInterface {
+public final class InMemoryEmailVerificationChallengeRepository {
 
     private final Map<String, EmailVerificationChallenge> challenges =
             new ConcurrentHashMap<>();
 
-    @Override
     public void save(final EmailVerificationChallenge challenge) {
         this.challenges.put(normalize(challenge.getEmail()), challenge);
     }
 
-    @Override
     public Optional<EmailVerificationChallenge> findByEmail(final String email) {
         return Optional.ofNullable(this.challenges.get(normalize(email)));
     }
 
-    @Override
     public void deleteByEmail(final String email) {
         this.challenges.remove(normalize(email));
     }

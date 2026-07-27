@@ -1,7 +1,8 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import com.scholarmatch.entity.Message;
 import com.scholarmatch.entity.User;
+import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.register.RegisterAccountData;
