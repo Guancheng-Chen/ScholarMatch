@@ -1,7 +1,7 @@
 package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
-import com.scholarmatch.frameworks.gui.style.RoundedPanel;
+import com.scholarmatch.frameworks.gui.component.ApplicationCard;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.util.function.Consumer;
 
@@ -26,6 +25,7 @@ public final class MyApplicationsView extends JPanel {
 
     private final MyApplicationsViewModel viewModel;
     private final JPanel rows = new JPanel();
+    private final CenteringScrollPanel holder;
     private final Runnable applicationsListener;
     private final Consumer<String> errorListener;
 
@@ -54,10 +54,11 @@ public final class MyApplicationsView extends JPanel {
         title.setBorder(new EmptyBorder(18, 22, 12, 22));
         this.rows.setLayout(new BoxLayout(this.rows, BoxLayout.Y_AXIS));
         this.rows.setOpaque(false);
-        final CenteringScrollPanel holder = new CenteringScrollPanel(this.rows);
-        holder.setBorder(new EmptyBorder(20, 28, 28, 28));
-        final JScrollPane scrollPane = new JScrollPane(holder);
+        this.holder = new CenteringScrollPanel(this.rows);
+        this.holder.setBorder(new EmptyBorder(20, 28, 28, 28));
+        final JScrollPane scrollPane = new JScrollPane(this.holder);
         scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         viewModel.getApplications().addListener(this.applicationsListener);
         viewModel.errorMessageProperty().addListener(this.errorListener);
         add(title, BorderLayout.NORTH);
@@ -68,19 +69,22 @@ public final class MyApplicationsView extends JPanel {
 
     private void rebuild() {
         this.rows.removeAll();
+        if (this.viewModel.getApplications().isEmpty()) {
+            final JLabel empty = new JLabel(
+                    "You have not applied to any postings yet.");
+            empty.setName("emptyState");
+            empty.setForeground(Theme.FG_MUTED);
+            empty.setAlignmentX(LEFT_ALIGNMENT);
+            this.rows.add(empty);
+        }
         for (final PostingApplicationData application : this.viewModel.getApplications()) {
-            final RoundedPanel row = new RoundedPanel(Theme.CARD_RADIUS, 18);
-            row.setLayout(new BorderLayout());
-            row.setAlignmentX(Component.LEFT_ALIGNMENT);
-            final String title = application.getPostingTitle().isBlank()
-                    ? "Posting " + application.getPostingId() : application.getPostingTitle();
-            row.add(new JLabel(title), BorderLayout.WEST);
-            row.add(new JLabel(application.getStatus().name()), BorderLayout.EAST);
+            final ApplicationCard row = new ApplicationCard(application);
             this.rows.add(row);
             this.rows.add(Box.createVerticalStrut(10));
         }
         this.rows.revalidate();
         this.rows.repaint();
+        this.holder.reflowNow();
     }
 
     @Override
