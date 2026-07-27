@@ -28,6 +28,7 @@ public final class OpportunitiesView extends JPanel {
     private final OpportunitiesViewModel viewModel;
     private final ApplyToPostingController applyController;
     private final JPanel cardList = new JPanel();
+    private final CenteringScrollPanel holder;
     private final Runnable postingsListener;
     private final Consumer<String> errorListener;
     private final Consumer<String> successListener;
@@ -50,9 +51,9 @@ public final class OpportunitiesView extends JPanel {
 
         this.cardList.setLayout(new BoxLayout(this.cardList, BoxLayout.Y_AXIS));
         this.cardList.setOpaque(false);
-        final CenteringScrollPanel holder = new CenteringScrollPanel(this.cardList);
-        holder.setBorder(new EmptyBorder(20, 28, 28, 28));
-        final JScrollPane scrollPane = new JScrollPane(holder);
+        this.holder = new CenteringScrollPanel(this.cardList);
+        this.holder.setBorder(new EmptyBorder(20, 28, 28, 28));
+        final JScrollPane scrollPane = new JScrollPane(this.holder);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
@@ -67,12 +68,20 @@ public final class OpportunitiesView extends JPanel {
 
     private void rebuild() {
         this.cardList.removeAll();
+        if (this.viewModel.getPostings().isEmpty()) {
+            final JLabel empty = new JLabel("No opportunities are available right now.");
+            empty.setName("emptyState");
+            empty.setForeground(Theme.FG_MUTED);
+            empty.setAlignmentX(LEFT_ALIGNMENT);
+            this.cardList.add(empty);
+        }
         for (final PostingData posting : this.viewModel.getPostings()) {
             this.cardList.add(new PostingCard(posting, this.applyController::apply));
             this.cardList.add(Box.createVerticalStrut(12));
         }
         this.cardList.revalidate();
         this.cardList.repaint();
+        this.holder.reflowNow();
     }
 
     private void show(final String message, final boolean error) {

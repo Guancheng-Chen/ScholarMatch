@@ -2,10 +2,9 @@ package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.ResearchField;
-import com.scholarmatch.frameworks.gui.component.PostingApplicationRow;
+import com.scholarmatch.frameworks.gui.component.OwnedPostingCard;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
-import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
 import com.scholarmatch.interface_adapter.controller.ClosePostingController;
@@ -13,7 +12,6 @@ import com.scholarmatch.interface_adapter.controller.CreatePostingController;
 import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
 import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
-import com.scholarmatch.usecase.dto.PostingApplicationData;
 import com.scholarmatch.usecase.dto.PostingData;
 import com.scholarmatch.usecase.load_postings.PostingScope;
 
@@ -29,7 +27,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.function.Consumer;
@@ -46,6 +43,7 @@ public final class MyPostingsView extends JPanel {
     private final DeclineApplicationController declineController;
     private final MyPostingsViewModel viewModel;
     private final JPanel cardList = new JPanel();
+    private final CenteringScrollPanel holder;
     private final Runnable postingsListener;
     private final Consumer<String> errorListener;
     private final Consumer<String> successListener;
@@ -84,9 +82,9 @@ public final class MyPostingsView extends JPanel {
 
         this.cardList.setLayout(new BoxLayout(this.cardList, BoxLayout.Y_AXIS));
         this.cardList.setOpaque(false);
-        final CenteringScrollPanel holder = new CenteringScrollPanel(this.cardList);
-        holder.setBorder(new EmptyBorder(20, 28, 28, 28));
-        final JScrollPane scrollPane = new JScrollPane(holder);
+        this.holder = new CenteringScrollPanel(this.cardList);
+        this.holder.setBorder(new EmptyBorder(20, 28, 28, 28));
+        final JScrollPane scrollPane = new JScrollPane(this.holder);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
@@ -102,40 +100,24 @@ public final class MyPostingsView extends JPanel {
 
     private void rebuild() {
         this.cardList.removeAll();
+        if (this.viewModel.getPostings().isEmpty()) {
+            final JLabel empty = new JLabel(
+                    "You have not created a posting yet. Select New Posting to get started.");
+            empty.setName("emptyState");
+            empty.setForeground(Theme.FG_MUTED);
+            empty.setAlignmentX(LEFT_ALIGNMENT);
+            this.cardList.add(empty);
+        }
         for (final PostingData posting : this.viewModel.getPostings()) {
-            final RoundedPanel card = new RoundedPanel(Theme.CARD_RADIUS, 18);
-            card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-            card.setAlignmentX(Component.LEFT_ALIGNMENT);
-            final JLabel title = new JLabel(posting.getTitle() + " - " + posting.getStatus());
-            title.setFont(title.getFont().deriveFont(Font.BOLD, 17f));
-            title.setAlignmentX(Component.LEFT_ALIGNMENT);
-            card.add(title);
-            card.add(Box.createVerticalStrut(8));
-            final String accepted = posting.getCapacity() == null
-                    ? posting.getAcceptedCount() + " accepted / unlimited capacity"
-                    : posting.getAcceptedCount() + " / " + posting.getCapacity() + " accepted";
-            final JLabel count = new JLabel(
-                    posting.getApplicantCount() + " applicants; " + accepted);
-            count.setAlignmentX(Component.LEFT_ALIGNMENT);
-            card.add(count);
-            if (posting.isActive()) {
-                final JButton closeButton = new JButton("Close Posting");
-                Buttons.outlined(closeButton);
-                closeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-                closeButton.addActionListener(event -> closePosting(posting));
-                card.add(Box.createVerticalStrut(8));
-                card.add(closeButton);
-            }
-            for (final PostingApplicationData application
-                    : this.viewModel.getApplicationsFor(posting.getPostingId())) {
-                card.add(new PostingApplicationRow(
-                        application, this.acceptController, this.declineController));
-            }
+            final OwnedPostingCard card = new OwnedPostingCard(
+                    posting, this.viewModel.getApplicationsFor(posting.getPostingId()),
+                    this::closePosting, this.acceptController, this.declineController);
             this.cardList.add(card);
             this.cardList.add(Box.createVerticalStrut(12));
         }
         this.cardList.revalidate();
         this.cardList.repaint();
+        this.holder.reflowNow();
     }
 
     private void showCreateForm() {
