@@ -3,6 +3,9 @@ package com.scholarmatch.frameworks.data_access_object;
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.EmailAccountType;
+import com.scholarmatch.entity.EmailVerificationChallenge;
+import com.scholarmatch.entity.EmailVerificationOutcome;
+import com.scholarmatch.entity.EmailVerificationResult;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Message;
@@ -12,18 +15,25 @@ import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.entity.PostingStatus;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
+import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
+import com.scholarmatch.usecase.data_access_interface.ChangeEmailDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ChangePasswordDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.EmailChangeCodeDeliveryDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.EmailVerificationChallengeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoginDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RecommendDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.VerificationCodeGeneratorInterface;
 import com.scholarmatch.usecase.data_access_interface.ConnectDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.CreatePostingDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadPostingsDataAccessInterface;
@@ -39,11 +49,15 @@ import com.scholarmatch.usecase.register.RegisterAccountData;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputData;
 import com.scholarmatch.usecase.load_postings.PostingScope;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -70,6 +84,9 @@ public final class LocalServerRepository
         LoadMatchesDataAccessInterface,
         LoadProfileDataAccessInterface,
         UpdateProfileDataAccessInterface,
+        RequestEmailChangeVerificationDataAccessInterface,
+        ChangeEmailDataAccessInterface,
+        ChangePasswordDataAccessInterface,
         DeleteAccountDataAccessInterface,
         SendMessageDataAccessInterface,
         LoadMessageDataAccessInterface,
@@ -90,6 +107,11 @@ public final class LocalServerRepository
     private final Map<String, PostingApplication> applicationsById = new LinkedHashMap<>();
     private final CurrentUserProviderInterface session;
     private final InstitutionCatalogDataAccessInterface institutionCatalog;
+    private final EmailVerificationChallengeDataAccessInterface emailChallenges;
+    private final VerificationCodeGeneratorInterface codeGenerator;
+    private final EmailChangeCodeDeliveryDataAccessInterface codeDelivery;
+    private final AcademicEmailDomainDataAccessInterface academicEmailDomains;
+    private final Clock clock;
 
     /**
      * Constructs a LocalServerRepository pre-seeded with a few demo users.
@@ -104,8 +126,31 @@ public final class LocalServerRepository
     public LocalServerRepository(
             final CurrentUserProviderInterface session,
             final InstitutionCatalogDataAccessInterface institutionCatalog) {
+        this(
+                session,
+                institutionCatalog,
+                new InMemoryEmailVerificationChallengeRepository(),
+                new SecureVerificationCodeGenerator(),
+                (email, code) -> { },
+                new ClasspathAcademicEmailDomainRepository(),
+                Clock.systemUTC());
+    }
+
+    public LocalServerRepository(
+            final CurrentUserProviderInterface session,
+            final InstitutionCatalogDataAccessInterface institutionCatalog,
+            final EmailVerificationChallengeDataAccessInterface emailChallenges,
+            final VerificationCodeGeneratorInterface codeGenerator,
+            final EmailChangeCodeDeliveryDataAccessInterface codeDelivery,
+            final AcademicEmailDomainDataAccessInterface academicEmailDomains,
+            final Clock clock) {
         this.session = session;
         this.institutionCatalog = institutionCatalog;
+        this.emailChallenges = emailChallenges;
+        this.codeGenerator = codeGenerator;
+        this.codeDelivery = codeDelivery;
+        this.academicEmailDomains = academicEmailDomains;
+        this.clock = clock;
         seedDemoUsers();
     }
 
@@ -360,14 +405,6 @@ public final class LocalServerRepository
     @Override
     public User updateProfile(final UpdateProfileInputData data) {
         final User user = getProfile();
-        if (data.getEmail() != null && !data.getEmail().equalsIgnoreCase(user.getEmail())) {
-            final User existing = findByEmail(data.getEmail());
-            if (existing != null && !existing.getUserId().equals(user.getUserId())) {
-                throw new InvalidRequestException("Email is already registered");
-            }
-            user.setEmail(data.getEmail());
-            user.setEmailAccountType(EmailAccountType.REGULAR);
-        }
         if (data.getInstitution() != null) {
             user.setInstitution(parseInstitution(data.getInstitution()));
         }
@@ -408,6 +445,71 @@ public final class LocalServerRepository
             user.addResearchInterest(interest);
         }
         return user;
+    }
+
+    @Override
+    public void requestEmailChangeVerification(final String email) {
+        final String normalizedEmail = normalizeEmail(email);
+        final User existing = findByEmail(normalizedEmail);
+        if (existing != null
+                && !existing.getUserId().equals(this.session.getCurrentUserId())) {
+            throw new InvalidRequestException("Email is already registered");
+        }
+        final String code = this.codeGenerator.generateCode();
+        final EmailVerificationChallenge challenge =
+                new EmailVerificationChallenge(
+                        normalizedEmail,
+                        code,
+                        Instant.now(this.clock).plus(Duration.ofMinutes(10)));
+        this.emailChallenges.save(challenge);
+        try {
+            this.codeDelivery.sendCode(normalizedEmail, code);
+        } catch (final RuntimeException exception) {
+            this.emailChallenges.deleteByEmail(normalizedEmail);
+            throw exception;
+        }
+    }
+
+    @Override
+    public User changeEmail(
+            final String email,
+            final String currentPassword,
+            final String verificationCode) {
+        final User user = getProfile();
+        if (!user.getPasswordHash().equals(currentPassword)) {
+            throw new InvalidRequestException("Current password is incorrect");
+        }
+        final String normalizedEmail = normalizeEmail(email);
+        final User existing = findByEmail(normalizedEmail);
+        if (existing != null && !existing.getUserId().equals(user.getUserId())) {
+            throw new InvalidRequestException("Email is already registered");
+        }
+        final EmailVerificationChallenge challenge = this.emailChallenges
+                .findByEmail(normalizedEmail)
+                .orElseThrow(() -> new InvalidRequestException(
+                        "Request a verification code for this email first"));
+        final EmailVerificationResult result =
+                challenge.verify(verificationCode, Instant.now(this.clock));
+        if (result.outcome() != EmailVerificationOutcome.VERIFIED) {
+            throw new InvalidRequestException(verificationFailureMessage(result));
+        }
+        user.setEmail(normalizedEmail);
+        user.setEmailAccountType(
+                this.academicEmailDomains.isAcademicEmail(normalizedEmail)
+                        ? EmailAccountType.ACADEMIC : EmailAccountType.REGULAR);
+        this.emailChallenges.deleteByEmail(normalizedEmail);
+        return user;
+    }
+
+    @Override
+    public void changePassword(
+            final String currentPassword,
+            final String newPassword) {
+        final User user = getProfile();
+        if (!user.getPasswordHash().equals(currentPassword)) {
+            throw new InvalidRequestException("Current password is incorrect");
+        }
+        user.setPasswordHash(newPassword);
     }
 
     @Override
@@ -569,7 +671,25 @@ public final class LocalServerRepository
         return user == null ? "" : user.getFullName();
     }
 
-    private boolean hasMutualConnection(final String firstUserId, final String secondUserId) {
+    private String normalizeEmail(final String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String verificationFailureMessage(
+            final EmailVerificationResult result) {
+        return switch (result.outcome()) {
+            case EXPIRED -> "Verification code has expired";
+            case ATTEMPTS_EXHAUSTED ->
+                "Verification failed after three incorrect attempts";
+            case INVALID_CODE -> "Verification code is incorrect. "
+                    + result.attemptsRemaining() + " attempts remaining";
+            case VERIFIED -> "";
+        };
+    }
+
+    private boolean hasMutualConnection(
+            final String firstUserId,
+            final String secondUserId) {
         return this.recordedConnections.contains(firstUserId + "->" + secondUserId)
                 && this.recordedConnections.contains(secondUserId + "->" + firstUserId)
                 && !this.recordedDislikes.contains(firstUserId + "->" + secondUserId)

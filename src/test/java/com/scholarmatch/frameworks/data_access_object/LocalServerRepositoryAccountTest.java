@@ -16,6 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,22 +52,22 @@ class LocalServerRepositoryAccountTest {
     }
 
     @Test
-    void testProfileNotFoundAndDuplicateEmailAreReported() {
+    void testProfileNotFoundAndProfileUpdateCannotChangeEmail() {
         this.session.setCurrentUserId("missing-user");
         assertThrows(ResourceNotFoundException.class, this.repository::getProfile);
 
         final AuthResult first = register("Ada", "ada@example.com");
-        register("Grace", "grace@example.com");
         this.session.setCurrentUserId(first.userId());
 
-        assertThrows(InvalidRequestException.class,
-                () -> this.repository.updateProfile(input(
-                        "grace@example.com", "FACULTY", "COMPUTER_SCIENCE",
-                        "CO_AUTHOR", "SELF_FUNDED")));
+        final User updated = this.repository.updateProfile(input(
+                "grace@example.com", "FACULTY", "COMPUTER_SCIENCE",
+                "CO_AUTHOR", "SELF_FUNDED"));
+
+        assertEquals("ada@example.com", updated.getEmail());
     }
 
     @Test
-    void testUpdateProfileMapsAllFieldsAndResetsEmailClassification() {
+    void testUpdateProfileMapsAllFieldsWithoutChangingAccountEmail() {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
         final User user = this.repository.getProfile();
@@ -73,8 +78,8 @@ class LocalServerRepositoryAccountTest {
                 "new@example.com", "FACULTY", "COMPUTER_SCIENCE",
                 "CO_AUTHOR", "SELF_FUNDED"));
 
-        assertEquals("new@example.com", updated.getEmail());
-        assertEquals(EmailAccountType.REGULAR, updated.getEmailAccountType());
+        assertEquals("ada@example.com", updated.getEmail());
+        assertEquals(EmailAccountType.ACADEMIC, updated.getEmailAccountType());
         assertEquals(Institution.MIT, updated.getInstitution());
         assertEquals(AcademicLevel.FACULTY, updated.getAcademicLevel());
         assertEquals(ResearchField.COMPUTER_SCIENCE, updated.getResearchField());
@@ -103,6 +108,79 @@ class LocalServerRepositoryAccountTest {
         assertEquals(FundingStatus.OTHER, updated.getFundingStatus());
     }
 
+    @Test
+    void testEmailAndPasswordChangesUseVerifiedAccountSettingsFlow() {
+        final AtomicReference<String> deliveredCode = new AtomicReference<>();
+        final MutableClock clock = new MutableClock(
+                Instant.parse("2026-07-26T12:00:00Z"));
+        this.repository = new LocalServerRepository(
+                this.session,
+                new ClasspathInstitutionCatalogRepository(),
+                new InMemoryEmailVerificationChallengeRepository(),
+                () -> "123456",
+                (email, code) -> deliveredCode.set(code),
+                email -> email.endsWith("@mit.edu"),
+                clock);
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+
+        this.repository.requestEmailChangeVerification("new@mit.edu");
+        assertEquals("123456", deliveredCode.get());
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "new@mit.edu", "wrong", "123456"));
+
+        final User updated = this.repository.changeEmail(
+                "new@mit.edu", "password", "123456");
+        assertEquals("new@mit.edu", updated.getEmail());
+        assertEquals(EmailAccountType.ACADEMIC, updated.getEmailAccountType());
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "new@mit.edu", "password", "123456"));
+
+        this.repository.changePassword("password", "new-password");
+        assertEquals(registration.userId(),
+                this.repository.login("new@mit.edu", "new-password").userId());
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.login("new@mit.edu", "password"));
+    }
+
+    @Test
+    void testEmailCodeExpiresAndStopsAfterThreeInvalidAttempts() {
+        final MutableClock clock = new MutableClock(
+                Instant.parse("2026-07-26T12:00:00Z"));
+        this.repository = new LocalServerRepository(
+                this.session,
+                new ClasspathInstitutionCatalogRepository(),
+                new InMemoryEmailVerificationChallengeRepository(),
+                () -> "123456",
+                (email, code) -> { },
+                email -> false,
+                clock);
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+
+        this.repository.requestEmailChangeVerification("first@example.com");
+        clock.advance(Duration.ofMinutes(10));
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "first@example.com", "password", "123456"));
+
+        this.repository.requestEmailChangeVerification("second@example.com");
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "second@example.com", "password", "000000"));
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "second@example.com", "password", "000000"));
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "second@example.com", "password", "000000"));
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail(
+                        "second@example.com", "password", "123456"));
+    }
+
     private AuthResult register(final String firstName, final String email) {
         return this.repository.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
@@ -118,5 +196,33 @@ class LocalServerRepositoryAccountTest {
                 email, "MIT", academicLevel, researchField, lookingFor,
                 "Collaboration", "Research", 12, fundingStatus,
                 List.of("new interest"), "555-1234", 5, 100, List.of(), List.of());
+    }
+
+    private static final class MutableClock extends Clock {
+
+        private Instant instant;
+
+        MutableClock(final Instant instant) {
+            this.instant = instant;
+        }
+
+        void advance(final Duration duration) {
+            this.instant = this.instant.plus(duration);
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneId.of("UTC");
+        }
+
+        @Override
+        public Clock withZone(final ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return this.instant;
+        }
     }
 }
