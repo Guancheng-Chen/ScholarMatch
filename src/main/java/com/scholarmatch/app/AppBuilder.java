@@ -11,7 +11,12 @@ import com.scholarmatch.frameworks.data_access_object.server.ProfileGateway;
 import com.scholarmatch.frameworks.data_access_object.SemanticScholarGateway;
 import com.scholarmatch.frameworks.data_access_object.server.ServerHttpClient;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
+import com.scholarmatch.frameworks.data_access_object.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.InMemoryEmailVerificationChallengeRepository;
+import com.scholarmatch.frameworks.data_access_object.ResendEmailChangeCodeSender;
+import com.scholarmatch.frameworks.data_access_object.SecureVerificationCodeGenerator;
+import com.scholarmatch.frameworks.data_access_object.server.AccountSettingsGateway;
 import com.scholarmatch.frameworks.data_access_object.server.RemoteVerificationEmailSender;
 import com.scholarmatch.frameworks.gui.MainView;
 import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
@@ -70,6 +75,8 @@ import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
 import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
 import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.usecase.data_access_interface.ChangeEmailDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.ChangePasswordDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
@@ -90,6 +97,7 @@ import com.scholarmatch.usecase.data_access_interface.AcceptApplicationDataAcces
 import com.scholarmatch.usecase.data_access_interface.DeclineApplicationDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
 import com.scholarmatch.usecase.delete_account.DeleteAccountInteractor;
 import com.scholarmatch.usecase.load_profile.LoadProfileInteractor;
 import com.scholarmatch.usecase.login.LoginInteractor;
@@ -117,6 +125,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
 
@@ -171,6 +180,9 @@ public final class AppBuilder {
     private LoadMatchesDataAccessInterface loadMatchesDataAccessObject;
     private LoadProfileDataAccessInterface loadProfileDataAccessObject;
     private UpdateProfileDataAccessInterface updateProfileDataAccessObject;
+    private RequestEmailChangeVerificationDataAccessInterface requestEmailChangeDataAccessObject;
+    private ChangeEmailDataAccessInterface changeEmailDataAccessObject;
+    private ChangePasswordDataAccessInterface changePasswordDataAccessObject;
     private DeleteAccountDataAccessInterface deleteAccountDataAccessObject;
     private SendMessageDataAccessInterface sendMessageDataAccessObject;
     private LoadMessageDataAccessInterface loadMessageDataAccessObject;
@@ -313,11 +325,21 @@ public final class AppBuilder {
         final ServerHttpClient httpClient = new ServerHttpClient(SERVER_URL, this.currentUserProvider);
         final AuthGateway authGateway = new AuthGateway(httpClient);
         final ProfileGateway profileGateway = new ProfileGateway(httpClient, this.institutionCatalog);
+        final AccountSettingsGateway accountSettingsGateway =
+                new AccountSettingsGateway(httpClient, this.institutionCatalog);
         final MatchingGateway matchingGateway = new MatchingGateway(httpClient, this.institutionCatalog);
         final MessagingGateway messagingGateway = new MessagingGateway(httpClient);
         final PostingGateway postingGateway = new PostingGateway(httpClient);
-        final LocalServerRepository localRepo =
-                new LocalServerRepository(this.currentUserProvider, this.institutionCatalog);
+        final LocalServerRepository localRepo = new LocalServerRepository(
+                this.currentUserProvider,
+                this.institutionCatalog,
+                new InMemoryEmailVerificationChallengeRepository(),
+                new SecureVerificationCodeGenerator(),
+                new ResendEmailChangeCodeSender(
+                        System.getenv("RESEND_API_KEY"),
+                        System.getenv("RESEND_FROM_EMAIL")),
+                new ClasspathAcademicEmailDomainRepository(),
+                Clock.systemUTC());
 
         this.loginDataAccessObject = offline ? localRepo : authGateway;
         this.registerDataAccessObject = offline ? localRepo : authGateway;
@@ -327,6 +349,12 @@ public final class AppBuilder {
         this.loadMatchesDataAccessObject = offline ? localRepo : matchingGateway;
         this.loadProfileDataAccessObject = offline ? localRepo : profileGateway;
         this.updateProfileDataAccessObject = offline ? localRepo : profileGateway;
+        this.requestEmailChangeDataAccessObject =
+                offline ? localRepo : accountSettingsGateway;
+        this.changeEmailDataAccessObject =
+                offline ? localRepo : accountSettingsGateway;
+        this.changePasswordDataAccessObject =
+                offline ? localRepo : accountSettingsGateway;
         this.deleteAccountDataAccessObject = offline ? localRepo : profileGateway;
         this.sendMessageDataAccessObject = offline ? localRepo : messagingGateway;
         this.loadMessageDataAccessObject = offline ? localRepo : messagingGateway;
