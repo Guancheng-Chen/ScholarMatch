@@ -128,6 +128,11 @@ class LocalServerRepositoryPostingTest {
 
         assertEquals(EmailAccountType.ACADEMIC, repository.getProfile().getEmailAccountType());
         assertEquals("UNIVERSITY_OF_TORONTO", repository.getProfile().getInstitution().name());
+        final Posting posting = repository.createPosting(
+                "Verified poster", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, 1);
+        assertEquals("Demo Student", posting.getPosterName());
+        assertTrue(posting.isPosterAcademicEmailVerified());
     }
 
     @Test

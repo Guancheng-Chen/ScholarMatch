@@ -22,10 +22,33 @@ public record PostingData(
         PostingStatus status,
         boolean full,
         boolean active,
+        String posterName,
+        boolean posterAcademicEmailVerified,
         List<PostingApplicationData> applications) {
 
     public PostingData {
         applications = List.copyOf(applications);
+    }
+
+    public PostingData(
+            final String postingId,
+            final String posterUserId,
+            final String title,
+            final String description,
+            final ResearchField researchField,
+            final CollaborationType collaborationType,
+            final Integer capacity,
+            final int applicantCount,
+            final int acceptedCount,
+            final LocalDateTime createdAt,
+            final PostingStatus status,
+            final boolean full,
+            final boolean active,
+            final List<PostingApplicationData> applications) {
+        this(
+                postingId, posterUserId, title, description, researchField,
+                collaborationType, capacity, applicantCount, acceptedCount,
+                createdAt, status, full, active, "", false, applications);
     }
 
     public static PostingData from(
@@ -36,7 +59,9 @@ public record PostingData(
                 posting.getDescription(), posting.getResearchField(),
                 posting.getCollaborationType(), posting.getCapacity(),
                 posting.getApplicantCount(), posting.getAcceptedCount(), posting.getCreatedAt(),
-                posting.getStatus(), posting.isFull(), posting.isActive(), applications);
+                posting.getStatus(), posting.isFull(), posting.isActive(),
+                posting.getPosterName(), posting.isPosterAcademicEmailVerified(),
+                applications);
     }
 
     public static PostingData from(final Posting posting) {
@@ -101,5 +126,13 @@ public record PostingData(
 
     public List<PostingApplicationData> getApplications() {
         return applications;
+    }
+
+    public String getPosterName() {
+        return posterName;
+    }
+
+    public boolean isPosterAcademicEmailVerified() {
+        return posterAcademicEmailVerified;
     }
 }
