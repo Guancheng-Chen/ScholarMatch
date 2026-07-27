@@ -113,9 +113,16 @@ class LocalServerRepositoryPostingTest {
     }
 
     @Test
-    void testSeededAcademicAccountCanLogIn() {
+    void testAllSeededAccountsUseStandardDemoPassword() {
+        for (final String email : List.of(
+                "ada@demo.local",
+                "alan@demo.local",
+                "grace@demo.local",
+                "demo.student@utoronto.ca")) {
+            repository.login(email, "12345678");
+        }
         final AuthResult result = repository.login(
-                "demo.student@utoronto.ca", "DemoPass123!");
+                "demo.student@utoronto.ca", "12345678");
         session.setCurrentUserId(result.userId());
 
         assertEquals(EmailAccountType.ACADEMIC, repository.getProfile().getEmailAccountType());

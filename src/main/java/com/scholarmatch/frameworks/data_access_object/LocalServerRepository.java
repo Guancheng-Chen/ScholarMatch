@@ -498,7 +498,7 @@ public final class LocalServerRepository
                 CollaborationType.RESEARCH_GROUP,
                 "Looking for University of Toronto classmates to build course projects.",
                 "Interested in software engineering and collaborative student projects.",
-                6, FundingStatus.OTHER, "DemoPass123!", EmailAccountType.ACADEMIC);
+                6, FundingStatus.OTHER, "12345678", EmailAccountType.ACADEMIC);
         final String posterId = this.usersById.values().iterator().next().getUserId();
         final Posting posting = new Posting(
                 UUID.randomUUID().toString(), posterId,
@@ -524,7 +524,7 @@ public final class LocalServerRepository
         final User user = new User(
                 UUID.randomUUID().toString(), firstName, lastName, email, "",
                 institution, academicLevel, researchField, lookingFor, collaborationDescription,
-                researchDescription, weeklyAvailabilityHours, fundingStatus, "");
+                researchDescription, weeklyAvailabilityHours, fundingStatus, "12345678");
         this.usersById.put(user.getUserId(), user);
         this.seedUserIds.add(user.getUserId());
     }
