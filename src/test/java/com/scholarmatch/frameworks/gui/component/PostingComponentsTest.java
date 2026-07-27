@@ -96,8 +96,8 @@ class PostingComponentsTest {
                     named(card, JLabel.class, "postingTitle").getText());
             assertEquals("Description",
                     named(card, JTextArea.class, "postingDescription").getText());
-            assertTrue(named(card, JLabel.class, "postingOwner").getText()
-                    .contains("owner-1"));
+            assertEquals("Posted by Unknown user",
+                    named(card, JLabel.class, "postingOwner").getText());
             assertTrue(named(card, JLabel.class, "postingMetadata").getText()
                     .contains("unlimited"));
             card.reflow(320);
@@ -213,6 +213,29 @@ class PostingComponentsTest {
                             "academicVerificationBadge").getText());
             assertTrue(named(opportunity, JLabel.class, "postingOwner")
                     .getText().contains("Ada Lovelace"));
+        });
+    }
+
+    @Test
+    void testOwnerSummaryIsTextOnlyAndHandlesMissingNames() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            final PostingOwnerSummary named = new PostingOwnerSummary(
+                    " Ada Lovelace ", true);
+            final PostingOwnerSummary unnamed = new PostingOwnerSummary(
+                    " ", false);
+
+            assertEquals("Posted by Ada Lovelace",
+                    named(named, JLabel.class, "postingOwner").getText());
+            assertEquals("Verified university email",
+                    named(named, JLabel.class,
+                            "academicVerificationBadge").getText());
+            assertEquals("Posted by Unknown user",
+                    named(unnamed, JLabel.class, "postingOwner").getText());
+            assertTrue(SwingTestSupport.findAll(named, JButton.class).isEmpty());
+            assertTrue(SwingTestSupport.findAll(unnamed, JButton.class).isEmpty());
+            assertFalse(SwingTestSupport.findAll(unnamed, JLabel.class).stream()
+                    .anyMatch(label -> "academicVerificationBadge"
+                            .equals(label.getName())));
         });
     }
 
