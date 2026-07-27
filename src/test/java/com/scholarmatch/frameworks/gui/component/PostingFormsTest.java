@@ -96,6 +96,7 @@ class PostingFormsTest {
                             .getDocumentListeners()) {
                 if (listener.getClass().getName().contains("ApplyToPostingPanel")) {
                     listener.changedUpdate(null);
+                    listener.removeUpdate(null);
                 }
             }
             button(panel, "Cancel").doClick();
