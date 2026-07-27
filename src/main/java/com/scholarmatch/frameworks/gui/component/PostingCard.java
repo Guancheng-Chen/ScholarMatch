@@ -70,7 +70,9 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
         this.header.add(title, BorderLayout.CENTER);
         this.header.add(status, BorderLayout.EAST);
 
-        final JLabel owner = new JLabel("Posted by " + posting.getPosterUserId()
+        final String ownerName = posting.getPosterName().isBlank()
+                ? posting.getPosterUserId() : posting.getPosterName();
+        final JLabel owner = new JLabel("Posted by " + ownerName
                 + "  •  " + posting.getCreatedAt().format(DATE_FORMAT));
         owner.setName("postingOwner");
         owner.setForeground(Theme.FG_MUTED);
@@ -104,6 +106,10 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
         add(this.header);
         add(Box.createVerticalStrut(6));
         add(owner);
+        if (posting.isPosterAcademicEmailVerified()) {
+            add(Box.createVerticalStrut(5));
+            add(verificationBadge());
+        }
         add(Box.createVerticalStrut(16));
         add(description);
         add(Box.createVerticalStrut(16));
@@ -145,6 +151,15 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
     private static String format(final String value) {
         final String lower = value.toLowerCase(Locale.ROOT).replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+    }
+
+    private static JLabel verificationBadge() {
+        final JLabel badge = new JLabel("Verified university email");
+        badge.setName("academicVerificationBadge");
+        badge.setForeground(Theme.ACCENT_FG);
+        badge.setFont(badge.getFont().deriveFont(Font.BOLD));
+        badge.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return badge;
     }
 
     @FunctionalInterface

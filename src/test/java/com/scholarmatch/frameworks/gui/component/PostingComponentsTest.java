@@ -176,6 +176,46 @@ class PostingComponentsTest {
         assertEquals(null, applied.get());
     }
 
+    @Test
+    void testPostingScreensShowVerifiedOwnerBadge() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            final PostingData posting = new PostingData(
+                    "posting-1", "owner-1", "Research Assistant",
+                    "Description", ResearchField.MACHINE_LEARNING,
+                    CollaborationType.CO_AUTHOR, 2, 1, 1,
+                    LocalDateTime.now(), PostingStatus.OPEN,
+                    false, true, "Ada Lovelace", true, List.of());
+            final PostingCard opportunity =
+                    new PostingCard(posting, (id, text) -> { });
+            final OwnedPostingCard owned = new OwnedPostingCard(
+                    posting, List.of(), value -> { },
+                    new AcceptApplicationController(
+                            mock(AcceptApplicationInputBoundary.class)),
+                    new DeclineApplicationController(
+                            mock(DeclineApplicationInputBoundary.class)));
+            final PostingApplicationData application =
+                    new PostingApplicationData(
+                            "a-1", "posting-1", "user-1", "Message",
+                            PostingApplicationStatus.PENDING,
+                            LocalDateTime.now(), "Title", "Applicant",
+                            "Ada Lovelace", true);
+            final ApplicationCard submitted =
+                    new ApplicationCard(application);
+
+            assertEquals("Verified university email",
+                    named(opportunity, JLabel.class,
+                            "academicVerificationBadge").getText());
+            assertEquals("Verified university email",
+                    named(owned, JLabel.class,
+                            "academicVerificationBadge").getText());
+            assertEquals("Verified university email",
+                    named(submitted, JLabel.class,
+                            "academicVerificationBadge").getText());
+            assertTrue(named(opportunity, JLabel.class, "postingOwner")
+                    .getText().contains("Ada Lovelace"));
+        });
+    }
+
     private static JButton button(final PostingCard card) {
         return SwingTestSupport.find(card, JButton.class, 0);
     }

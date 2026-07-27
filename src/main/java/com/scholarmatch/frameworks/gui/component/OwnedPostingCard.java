@@ -129,6 +129,15 @@ public final class OwnedPostingCard extends RoundedPanel implements Reflowable {
         add(header);
         add(Box.createVerticalStrut(6));
         add(meta);
+        if (posting.isPosterAcademicEmailVerified()) {
+            final JLabel badge = new JLabel("Verified university email");
+            badge.setName("academicVerificationBadge");
+            badge.setForeground(Theme.ACCENT_FG);
+            badge.setFont(badge.getFont().deriveFont(Font.BOLD));
+            badge.setAlignmentX(Component.LEFT_ALIGNMENT);
+            add(Box.createVerticalStrut(5));
+            add(badge);
+        }
         add(Box.createVerticalStrut(14));
         add(description);
         add(Box.createVerticalStrut(16));
