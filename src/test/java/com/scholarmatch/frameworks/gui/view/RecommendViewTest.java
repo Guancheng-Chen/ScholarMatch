@@ -106,7 +106,7 @@ class RecommendViewTest {
                 viewModel);
         viewModel.setCardStack(List.of(user));
 
-        SwingTestSupport.find(view, JButton.class, 0).doClick();
+        SwingTestSupport.find(view, JButton.class, 1).doClick();
 
         verify(interactor).execute(argThatHasUserId("dislike-me"));
         assertTrue(viewModel.getCardStack().isEmpty());
@@ -129,7 +129,7 @@ class RecommendViewTest {
                 viewModel);
         viewModel.setCardStack(List.of(user));
 
-        SwingTestSupport.find(view, JButton.class, 1).doClick();
+        SwingTestSupport.find(view, JButton.class, 2).doClick();
 
         verify(interactor).execute(org.mockito.ArgumentMatchers.argThat(
                 data -> data != null && "skip-me".equals(data.getSkippedUserId())));
@@ -153,7 +153,7 @@ class RecommendViewTest {
                 viewModel);
         viewModel.setCardStack(List.of(user));
 
-        SwingTestSupport.find(view, JButton.class, 2).doClick();
+        SwingTestSupport.find(view, JButton.class, 3).doClick();
 
         verify(interactor, times(1)).execute(org.mockito.ArgumentMatchers.argThat(
                 data -> data != null && "connect-me".equals(data.getConnectedUserId())

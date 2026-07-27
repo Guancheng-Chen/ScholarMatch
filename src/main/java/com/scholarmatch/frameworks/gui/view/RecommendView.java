@@ -1,7 +1,9 @@
 package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.component.RecommendUserCard;
+import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
+import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.ConnectController;
 import com.scholarmatch.interface_adapter.controller.DislikeController;
@@ -9,12 +11,15 @@ import com.scholarmatch.interface_adapter.controller.RecommendController;
 import com.scholarmatch.interface_adapter.controller.SkipController;
 import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
 import com.scholarmatch.usecase.dto.UserData;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 
 /**
@@ -34,6 +39,7 @@ public final class RecommendView extends JPanel {
     private final DislikeController dislikeController;
     private final SkipController skipController;
     private final RecommendViewModel viewModel;
+    private final JPanel contentPanel = new JPanel(new BorderLayout());
 
     /**
      * Constructs the RecommendView.
@@ -57,6 +63,10 @@ public final class RecommendView extends JPanel {
         this.skipController = skipController;
         this.viewModel = viewModel;
         setBackground(Theme.BG_DEFAULT);
+        contentPanel.setOpaque(false);
+
+        add(buildHeader(), BorderLayout.NORTH);
+        add(contentPanel, BorderLayout.CENTER);
 
         viewModel.getCardStack().addListener(this::renderTopCard);
         viewModel.errorMessageProperty().addListener(message -> renderTopCard());
@@ -64,21 +74,33 @@ public final class RecommendView extends JPanel {
         recommendController.execute();
     }
 
+    private JPanel buildHeader() {
+        final JButton refreshButton = new JButton(Icons.of(FontAwesomeSolid.SYNC_ALT, 15, Theme.FG_DEFAULT));
+        Buttons.outlined(refreshButton);
+        refreshButton.setToolTipText("Refresh recommendations");
+        refreshButton.addActionListener(evt -> recommendController.execute());
+
+        final JPanel header = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 16));
+        header.setOpaque(false);
+        header.add(refreshButton);
+        return header;
+    }
+
     private void renderTopCard() {
-        removeAll();
+        contentPanel.removeAll();
 
         final String errorMessage = this.viewModel.errorMessageProperty().get();
         if (errorMessage != null && !errorMessage.isBlank()) {
-            add(emptyStateLabel(errorMessage), BorderLayout.CENTER);
-            revalidate();
-            repaint();
+            contentPanel.add(emptyStateLabel(errorMessage), BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
             return;
         }
 
         if (this.viewModel.getCardStack().isEmpty()) {
-            add(emptyStateLabel("No more recommendations right now."), BorderLayout.CENTER);
-            revalidate();
-            repaint();
+            contentPanel.add(emptyStateLabel("No more recommendations right now."), BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
             return;
         }
 
@@ -114,9 +136,9 @@ public final class RecommendView extends JPanel {
         scrollPane.getViewport().setBackground(Theme.BG_DEFAULT);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        add(scrollPane, BorderLayout.CENTER);
-        revalidate();
-        repaint();
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
         // The panel's width isn't known until Swing finishes laying out the frame, so the
         // constructor's own size is still 0 here — defer the first reflow past that.
         javax.swing.SwingUtilities.invokeLater(centeringPanel::reflowNow);
