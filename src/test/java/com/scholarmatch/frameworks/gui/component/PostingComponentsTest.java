@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +49,13 @@ class PostingComponentsTest {
             final List<JButton> buttons = SwingTestSupport.findAll(row, JButton.class);
             assertTrue(buttons.get(0).isEnabled());
             assertTrue(buttons.get(1).isEnabled());
-            assertTrue(SwingTestSupport.find(row, JLabel.class, 0).getText().startsWith("Ada —"));
+            assertEquals("Ada", named(row, JLabel.class, "applicantName").getText());
+            assertEquals("Please consider me",
+                    named(row, JTextArea.class, "applicationMessage").getText());
+            row.reflow(400);
+            assertTrue(row.getLayout() instanceof javax.swing.BoxLayout);
+            row.reflow(700);
+            assertTrue(row.getLayout() instanceof java.awt.BorderLayout);
             buttons.forEach(JButton::doClick);
         });
         final ArgumentCaptor<AcceptApplicationInputData> accepted =
@@ -71,7 +78,7 @@ class PostingComponentsTest {
             final List<JButton> buttons = SwingTestSupport.findAll(row, JButton.class);
             assertFalse(buttons.get(0).isEnabled());
             assertFalse(buttons.get(1).isEnabled());
-            assertTrue(SwingTestSupport.find(row, JLabel.class, 0).getText().startsWith("user-1 —"));
+            assertEquals("user-1", named(row, JLabel.class, "applicantName").getText());
         });
     }
 
@@ -88,11 +95,75 @@ class PostingComponentsTest {
                             postingId.set(id);
                             message.set(text);
                         });
+                assertEquals("Research Assistant",
+                        named(card, JLabel.class, "postingTitle").getText());
+                assertEquals("Description",
+                        named(card, JTextArea.class, "postingDescription").getText());
+                assertTrue(named(card, JLabel.class, "postingOwner").getText()
+                        .contains("owner-1"));
+                assertTrue(named(card, JLabel.class, "postingMetadata").getText()
+                        .contains("unlimited"));
+                card.reflow(320);
+                assertEquals(320, card.getPreferredSize().width);
                 button(card).doClick();
             }
         });
         assertEquals("posting-1", postingId.get());
         assertEquals("", message.get());
+    }
+
+    @Test
+    void testApplicationCardDisplaysFallbackMessageStatusAndReflows() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            final ApplicationCard fallback = new ApplicationCard(application(
+                    PostingApplicationStatus.PENDING, "Ada"));
+            assertEquals("Title", named(fallback, JLabel.class, "postingTitle").getText());
+            assertEquals("Pending",
+                    named(fallback, JLabel.class, "applicationStatus").getText());
+            assertEquals("Please consider me",
+                    named(fallback, JTextArea.class, "applicationMessage").getText());
+            fallback.reflow(400);
+            assertTrue(SwingTestSupport.findAll(fallback, javax.swing.JPanel.class).stream()
+                    .anyMatch(panel -> panel.getLayout() instanceof javax.swing.BoxLayout));
+            fallback.reflow(700);
+
+            final PostingApplicationData unnamedPosting = new PostingApplicationData(
+                    "a2", "posting-2", "user-2", "Long message",
+                    PostingApplicationStatus.REJECTED, LocalDateTime.now(), "", "");
+            final ApplicationCard second = new ApplicationCard(unnamedPosting);
+            assertEquals("Posting posting-2",
+                    named(second, JLabel.class, "postingTitle").getText());
+        });
+    }
+
+    @Test
+    void testOwnedPostingCardShowsDetailsApplicationsEmptyStateAndClose() throws Exception {
+        final AtomicReference<String> closed = new AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            final AcceptApplicationController accept = new AcceptApplicationController(
+                    mock(AcceptApplicationInputBoundary.class));
+            final DeclineApplicationController decline = new DeclineApplicationController(
+                    mock(DeclineApplicationInputBoundary.class));
+            final OwnedPostingCard active = new OwnedPostingCard(
+                    posting(2, true, false),
+                    List.of(application(PostingApplicationStatus.PENDING, "Ada")),
+                    value -> closed.set(value.getPostingId()), accept, decline);
+            assertEquals("Research Assistant",
+                    named(active, JLabel.class, "postingTitle").getText());
+            assertEquals("Description",
+                    named(active, JTextArea.class, "postingDescription").getText());
+            assertTrue(named(active, JLabel.class, "applicationsTitle").getText().contains("1"));
+            named(active, JButton.class, "closePostingButton").doClick();
+            active.reflow(400);
+
+            final OwnedPostingCard closedCard = new OwnedPostingCard(
+                    posting(null, false, false), List.of(), value -> { }, accept, decline);
+            assertEquals("No applications received yet.",
+                    named(closedCard, JLabel.class, "emptyApplications").getText());
+            assertFalse(SwingTestSupport.findAll(closedCard, JButton.class).stream()
+                    .anyMatch(button -> "Close Posting".equals(button.getText())));
+        });
+        assertEquals("posting-1", closed.get());
     }
 
     @Test
@@ -118,6 +189,13 @@ class PostingComponentsTest {
 
     private static JButton button(final PostingCard card) {
         return SwingTestSupport.find(card, JButton.class, 0);
+    }
+
+    private static <T extends java.awt.Component> T named(
+            final java.awt.Container root, final Class<T> type, final String name) {
+        return SwingTestSupport.findAll(root, type).stream()
+                .filter(component -> name.equals(component.getName()))
+                .findFirst().orElseThrow();
     }
 
     private static PostingApplicationData application(
