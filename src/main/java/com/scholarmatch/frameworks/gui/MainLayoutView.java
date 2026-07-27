@@ -35,7 +35,7 @@ import com.scholarmatch.interface_adapter.controller.DeclineApplicationControlle
 import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
 import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
 import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
 import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
@@ -115,7 +115,7 @@ final class MainLayoutView extends JPanel {
         final UpdateProfileController updateProfileController,
         final LoadProfileController loadProfileController,
         final UpdateProfileViewModel updateProfileViewModel,
-        final RequestEmailChangeVerificationController requestEmailChangeController,
+        final RequestEmailVerificationController requestEmailChangeController,
         final ChangeEmailController changeEmailController,
         final ChangePasswordController changePasswordController,
         final AccountSettingsViewModel accountSettingsViewModel,

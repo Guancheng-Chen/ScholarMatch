@@ -111,6 +111,16 @@ class LocalServerRepositoryAccountTest {
     }
 
     @Test
+    void testRequestVerificationCodeRejectsEmailAlreadyRegisteredToAnotherUser() {
+        register("Ada", "ada@example.com");
+        final AuthResult other = register("Grace", "grace@example.com");
+        this.session.setCurrentUserId(other.userId());
+
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.requestVerificationCode("ada@example.com"));
+    }
+
+    @Test
     void testEmailAndPasswordChangesUseVerifiedAccountSettingsFlow() {
         final AtomicReference<String> deliveredCode = new AtomicReference<>();
         final MutableClock clock = new MutableClock(
@@ -126,7 +136,7 @@ class LocalServerRepositoryAccountTest {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
 
-        this.repository.requestEmailChangeVerification("new@mit.edu");
+        this.repository.requestVerificationCode("new@mit.edu");
         assertEquals("123456", deliveredCode.get());
         assertThrows(InvalidRequestException.class, () ->
                 this.repository.changeEmail(
@@ -162,13 +172,13 @@ class LocalServerRepositoryAccountTest {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
 
-        this.repository.requestEmailChangeVerification("first@example.com");
+        this.repository.requestVerificationCode("first@example.com");
         clock.advance(Duration.ofMinutes(10));
         assertThrows(InvalidRequestException.class, () ->
                 this.repository.changeEmail(
                         "first@example.com", "password", "123456"));
 
-        this.repository.requestEmailChangeVerification("second@example.com");
+        this.repository.requestVerificationCode("second@example.com");
         assertThrows(InvalidRequestException.class, () ->
                 this.repository.changeEmail(
                         "second@example.com", "password", "000000"));

@@ -4,7 +4,7 @@ import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.ChangeEmailDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.ChangePasswordDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.VerificationEmailSenderDataAccessInterface;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import java.util.Map;
  * Authenticated HTTP adapter for account email and password management.
  */
 public final class AccountSettingsGateway
-        implements RequestEmailChangeVerificationDataAccessInterface,
+        implements VerificationEmailSenderDataAccessInterface,
         ChangeEmailDataAccessInterface,
         ChangePasswordDataAccessInterface {
 
@@ -27,7 +27,7 @@ public final class AccountSettingsGateway
     }
 
     @Override
-    public void requestEmailChangeVerification(final String email) {
+    public void requestVerificationCode(final String email) {
         this.http.post(
                 "/api/account/email-change/request-code",
                 this.http.toJson(Map.of("email", email)),

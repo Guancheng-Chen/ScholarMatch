@@ -14,7 +14,6 @@ import com.scholarmatch.usecase.login.LoginOutputData;
 import com.scholarmatch.usecase.logout.LogoutOutputData;
 import com.scholarmatch.usecase.register.RegisterOutputData;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationOutputData;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationOutputData;
 import com.scholarmatch.usecase.update_profile.UpdateProfileOutputData;
 import org.junit.jupiter.api.Test;
 
@@ -133,7 +132,7 @@ class AccountPresenterTest {
         assertEquals("cannot update", viewModel.errorMessageProperty().get());
 
         presenter.prepareSuccessView(
-                new RequestEmailChangeVerificationOutputData("new@example.com"));
+                new RequestEmailVerificationOutputData("new@example.com"));
         assertEquals("", viewModel.errorMessageProperty().get());
         assertEquals("Verification code sent to new@example.com.",
                 viewModel.successMessageProperty().get());
