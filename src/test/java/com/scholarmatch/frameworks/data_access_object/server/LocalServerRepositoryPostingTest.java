@@ -46,6 +46,8 @@ class LocalServerRepositoryPostingTest {
 
         session.setCurrentUserId("applicant-1");
         final PostingApplication first = repository.applyToPosting(posting.getPostingId(), "First");
+        assertEquals("poster-1", first.getPosterUserId());
+        assertEquals("poster-1", first.getPosterName());
         session.setCurrentUserId("applicant-2");
         final PostingApplication second = repository.applyToPosting(posting.getPostingId(), "Second");
 

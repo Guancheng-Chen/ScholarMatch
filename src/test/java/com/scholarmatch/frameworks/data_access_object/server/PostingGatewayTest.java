@@ -30,13 +30,15 @@ import static org.mockito.Mockito.when;
 class PostingGatewayTest {
 
     private static final String POSTING_JSON = """
-            {"postingId": "p-1", "posterUserId": "u-1", "title": "Title",
+            {"postingId": "p-1", "posterUserId": "u-1", "posterName": "Grace Hopper",
+             "title": "Title",
              "description": "Desc", "researchField": "COMPUTER_SCIENCE",
              "collaborationType": "CO_AUTHOR", "capacity": 3, "applicantCount": 0,
              "status": "OPEN", "createdAt": "2024-01-01T10:00:00"}""";
 
     private static final String APPLICATION_JSON = """
             {"applicationId": "a-1", "postingId": "p-1", "applicantUserId": "u-2",
+             "posterUserId": "u-1", "posterName": "Grace Hopper",
              "message": "hi", "status": "PENDING", "appliedAt": "2024-01-01T10:00:00"}""";
 
     private HttpTestServer fakeServer;
@@ -63,6 +65,8 @@ class PostingGatewayTest {
                 "Title", "Desc", ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR, 3);
 
         assertEquals("p-1", posting.getPostingId());
+        assertEquals("u-1", posting.getPosterUserId());
+        assertEquals("Grace Hopper", posting.getPosterName());
         assertEquals(PostingStatus.OPEN, posting.getStatus());
         assertEquals("POST", this.fakeServer.lastMethod().get());
         assertTrue(this.fakeServer.lastRequestBody().get().contains("Title"));
@@ -94,6 +98,8 @@ class PostingGatewayTest {
         final PostingApplication application = this.gateway.applyToPosting("p-1", "hi");
 
         assertEquals("a-1", application.getApplicationId());
+        assertEquals("u-1", application.getPosterUserId());
+        assertEquals("Grace Hopper", application.getPosterName());
         assertEquals(PostingApplicationStatus.PENDING, application.getStatus());
     }
 
@@ -123,6 +129,7 @@ class PostingGatewayTest {
 
         assertEquals(1, applications.size());
         assertEquals("a-1", applications.get(0).getApplicationId());
+        assertEquals("u-1", applications.get(0).getPosterUserId());
     }
 
     @Test
@@ -197,7 +204,8 @@ class PostingGatewayTest {
         assertEquals("Ada Lovelace", verified.getPosterName());
         assertTrue(verified.isPosterAcademicEmailVerified());
 
-        this.fakeServer.bodyToReturn().set("[" + POSTING_JSON + "]");
+        this.fakeServer.bodyToReturn().set("[" + POSTING_JSON.replace(
+                ", \"posterName\": \"Grace Hopper\"", "") + "]");
         final Posting unknown =
                 this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
         assertEquals("", unknown.getPosterName());
@@ -236,5 +244,7 @@ class PostingGatewayTest {
         assertEquals(PostingApplicationStatus.PENDING, application.getStatus());
         assertEquals("Posting", application.getPostingTitle());
         assertEquals("Ada", application.getApplicantName());
+        assertEquals("", application.getPosterUserId());
+        assertEquals("", application.getPosterName());
     }
 }

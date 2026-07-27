@@ -297,6 +297,7 @@ public final class LocalServerRepository
                 UUID.randomUUID().toString(), postingId, currentId,
                 message == null ? "" : message, PostingApplicationStatus.PENDING,
                 LocalDateTime.now(), posting.getTitle(), displayName(currentId),
+                posting.getPosterUserId(),
                 posting.getPosterName(),
                 posting.isPosterAcademicEmailVerified());
         this.applicationsById.put(application.getApplicationId(), application);

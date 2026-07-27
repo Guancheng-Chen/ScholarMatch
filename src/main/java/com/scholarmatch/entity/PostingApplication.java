@@ -15,6 +15,7 @@ public final class PostingApplication {
     private final LocalDateTime appliedAt;
     private final String postingTitle;
     private final String applicantName;
+    private final String posterUserId;
     private final String posterName;
     private final boolean posterAcademicEmailVerified;
     private PostingApplicationStatus status;
@@ -31,7 +32,7 @@ public final class PostingApplication {
             final LocalDateTime appliedAt) {
         this(
                 applicationId, postingId, applicantUserId, message, status,
-                appliedAt, "", "", "", false);
+                appliedAt, "", "", "", "", false);
     }
 
     public PostingApplication(
@@ -45,7 +46,7 @@ public final class PostingApplication {
             final String applicantName) {
         this(
                 applicationId, postingId, applicantUserId, message, status,
-                appliedAt, postingTitle, applicantName, "", false);
+                appliedAt, postingTitle, applicantName, "", "", false);
     }
 
     public PostingApplication(
@@ -59,6 +60,24 @@ public final class PostingApplication {
             final String applicantName,
             final String posterName,
             final boolean posterAcademicEmailVerified) {
+        this(
+                applicationId, postingId, applicantUserId, message, status,
+                appliedAt, postingTitle, applicantName, "", posterName,
+                posterAcademicEmailVerified);
+    }
+
+    public PostingApplication(
+            final String applicationId,
+            final String postingId,
+            final String applicantUserId,
+            final String message,
+            final PostingApplicationStatus status,
+            final LocalDateTime appliedAt,
+            final String postingTitle,
+            final String applicantName,
+            final String posterUserId,
+            final String posterName,
+            final boolean posterAcademicEmailVerified) {
         this.applicationId = Objects.requireNonNull(applicationId);
         this.postingId = Objects.requireNonNull(postingId);
         this.applicantUserId = Objects.requireNonNull(applicantUserId);
@@ -67,6 +86,7 @@ public final class PostingApplication {
         this.appliedAt = Objects.requireNonNull(appliedAt);
         this.postingTitle = postingTitle == null ? "" : postingTitle;
         this.applicantName = applicantName == null ? "" : applicantName;
+        this.posterUserId = posterUserId == null ? "" : posterUserId;
         this.posterName = posterName == null ? "" : posterName;
         this.posterAcademicEmailVerified = posterAcademicEmailVerified;
     }
@@ -121,6 +141,10 @@ public final class PostingApplication {
 
     public String getApplicantName() {
         return this.applicantName;
+    }
+
+    public String getPosterUserId() {
+        return this.posterUserId;
     }
 
     public String getPosterName() {

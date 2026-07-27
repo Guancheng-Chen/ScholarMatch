@@ -26,6 +26,8 @@ class PostingApplicationDataTest {
         assertEquals(appliedAt, data.getAppliedAt());
         assertEquals("", data.getPostingTitle());
         assertEquals("", data.getApplicantName());
+        assertEquals("", data.getPosterUserId());
+        assertEquals("", data.getPosterName());
     }
 
     @Test
@@ -33,12 +35,15 @@ class PostingApplicationDataTest {
         final PostingApplication application = new PostingApplication(
                 "application-1", "posting-1", "applicant-1", "Hello",
                 PostingApplicationStatus.ACCEPTED, LocalDateTime.now(),
-                "Posting Title", "Ada Lovelace");
+                "Posting Title", "Ada Lovelace", "poster-1",
+                "Grace Hopper", true);
 
         final PostingApplicationData data = PostingApplicationData.from(application);
 
         assertEquals("Posting Title", data.getPostingTitle());
         assertEquals("Ada Lovelace", data.getApplicantName());
+        assertEquals("poster-1", data.getPosterUserId());
+        assertEquals("Grace Hopper", data.getPosterName());
         assertEquals(List.of(data), PostingApplicationData.fromAll(List.of(application)));
     }
 }

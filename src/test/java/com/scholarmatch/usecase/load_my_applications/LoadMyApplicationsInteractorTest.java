@@ -5,11 +5,12 @@ import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.usecase.data_access_interface.LoadMyApplicationsDataAccessInterface;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +29,13 @@ class LoadMyApplicationsInteractorTest {
 
         interactor.execute();
 
-        verify(output).prepareSuccessView(any());
+        final ArgumentCaptor<LoadMyApplicationsOutputData> result =
+                ArgumentCaptor.forClass(LoadMyApplicationsOutputData.class);
+        verify(output).prepareSuccessView(result.capture());
+        assertEquals("poster-1",
+                result.getValue().applications().getFirst().getPosterUserId());
+        assertEquals("Posting Owner",
+                result.getValue().applications().getFirst().getPosterName());
         when(dao.getMyApplications()).thenThrow(new InvalidRequestException("load failed"));
         interactor.execute();
         verify(output).prepareFailView("load failed");
@@ -37,6 +44,7 @@ class LoadMyApplicationsInteractorTest {
     private PostingApplication application() {
         return new PostingApplication(
                 "application-1", "posting-1", "applicant-1", "Message",
-                PostingApplicationStatus.PENDING, LocalDateTime.now());
+                PostingApplicationStatus.PENDING, LocalDateTime.now(),
+                "Posting", "Applicant", "poster-1", "Posting Owner", false);
     }
 }

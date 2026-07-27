@@ -148,7 +148,8 @@ public final class PostingGateway
                 PostingStatus.OPEN);
         return new Posting(
                 node.get("postingId").asText(),
-                node.get("posterUserId").asText(),
+                node.has("posterUserId")
+                        ? node.get("posterUserId").asText("") : "",
                 node.has("posterName") ? node.get("posterName").asText("") : "",
                 verified(node),
                 node.get("title").asText(),
@@ -176,6 +177,7 @@ public final class PostingGateway
                 LocalDateTime.parse(node.get("appliedAt").asText()),
                 node.has("postingTitle") ? node.get("postingTitle").asText("") : "",
                 node.has("applicantName") ? node.get("applicantName").asText("") : "",
+                node.has("posterUserId") ? node.get("posterUserId").asText("") : "",
                 node.has("posterName") ? node.get("posterName").asText("") : "",
                 verified(node));
     }

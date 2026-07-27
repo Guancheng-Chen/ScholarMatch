@@ -28,8 +28,14 @@ public record PostingApplicationData(
         LocalDateTime appliedAt,
         String postingTitle,
         String applicantName,
+        String posterUserId,
         String posterName,
         boolean posterAcademicEmailVerified) {
+
+    public PostingApplicationData {
+        posterUserId = posterUserId == null ? "" : posterUserId;
+        posterName = posterName == null ? "" : posterName;
+    }
 
     public PostingApplicationData(
             final String applicationId,
@@ -40,7 +46,7 @@ public record PostingApplicationData(
             final LocalDateTime appliedAt) {
         this(
                 applicationId, postingId, applicantUserId, message, status,
-                appliedAt, "", "", "", false);
+                appliedAt, "", "", "", "", false);
     }
 
     public PostingApplicationData(
@@ -54,7 +60,24 @@ public record PostingApplicationData(
             final String applicantName) {
         this(
                 applicationId, postingId, applicantUserId, message, status,
-                appliedAt, postingTitle, applicantName, "", false);
+                appliedAt, postingTitle, applicantName, "", "", false);
+    }
+
+    public PostingApplicationData(
+            final String applicationId,
+            final String postingId,
+            final String applicantUserId,
+            final String message,
+            final PostingApplicationStatus status,
+            final LocalDateTime appliedAt,
+            final String postingTitle,
+            final String applicantName,
+            final String posterName,
+            final boolean posterAcademicEmailVerified) {
+        this(
+                applicationId, postingId, applicantUserId, message, status,
+                appliedAt, postingTitle, applicantName, "", posterName,
+                posterAcademicEmailVerified);
     }
 
     public static PostingApplicationData from(final PostingApplication application) {
@@ -67,6 +90,7 @@ public record PostingApplicationData(
                 application.getAppliedAt(),
                 application.getPostingTitle(),
                 application.getApplicantName(),
+                application.getPosterUserId(),
                 application.getPosterName(),
                 application.isPosterAcademicEmailVerified());
     }
@@ -106,6 +130,10 @@ public record PostingApplicationData(
 
     public String getApplicantName() {
         return applicantName;
+    }
+
+    public String getPosterUserId() {
+        return posterUserId;
     }
 
     public String getPosterName() {
