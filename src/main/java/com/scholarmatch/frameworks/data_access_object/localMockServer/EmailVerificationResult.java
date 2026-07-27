@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 /**
  * Result from one verification-code attempt.

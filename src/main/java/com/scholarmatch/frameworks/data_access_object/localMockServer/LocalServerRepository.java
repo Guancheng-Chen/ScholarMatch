@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
@@ -12,14 +12,13 @@ import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.entity.PostingStatus;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
-import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.data_access_interface.ChangeEmailDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.ChangePasswordDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.DislikeDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.EmailChangeCodeDeliveryDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMatchesDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
@@ -29,7 +28,6 @@ import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterfac
 import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.VerificationCodeGeneratorInterface;
 import com.scholarmatch.usecase.data_access_interface.ConnectDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.CreatePostingDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadPostingsDataAccessInterface;

@@ -1,6 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
-
-import com.scholarmatch.usecase.data_access_interface.VerificationCodeGeneratorInterface;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import java.security.SecureRandom;
 import java.util.Locale;

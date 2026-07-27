@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import java.util.Locale;
 import java.util.Map;

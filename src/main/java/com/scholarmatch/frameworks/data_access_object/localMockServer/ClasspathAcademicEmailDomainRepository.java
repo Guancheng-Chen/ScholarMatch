@@ -1,6 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
-
-import com.scholarmatch.usecase.data_access_interface.AcademicEmailDomainDataAccessInterface;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.scholarmatch.frameworks.data_access_object;
+package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
@@ -7,6 +7,8 @@ import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
+import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.exception.ResourceNotFoundException;
