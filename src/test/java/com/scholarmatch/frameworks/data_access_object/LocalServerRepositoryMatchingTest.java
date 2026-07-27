@@ -27,22 +27,21 @@ class LocalServerRepositoryMatchingTest {
     }
 
     @Test
-    void testSeedUsersMatchImmediatelyAndCanExchangeMessages() {
+    void testSeedUsersRequireReciprocalConnect() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
         final List<User> recommendations = this.repository.getRecommendations();
         final User seedUser = recommendations.getFirst();
-        final User otherSeedUser = recommendations.get(1);
 
-        assertTrue(this.repository.connect(seedUser.getUserId()));
-        assertTrue(this.repository.connect(otherSeedUser.getUserId()));
-        assertTrue(this.repository.getMatches().containsAll(List.of(seedUser, otherSeedUser)));
+        assertFalse(this.repository.connect(seedUser.getUserId()));
+        assertTrue(this.repository.getMatches().isEmpty());
 
-        final Message message = this.repository.sendMessage(seedUser.getUserId(), "Hello");
-        this.repository.sendMessage(otherSeedUser.getUserId(), "Other conversation");
-        assertEquals("Hello", message.getContent());
-        assertEquals(List.of(message),
-                this.repository.getConversation(seedUser.getUserId()));
+        final AuthResult seed = this.repository.login(seedUser.getEmail(), "12345678");
+        this.session.setCurrentUserId(seed.userId());
+        assertTrue(this.repository.connect(current.userId()));
+
+        this.session.setCurrentUserId(current.userId());
+        assertEquals(List.of(seedUser), this.repository.getMatches());
     }
 
     @Test
@@ -63,6 +62,7 @@ class LocalServerRepositoryMatchingTest {
 
         this.session.setCurrentUserId(first.userId());
         assertFalse(this.repository.connect(second.userId()));
+        assertTrue(this.repository.getMatches().isEmpty());
         assertThrows(InvalidRequestException.class,
                 () -> this.repository.sendMessage(second.userId(), "Too early"));
 

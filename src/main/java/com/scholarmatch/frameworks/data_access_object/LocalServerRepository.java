@@ -313,7 +313,8 @@ public final class LocalServerRepository
     @Override
     public boolean connect(final String connectedUserId) {
         final String currentId = this.session.getCurrentUserId();
-        if (this.seedUserIds.contains(connectedUserId)) {
+        if (this.seedUserIds.contains(connectedUserId)
+                && this.recordedConnections.contains(connectedUserId + "->" + currentId)) {
             // Seed users always "connect back" instantly — record both directions so
             // this match also shows up later via getMatches(), not just in this moment.
             this.recordedConnections.add(currentId + "->" + connectedUserId);
@@ -321,7 +322,7 @@ public final class LocalServerRepository
             return true;
         }
         this.recordedConnections.add(currentId + "->" + connectedUserId);
-        return this.recordedConnections.contains(connectedUserId + "->" + currentId);
+        return hasMutualConnection(currentId, connectedUserId);
     }
 
     @Override
@@ -337,8 +338,7 @@ public final class LocalServerRepository
         for (final User user : this.usersById.values()) {
             final String otherId = user.getUserId();
             final boolean mutualMatch = !otherId.equals(currentId)
-                    && this.recordedConnections.contains(currentId + "->" + otherId)
-                    && this.recordedConnections.contains(otherId + "->" + currentId);
+                    && hasMutualConnection(currentId, otherId);
             if (mutualMatch) {
                 matches.add(user);
             }
@@ -566,6 +566,11 @@ public final class LocalServerRepository
     private String displayName(final String userId) {
         final User user = this.usersById.get(userId);
         return user == null ? "" : user.getFullName();
+    }
+
+    private boolean hasMutualConnection(final String firstUserId, final String secondUserId) {
+        return this.recordedConnections.contains(firstUserId + "->" + secondUserId)
+                && this.recordedConnections.contains(secondUserId + "->" + firstUserId);
     }
 
     private AuthResult toAuthResult(final User user) {
