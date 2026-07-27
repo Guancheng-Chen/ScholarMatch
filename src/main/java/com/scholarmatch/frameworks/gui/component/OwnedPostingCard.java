@@ -1,6 +1,7 @@
 package com.scholarmatch.frameworks.gui.component;
 
 import com.scholarmatch.frameworks.gui.style.Buttons;
+import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.Reflowable;
 import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
@@ -8,6 +9,7 @@ import com.scholarmatch.interface_adapter.controller.AcceptApplicationController
 import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
 import com.scholarmatch.usecase.dto.PostingApplicationData;
 import com.scholarmatch.usecase.dto.PostingData;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -102,9 +104,12 @@ public final class OwnedPostingCard extends RoundedPanel implements Reflowable {
         controls.setAlignmentX(Component.LEFT_ALIGNMENT);
         controls.add(counts);
         if (posting.isActive()) {
-            final JButton closeButton = new JButton("Close Posting");
+            final JButton closeButton = new JButton(
+                    "Close Posting", Icons.of(FontAwesomeSolid.LOCK, 13, Theme.FG_DEFAULT));
             closeButton.setName("closePostingButton");
             Buttons.outlined(closeButton);
+            closeButton.setFont(closeButton.getFont().deriveFont(Font.BOLD, 14f));
+            closeButton.setIconTextGap(8);
             closeButton.addActionListener(event -> onClose.accept(posting));
             final JPanel close = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
             close.setOpaque(false);
