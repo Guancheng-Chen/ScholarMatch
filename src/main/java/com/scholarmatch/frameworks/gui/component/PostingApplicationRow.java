@@ -14,6 +14,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -69,11 +70,18 @@ public final class PostingApplicationRow extends JPanel implements Reflowable {
         message.setName("applicationMessage");
         message.setEditable(false);
         message.setFocusable(false);
-        message.setOpaque(false);
+        message.setBackground(Theme.BG_INSET);
         message.setLineWrap(true);
         message.setWrapStyleWord(true);
         message.setForeground(Theme.FG_DEFAULT);
-        message.setBorder(BorderFactory.createEmptyBorder());
+        message.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        message.setRows(6);
+        message.setFont(message.getFont().deriveFont(14f));
+        final JScrollPane messageScroll = new JScrollPane(message);
+        messageScroll.setName("receivedApplicationMessageScroll");
+        messageScroll.setPreferredSize(new Dimension(460, 130));
+        messageScroll.setMinimumSize(new Dimension(240, 110));
+        messageScroll.setBorder(BorderFactory.createLineBorder(Theme.BORDER_DEFAULT));
 
         this.content.setOpaque(false);
         this.content.setLayout(new BoxLayout(this.content, BoxLayout.Y_AXIS));
@@ -81,7 +89,7 @@ public final class PostingApplicationRow extends JPanel implements Reflowable {
         this.content.add(Box.createVerticalStrut(3));
         this.content.add(details);
         this.content.add(Box.createVerticalStrut(10));
-        this.content.add(message);
+        this.content.add(messageScroll);
 
         final JButton acceptButton = new JButton("Accept");
         acceptButton.setName("acceptButton");

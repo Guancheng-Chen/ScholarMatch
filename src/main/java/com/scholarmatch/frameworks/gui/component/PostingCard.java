@@ -11,7 +11,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
@@ -44,6 +43,13 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
     public PostingCard(
             final PostingData posting,
             final BiConsumer<String, String> onApply) {
+        this(posting, onApply, ApplyToPostingDialog::showDialog);
+    }
+
+    PostingCard(
+            final PostingData posting,
+            final BiConsumer<String, String> onApply,
+            final ApplicationDialogLauncher dialogLauncher) {
         super(Theme.CARD_RADIUS, 24);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -87,13 +93,8 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
             applyButton.setText(posting.isFull() ? "Full" : "Closed");
             applyButton.setEnabled(false);
         } else {
-            applyButton.addActionListener(event -> {
-                final String message = JOptionPane.showInputDialog(
-                        this, "Application message", "Apply", JOptionPane.PLAIN_MESSAGE);
-                if (message != null) {
-                    onApply.accept(posting.getPostingId(), message);
-                }
-            });
+            applyButton.addActionListener(event ->
+                    dialogLauncher.open(this, posting, onApply));
         }
         final JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         actions.setOpaque(false);
@@ -144,5 +145,13 @@ public final class PostingCard extends RoundedPanel implements Reflowable {
     private static String format(final String value) {
         final String lower = value.toLowerCase(Locale.ROOT).replace('_', ' ');
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+    }
+
+    @FunctionalInterface
+    interface ApplicationDialogLauncher {
+        void open(
+                Component parent,
+                PostingData posting,
+                BiConsumer<String, String> onSubmit);
     }
 }

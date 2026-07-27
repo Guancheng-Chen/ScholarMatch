@@ -1,7 +1,7 @@
 package com.scholarmatch.frameworks.gui.view;
 
-import com.scholarmatch.entity.CollaborationType;
-import com.scholarmatch.entity.ResearchField;
+import com.scholarmatch.frameworks.gui.component.ConfirmationDialog;
+import com.scholarmatch.frameworks.gui.component.CreatePostingDialog;
 import com.scholarmatch.frameworks.gui.component.OwnedPostingCard;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
@@ -18,17 +18,13 @@ import com.scholarmatch.usecase.load_postings.PostingScope;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.util.function.Consumer;
 
 /**
@@ -48,6 +44,8 @@ public final class MyPostingsView extends JPanel {
     private final Consumer<String> errorListener;
     private final Consumer<String> successListener;
     private final Consumer<Integer> refreshListener;
+    private final CreateDialogLauncher createDialogLauncher;
+    private final CloseDialogLauncher closeDialogLauncher;
 
     public MyPostingsView(
             final CreatePostingController createController,
@@ -56,6 +54,25 @@ public final class MyPostingsView extends JPanel {
             final AcceptApplicationController acceptController,
             final DeclineApplicationController declineController,
             final MyPostingsViewModel viewModel) {
+        this(createController, loadController, closeController, acceptController,
+                declineController, viewModel, CreatePostingDialog::showDialog,
+                (parent, posting, onConfirm) -> ConfirmationDialog.showDialog(
+                        parent,
+                        "Close Posting",
+                        "Close this posting? New applications will no longer be accepted.",
+                        "Close Posting",
+                        onConfirm));
+    }
+
+    MyPostingsView(
+            final CreatePostingController createController,
+            final LoadPostingsController loadController,
+            final ClosePostingController closeController,
+            final AcceptApplicationController acceptController,
+            final DeclineApplicationController declineController,
+            final MyPostingsViewModel viewModel,
+            final CreateDialogLauncher createDialogLauncher,
+            final CloseDialogLauncher closeDialogLauncher) {
         super(new BorderLayout());
         this.createController = createController;
         this.loadController = loadController;
@@ -63,6 +80,8 @@ public final class MyPostingsView extends JPanel {
         this.acceptController = acceptController;
         this.declineController = declineController;
         this.viewModel = viewModel;
+        this.createDialogLauncher = createDialogLauncher;
+        this.closeDialogLauncher = closeDialogLauncher;
         this.postingsListener = this::rebuild;
         this.errorListener = message -> show(message, true);
         this.successListener = message -> show(message, false);
@@ -121,52 +140,17 @@ public final class MyPostingsView extends JPanel {
     }
 
     private void showCreateForm() {
-        final JTextField title = new JTextField();
-        final JTextArea description = new JTextArea(4, 28);
-        final JComboBox<ResearchField> field = new JComboBox<>(ResearchField.values());
-        final JComboBox<CollaborationType> type = new JComboBox<>(CollaborationType.values());
-        final JTextField capacity = new JTextField();
-        final JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
-        form.add(new JLabel("Title"));
-        form.add(title);
-        form.add(new JLabel("Description"));
-        form.add(new JScrollPane(description));
-        form.add(new JLabel("Research field"));
-        form.add(field);
-        form.add(new JLabel("Collaboration type"));
-        form.add(type);
-        form.add(new JLabel("Team capacity (blank = unlimited)"));
-        form.add(capacity);
-        if (JOptionPane.showConfirmDialog(
-                this, form, "New Posting", JOptionPane.OK_CANCEL_OPTION)
-                == JOptionPane.OK_OPTION) {
-            try {
-                if (title.getText().isBlank()) {
-                    show("Title is required.", true);
-                    return;
-                }
-                final Integer maximum = capacity.getText().isBlank()
-                        ? null : Integer.valueOf(capacity.getText().trim());
-                if (maximum != null && maximum <= 0) {
-                    throw new IllegalArgumentException();
-                }
+        this.createDialogLauncher.open(this, submission ->
                 this.createController.createPosting(
-                        title.getText().trim(), description.getText().trim(),
-                        (ResearchField) field.getSelectedItem(),
-                        (CollaborationType) type.getSelectedItem(), maximum);
-            } catch (final IllegalArgumentException exception) {
-                show("Team capacity must be a positive whole number.", true);
-            }
-        }
+                        submission.title(), submission.description(),
+                        submission.researchField(), submission.collaborationType(),
+                        submission.capacity()));
     }
 
     private void closePosting(final PostingData posting) {
-        final int choice = JOptionPane.showConfirmDialog(
-                this, "Close this posting? New applications will no longer be accepted.",
-                "Close Posting", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (choice == JOptionPane.YES_OPTION) {
-            this.closeController.closePosting(posting.getPostingId());
-        }
+        this.closeDialogLauncher.open(
+                this, posting,
+                () -> this.closeController.closePosting(posting.getPostingId()));
     }
 
     private void show(final String message, final boolean error) {
@@ -184,5 +168,18 @@ public final class MyPostingsView extends JPanel {
         this.viewModel.successMessageProperty().removeListener(this.successListener);
         this.viewModel.refreshRequestProperty().removeListener(this.refreshListener);
         super.removeNotify();
+    }
+
+    @FunctionalInterface
+    interface CreateDialogLauncher {
+        void open(
+                java.awt.Component parent,
+                Consumer<com.scholarmatch.frameworks.gui.component.CreatePostingPanel.Submission>
+                        onSubmit);
+    }
+
+    @FunctionalInterface
+    interface CloseDialogLauncher {
+        void open(java.awt.Component parent, PostingData posting, Runnable onConfirm);
     }
 }
