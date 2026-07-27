@@ -116,6 +116,7 @@ public final class ApplyToPostingPanel extends JPanel {
         final JLabel label = new JLabel("Posting summary");
         label.setFont(label.getFont().deriveFont(Font.BOLD, 15f));
         label.setForeground(Theme.FG_DEFAULT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         final JTextArea description = textArea(this.posting.getDescription());
         description.setName("applyPostingDescription");
         description.setEditable(false);
