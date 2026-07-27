@@ -83,6 +83,24 @@ public final class ApplicationCard extends RoundedPanel implements Reflowable {
         add(this.header);
         add(Box.createVerticalStrut(6));
         add(date);
+        if (!application.getPosterName().isBlank()) {
+            final JLabel owner = new JLabel(
+                    "Posted by " + application.getPosterName());
+            owner.setName("postingOwner");
+            owner.setForeground(Theme.FG_MUTED);
+            owner.setAlignmentX(Component.LEFT_ALIGNMENT);
+            add(Box.createVerticalStrut(5));
+            add(owner);
+        }
+        if (application.isPosterAcademicEmailVerified()) {
+            final JLabel badge = new JLabel("Verified university email");
+            badge.setName("academicVerificationBadge");
+            badge.setForeground(Theme.ACCENT_FG);
+            badge.setFont(badge.getFont().deriveFont(Font.BOLD));
+            badge.setAlignmentX(Component.LEFT_ALIGNMENT);
+            add(Box.createVerticalStrut(5));
+            add(badge);
+        }
         add(Box.createVerticalStrut(16));
         add(messageLabel);
         add(Box.createVerticalStrut(6));

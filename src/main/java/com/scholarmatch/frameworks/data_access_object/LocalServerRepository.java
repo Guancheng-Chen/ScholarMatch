@@ -205,8 +205,16 @@ public final class LocalServerRepository
         if (capacity != null && capacity <= 0) {
             throw new InvalidRequestException("Team capacity must be greater than zero");
         }
+        final String currentUserId = this.session.getCurrentUserId();
+        final User poster = this.usersById.get(currentUserId);
+        final String posterName = poster == null ? currentUserId : poster.getFullName();
+        final boolean academicEmailVerified = poster != null
+                && poster.getEmailAccountType() == EmailAccountType.ACADEMIC;
         final Posting posting = new Posting(
-                UUID.randomUUID().toString(), this.session.getCurrentUserId(), title, description,
+                UUID.randomUUID().toString(), currentUserId,
+                posterName,
+                academicEmailVerified,
+                title, description,
                 researchField, collaborationType, capacity, 0, 0,
                 PostingStatus.OPEN, LocalDateTime.now());
         this.postingsById.put(posting.getPostingId(), posting);
@@ -288,7 +296,9 @@ public final class LocalServerRepository
         final PostingApplication application = new PostingApplication(
                 UUID.randomUUID().toString(), postingId, currentId,
                 message == null ? "" : message, PostingApplicationStatus.PENDING,
-                LocalDateTime.now(), posting.getTitle(), displayName(currentId));
+                LocalDateTime.now(), posting.getTitle(), displayName(currentId),
+                posting.getPosterName(),
+                posting.isPosterAcademicEmailVerified());
         this.applicationsById.put(application.getApplicationId(), application);
         posting.setApplicantCount(posting.getApplicantCount() + 1);
         return application;
@@ -603,8 +613,11 @@ public final class LocalServerRepository
                 "Interested in software engineering and collaborative student projects.",
                 6, FundingStatus.OTHER, "12345678", EmailAccountType.ACADEMIC);
         final String posterId = this.usersById.values().iterator().next().getUserId();
+        final User poster = this.usersById.get(posterId);
         final Posting posting = new Posting(
                 UUID.randomUUID().toString(), posterId,
+                poster.getFullName(),
+                poster.getEmailAccountType() == EmailAccountType.ACADEMIC,
                 "Foundations of trustworthy computing",
                 "Seeking collaborators for a short research project on reliable computation.",
                 ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,

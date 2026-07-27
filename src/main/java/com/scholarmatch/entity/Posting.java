@@ -10,6 +10,8 @@ public final class Posting {
 
     private final String postingId;
     private final String posterUserId;
+    private final String posterName;
+    private final boolean posterAcademicEmailVerified;
     private final String title;
     private final String description;
     private final ResearchField researchField;
@@ -35,6 +37,26 @@ public final class Posting {
             final int acceptedCount,
             final PostingStatus status,
             final LocalDateTime createdAt) {
+        this(
+                postingId, posterUserId, "", false, title, description,
+                researchField, collaborationType, capacity, applicantCount,
+                acceptedCount, status, createdAt);
+    }
+
+    public Posting(
+            final String postingId,
+            final String posterUserId,
+            final String posterName,
+            final boolean posterAcademicEmailVerified,
+            final String title,
+            final String description,
+            final ResearchField researchField,
+            final CollaborationType collaborationType,
+            final Integer capacity,
+            final int applicantCount,
+            final int acceptedCount,
+            final PostingStatus status,
+            final LocalDateTime createdAt) {
         if (capacity != null && capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be greater than zero");
         }
@@ -43,6 +65,8 @@ public final class Posting {
         }
         this.postingId = Objects.requireNonNull(postingId);
         this.posterUserId = Objects.requireNonNull(posterUserId);
+        this.posterName = posterName == null ? "" : posterName;
+        this.posterAcademicEmailVerified = posterAcademicEmailVerified;
         this.title = Objects.requireNonNull(title);
         this.description = Objects.requireNonNull(description);
         this.researchField = Objects.requireNonNull(researchField);
@@ -87,6 +111,14 @@ public final class Posting {
 
     public String getPosterUserId() {
         return this.posterUserId;
+    }
+
+    public String getPosterName() {
+        return this.posterName;
+    }
+
+    public boolean isPosterAcademicEmailVerified() {
+        return this.posterAcademicEmailVerified;
     }
 
     public String getTitle() {

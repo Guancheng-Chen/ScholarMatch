@@ -18,6 +18,7 @@ import java.util.List;
  * @param postingTitle posting display title
  * @param applicantName applicant display name
  */
+@SuppressWarnings("JavadocType")
 public record PostingApplicationData(
         String applicationId,
         String postingId,
@@ -26,7 +27,9 @@ public record PostingApplicationData(
         PostingApplicationStatus status,
         LocalDateTime appliedAt,
         String postingTitle,
-        String applicantName) {
+        String applicantName,
+        String posterName,
+        boolean posterAcademicEmailVerified) {
 
     public PostingApplicationData(
             final String applicationId,
@@ -35,7 +38,23 @@ public record PostingApplicationData(
             final String message,
             final PostingApplicationStatus status,
             final LocalDateTime appliedAt) {
-        this(applicationId, postingId, applicantUserId, message, status, appliedAt, "", "");
+        this(
+                applicationId, postingId, applicantUserId, message, status,
+                appliedAt, "", "", "", false);
+    }
+
+    public PostingApplicationData(
+            final String applicationId,
+            final String postingId,
+            final String applicantUserId,
+            final String message,
+            final PostingApplicationStatus status,
+            final LocalDateTime appliedAt,
+            final String postingTitle,
+            final String applicantName) {
+        this(
+                applicationId, postingId, applicantUserId, message, status,
+                appliedAt, postingTitle, applicantName, "", false);
     }
 
     public static PostingApplicationData from(final PostingApplication application) {
@@ -47,7 +66,9 @@ public record PostingApplicationData(
                 application.getStatus(),
                 application.getAppliedAt(),
                 application.getPostingTitle(),
-                application.getApplicantName());
+                application.getApplicantName(),
+                application.getPosterName(),
+                application.isPosterAcademicEmailVerified());
     }
 
     public static List<PostingApplicationData> fromAll(
@@ -85,5 +106,13 @@ public record PostingApplicationData(
 
     public String getApplicantName() {
         return applicantName;
+    }
+
+    public String getPosterName() {
+        return posterName;
+    }
+
+    public boolean isPosterAcademicEmailVerified() {
+        return posterAcademicEmailVerified;
     }
 }

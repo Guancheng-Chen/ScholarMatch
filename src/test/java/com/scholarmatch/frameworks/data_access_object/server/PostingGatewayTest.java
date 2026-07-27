@@ -182,6 +182,46 @@ class PostingGatewayTest {
     }
 
     @Test
+    void testOwnerVerificationIsMappedWithoutSuffixInference() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"postingId":"p-1","posterUserId":"u-1",
+                  "posterName":"Ada Lovelace",
+                  "posterAcademicEmailVerified":true,
+                  "title":"Title","applicantCount":0,
+                  "createdAt":"2026-07-26T12:00:00"}]
+                """);
+
+        final Posting verified =
+                this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
+
+        assertEquals("Ada Lovelace", verified.getPosterName());
+        assertTrue(verified.isPosterAcademicEmailVerified());
+
+        this.fakeServer.bodyToReturn().set("[" + POSTING_JSON + "]");
+        final Posting unknown =
+                this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
+        assertEquals("", unknown.getPosterName());
+        assertEquals(false, unknown.isPosterAcademicEmailVerified());
+    }
+
+    @Test
+    void testApplicationOwnerVerificationIsMapped() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"applicationId":"a-1","postingId":"p-1",
+                  "applicantUserId":"u-2","message":"hi","status":"PENDING",
+                  "appliedAt":"2026-07-26T12:00:00",
+                  "posterName":"Ada Lovelace",
+                  "posterAcademicEmailVerified":true}]
+                """);
+
+        final PostingApplication application =
+                this.gateway.getMyApplications().getFirst();
+
+        assertEquals("Ada Lovelace", application.getPosterName());
+        assertTrue(application.isPosterAcademicEmailVerified());
+    }
+
+    @Test
     void testApplyNullMessageAndSparseApplicationUseDefaults() {
         this.fakeServer.bodyToReturn().set("""
                 {"applicationId":"a-1","postingId":"p-1","applicantUserId":"u-2",

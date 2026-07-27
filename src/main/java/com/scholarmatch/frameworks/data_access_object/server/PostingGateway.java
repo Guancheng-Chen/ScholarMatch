@@ -149,6 +149,8 @@ public final class PostingGateway
         return new Posting(
                 node.get("postingId").asText(),
                 node.get("posterUserId").asText(),
+                node.has("posterName") ? node.get("posterName").asText("") : "",
+                verified(node),
                 node.get("title").asText(),
                 node.has("description") ? node.get("description").asText("") : "",
                 researchField,
@@ -173,6 +175,18 @@ public final class PostingGateway
                 status,
                 LocalDateTime.parse(node.get("appliedAt").asText()),
                 node.has("postingTitle") ? node.get("postingTitle").asText("") : "",
-                node.has("applicantName") ? node.get("applicantName").asText("") : "");
+                node.has("applicantName") ? node.get("applicantName").asText("") : "",
+                node.has("posterName") ? node.get("posterName").asText("") : "",
+                verified(node));
+    }
+
+    private boolean verified(final JsonNode node) {
+        if (node.has("posterAcademicEmailVerified")) {
+            return node.get("posterAcademicEmailVerified").asBoolean(false);
+        }
+        if (node.has("posterAcademicVerified")) {
+            return node.get("posterAcademicVerified").asBoolean(false);
+        }
+        return false;
     }
 }
