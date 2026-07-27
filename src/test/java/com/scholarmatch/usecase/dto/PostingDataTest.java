@@ -29,6 +29,7 @@ class PostingDataTest {
         assertEquals("posting-1", data.getPostingId());
         assertEquals("poster-1", data.getPosterUserId());
         assertEquals("Grace Hopper", data.getPosterName());
+        assertEquals("Grace Hopper", data.getPosterDisplayName());
         assertTrue(data.isPosterAcademicEmailVerified());
         assertEquals("Title", data.getTitle());
         assertEquals("Description", data.getDescription());
@@ -56,6 +57,29 @@ class PostingDataTest {
                 PostingData.fromAll(List.of(first, second)).stream()
                         .map(PostingData::getPostingId)
                         .toList());
+    }
+
+    @Test
+    void testOwnerSummaryNormalizesNamesAndUsesStableFallback() {
+        final PostingData named = new PostingData(
+                "posting-1", " poster-1 ", "Title", "Description",
+                ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                2, 0, 0, LocalDateTime.now(), PostingStatus.OPEN,
+                false, true, " Grace Hopper ", true, List.of());
+        final PostingData unnamed = new PostingData(
+                "posting-2", null, "Title", "Description",
+                ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                2, 0, 0, LocalDateTime.now(), PostingStatus.OPEN,
+                false, true, null, false, List.of());
+
+        assertEquals("poster-1", named.getPosterUserId());
+        assertEquals("Grace Hopper", named.getPosterName());
+        assertEquals("Grace Hopper", named.getPosterDisplayName());
+        assertTrue(named.isPosterAcademicEmailVerified());
+        assertEquals("", unnamed.getPosterUserId());
+        assertEquals("", unnamed.getPosterName());
+        assertEquals("Unknown user", unnamed.getPosterDisplayName());
+        assertFalse(unnamed.isPosterAcademicEmailVerified());
     }
 
     private Posting posting(final String id, final LocalDateTime createdAt) {

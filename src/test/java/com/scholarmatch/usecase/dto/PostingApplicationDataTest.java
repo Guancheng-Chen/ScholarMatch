@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PostingApplicationDataTest {
 
@@ -28,6 +30,8 @@ class PostingApplicationDataTest {
         assertEquals("", data.getApplicantName());
         assertEquals("", data.getPosterUserId());
         assertEquals("", data.getPosterName());
+        assertEquals("Unknown user", data.getPosterDisplayName());
+        assertFalse(data.isPosterAcademicEmailVerified());
     }
 
     @Test
@@ -44,6 +48,22 @@ class PostingApplicationDataTest {
         assertEquals("Ada Lovelace", data.getApplicantName());
         assertEquals("poster-1", data.getPosterUserId());
         assertEquals("Grace Hopper", data.getPosterName());
+        assertEquals("Grace Hopper", data.getPosterDisplayName());
+        assertTrue(data.isPosterAcademicEmailVerified());
         assertEquals(List.of(data), PostingApplicationData.fromAll(List.of(application)));
+    }
+
+    @Test
+    void testOwnerSummaryTrimsProvidedIdentity() {
+        final PostingApplicationData data = new PostingApplicationData(
+                "application-1", "posting-1", "applicant-1", "Hello",
+                PostingApplicationStatus.PENDING, LocalDateTime.now(),
+                "Posting Title", "Ada Lovelace", " poster-1 ",
+                " Grace Hopper ", true);
+
+        assertEquals("poster-1", data.getPosterUserId());
+        assertEquals("Grace Hopper", data.getPosterName());
+        assertEquals("Grace Hopper", data.getPosterDisplayName());
+        assertTrue(data.isPosterAcademicEmailVerified());
     }
 }
