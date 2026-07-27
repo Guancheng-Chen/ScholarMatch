@@ -152,6 +152,39 @@ class ProfileGatewayTest {
     }
 
     @Test
+    void testGetPublicProfileUsesOwnerEndpointAndParsesPublicFields() {
+        this.fakeServer.bodyToReturn().set("""
+            {"scholarId":"owner-1","firstName":"Ada","lastName":"Lovelace",
+             "institution":"UNIVERSITY_OF_TORONTO",
+             "academicEmailVerified":true,
+             "researchDescription":"Public research"}
+            """);
+
+        final User user = this.gateway.getPublicProfile("owner-1");
+
+        assertEquals("owner-1", user.getUserId());
+        assertEquals("", user.getEmail());
+        assertEquals("", user.getPhoneNumber());
+        assertEquals(EmailAccountType.ACADEMIC, user.getEmailAccountType());
+        assertEquals("/api/profiles/owner-1", this.fakeServer.lastPath().get());
+    }
+
+    @Test
+    void testGetPublicProfileMapsMissingAndUnauthorizedResponses() {
+        this.fakeServer.statusToReturn().set(404);
+        this.fakeServer.bodyToReturn().set("{\"error\":\"Public profile not found\"}");
+        assertThrows(ResourceNotFoundException.class,
+                () -> this.gateway.getPublicProfile("missing"));
+
+        this.fakeServer.statusToReturn().set(403);
+        this.fakeServer.bodyToReturn().set("{\"error\":\"Profile access denied\"}");
+        final InvalidRequestException denied = assertThrows(
+                InvalidRequestException.class,
+                () -> this.gateway.getPublicProfile("private-owner"));
+        assertEquals("Profile access denied", denied.getMessage());
+    }
+
+    @Test
     void testUpdateProfileSendsAllProvidedFieldsIncludingPapersAndEducations() {
         this.fakeServer.bodyToReturn().set("{\"scholarId\": \"u-1\", \"firstName\": \"Ada\", \"lastName\": \"Lovelace\"}");
 
