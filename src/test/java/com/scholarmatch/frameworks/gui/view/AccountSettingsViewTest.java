@@ -3,14 +3,14 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
 import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
 import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 import com.scholarmatch.usecase.change_email.ChangeEmailInputBoundary;
 import com.scholarmatch.usecase.change_email.ChangeEmailInputData;
 import com.scholarmatch.usecase.change_password.ChangePasswordInputBoundary;
 import com.scholarmatch.usecase.change_password.ChangePasswordInputData;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationInputBoundary;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationInputData;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputData;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,8 +35,8 @@ class AccountSettingsViewTest {
 
     @Test
     void testButtonsSubmitTrimmedSettingsData() throws Exception {
-        final RequestEmailChangeVerificationInputBoundary request =
-                mock(RequestEmailChangeVerificationInputBoundary.class);
+        final RequestEmailVerificationInputBoundary request =
+                mock(RequestEmailVerificationInputBoundary.class);
         final ChangeEmailInputBoundary changeEmail = mock(ChangeEmailInputBoundary.class);
         final ChangePasswordInputBoundary changePassword = mock(ChangePasswordInputBoundary.class);
         final AccountSettingsView[] holder = new AccountSettingsView[1];
@@ -56,8 +56,8 @@ class AccountSettingsViewTest {
             button(holder[0], "Change Password").doClick();
         });
 
-        final ArgumentCaptor<RequestEmailChangeVerificationInputData> requestData =
-                ArgumentCaptor.forClass(RequestEmailChangeVerificationInputData.class);
+        final ArgumentCaptor<RequestEmailVerificationInputData> requestData =
+                ArgumentCaptor.forClass(RequestEmailVerificationInputData.class);
         verify(request, timeout(2000)).execute(requestData.capture());
         assertEquals("new@example.com", requestData.getValue().email());
 
@@ -83,7 +83,7 @@ class AccountSettingsViewTest {
 
         SwingUtilities.invokeAndWait(() -> {
             holder[0] = view(
-                    mock(RequestEmailChangeVerificationInputBoundary.class),
+                    mock(RequestEmailVerificationInputBoundary.class),
                     mock(ChangeEmailInputBoundary.class),
                     mock(ChangePasswordInputBoundary.class),
                     viewModel);
@@ -110,12 +110,12 @@ class AccountSettingsViewTest {
     }
 
     private AccountSettingsView view(
-            final RequestEmailChangeVerificationInputBoundary request,
+            final RequestEmailVerificationInputBoundary request,
             final ChangeEmailInputBoundary changeEmail,
             final ChangePasswordInputBoundary changePassword,
             final AccountSettingsViewModel viewModel) {
         return new AccountSettingsView(
-                new RequestEmailChangeVerificationController(request),
+                new RequestEmailVerificationController(request),
                 new ChangeEmailController(changeEmail),
                 new ChangePasswordController(changePassword),
                 viewModel);

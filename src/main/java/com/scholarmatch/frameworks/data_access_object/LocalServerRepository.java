@@ -30,7 +30,7 @@ import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInter
 import com.scholarmatch.usecase.data_access_interface.LoginDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RecommendDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.RequestEmailChangeVerificationDataAccessInterface;
+import com.scholarmatch.usecase.data_access_interface.VerificationEmailSenderDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.SendMessageDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.VerificationCodeGeneratorInterface;
@@ -84,7 +84,7 @@ public final class LocalServerRepository
         LoadMatchesDataAccessInterface,
         LoadProfileDataAccessInterface,
         UpdateProfileDataAccessInterface,
-        RequestEmailChangeVerificationDataAccessInterface,
+        VerificationEmailSenderDataAccessInterface,
         ChangeEmailDataAccessInterface,
         ChangePasswordDataAccessInterface,
         DeleteAccountDataAccessInterface,
@@ -459,7 +459,7 @@ public final class LocalServerRepository
     }
 
     @Override
-    public void requestEmailChangeVerification(final String email) {
+    public void requestVerificationCode(final String email) {
         final String normalizedEmail = normalizeEmail(email);
         final User existing = findByEmail(normalizedEmail);
         if (existing != null

@@ -6,14 +6,14 @@ import com.scholarmatch.usecase.change_email.ChangeEmailOutputBoundary;
 import com.scholarmatch.usecase.change_email.ChangeEmailOutputData;
 import com.scholarmatch.usecase.change_password.ChangePasswordOutputBoundary;
 import com.scholarmatch.usecase.change_password.ChangePasswordOutputData;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationOutputBoundary;
-import com.scholarmatch.usecase.request_email_change_verification.RequestEmailChangeVerificationOutputData;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationOutputBoundary;
+import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationOutputData;
 
 /**
  * Presenter for account email and password settings.
  */
 public final class AccountSettingsPresenter
-        implements RequestEmailChangeVerificationOutputBoundary,
+        implements RequestEmailVerificationOutputBoundary,
         ChangeEmailOutputBoundary,
         ChangePasswordOutputBoundary {
 
@@ -29,7 +29,7 @@ public final class AccountSettingsPresenter
 
     @Override
     public void prepareSuccessView(
-            final RequestEmailChangeVerificationOutputData outputData) {
+            final RequestEmailVerificationOutputData outputData) {
         this.viewModel.setErrorMessage("");
         this.viewModel.setSuccessMessage(
                 "Verification code sent to " + outputData.email() + ".");

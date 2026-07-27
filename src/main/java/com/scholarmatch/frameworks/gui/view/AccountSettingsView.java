@@ -5,7 +5,7 @@ import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
 import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailChangeVerificationController;
+import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
 
 import javax.swing.BorderFactory;
@@ -39,7 +39,7 @@ public final class AccountSettingsView extends JPanel {
     private final AccountSettingsViewModel viewModel;
 
     public AccountSettingsView(
-            final RequestEmailChangeVerificationController requestController,
+            final RequestEmailVerificationController requestController,
             final ChangeEmailController changeEmailController,
             final ChangePasswordController changePasswordController,
             final AccountSettingsViewModel viewModel) {
@@ -67,7 +67,7 @@ public final class AccountSettingsView extends JPanel {
         Buttons.outlined(sendCodeButton);
         sendCodeButton.addActionListener(event -> run(
                 sendCodeButton,
-                () -> requestController.execute(emailField.getText().trim())));
+                () -> requestController.sendVerificationCode(emailField.getText().trim())));
 
         final JButton changeEmailButton = new JButton("Change Email");
         Buttons.accent(changeEmailButton);
