@@ -33,8 +33,8 @@ public record PostingApplicationData(
         boolean posterAcademicEmailVerified) {
 
     public PostingApplicationData {
-        posterUserId = posterUserId == null ? "" : posterUserId;
-        posterName = posterName == null ? "" : posterName;
+        posterUserId = posterUserId == null ? "" : posterUserId.trim();
+        posterName = posterName == null ? "" : posterName.trim();
     }
 
     public PostingApplicationData(
@@ -138,6 +138,10 @@ public record PostingApplicationData(
 
     public String getPosterName() {
         return posterName;
+    }
+
+    public String getPosterDisplayName() {
+        return posterName.isBlank() ? "Unknown user" : posterName;
     }
 
     public boolean isPosterAcademicEmailVerified() {
