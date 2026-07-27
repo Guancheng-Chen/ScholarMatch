@@ -6,7 +6,6 @@ import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.DeleteAccountDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.InstitutionCatalogDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.LoadProfileDataAccessInterface;
-import com.scholarmatch.usecase.data_access_interface.LoadPublicProfileDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UpdateProfileDataAccessInterface;
 import com.scholarmatch.usecase.update_profile.UpdateProfileInputData;
 
@@ -21,7 +20,6 @@ import java.util.Map;
  */
 public final class ProfileGateway
         implements LoadProfileDataAccessInterface,
-        LoadPublicProfileDataAccessInterface,
         UpdateProfileDataAccessInterface,
         DeleteAccountDataAccessInterface {
 
@@ -36,12 +34,6 @@ public final class ProfileGateway
     @Override
     public User getProfile() {
         return this.userMapper.fromJson(this.http.get("/api/profile"));
-    }
-
-    @Override
-    public User getPublicProfile(final String userId) {
-        return this.userMapper.fromJson(
-                this.http.get("/api/profiles/" + userId));
     }
 
     @Override
