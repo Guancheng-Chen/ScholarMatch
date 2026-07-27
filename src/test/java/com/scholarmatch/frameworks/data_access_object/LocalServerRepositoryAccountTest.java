@@ -181,6 +181,26 @@ class LocalServerRepositoryAccountTest {
                         "second@example.com", "password", "123456"));
     }
 
+    @Test
+    void testPublicProfileLookupDoesNotChangeRecommendationState() {
+        final AuthResult owner = register("Owner", "owner@example.com");
+        final AuthResult viewer = register("Viewer", "viewer@example.com");
+        this.session.setCurrentUserId(viewer.userId());
+        final List<String> recommendationsBefore = this.repository
+                .getRecommendations().stream().map(User::getUserId).toList();
+
+        final User publicProfile = this.repository.getPublicProfile(owner.userId());
+
+        assertEquals(owner.userId(), publicProfile.getUserId());
+        assertEquals(recommendationsBefore, this.repository.getRecommendations()
+                .stream().map(User::getUserId).toList());
+
+        this.session.setCurrentUserId(owner.userId());
+        this.repository.deleteAccount();
+        assertThrows(ResourceNotFoundException.class,
+                () -> this.repository.getPublicProfile(owner.userId()));
+    }
+
     private AuthResult register(final String firstName, final String email) {
         return this.repository.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
