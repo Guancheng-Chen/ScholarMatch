@@ -3,12 +3,15 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
 import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
 import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
+import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
 import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
 import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import com.scholarmatch.usecase.change_email.ChangeEmailInputBoundary;
 import com.scholarmatch.usecase.change_email.ChangeEmailInputData;
 import com.scholarmatch.usecase.change_password.ChangePasswordInputBoundary;
 import com.scholarmatch.usecase.change_password.ChangePasswordInputData;
+import com.scholarmatch.usecase.delete_account.DeleteAccountInputBoundary;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputData;
 
@@ -25,9 +28,11 @@ import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -109,16 +114,109 @@ class AccountSettingsViewTest {
         SwingUtilities.invokeAndWait(holder[0]::removeNotify);
     }
 
+    @Test
+    void testConfirmingDeleteAccountDialogCallsController() throws Exception {
+        final DeleteAccountInputBoundary interactor = mock(DeleteAccountInputBoundary.class);
+        final AccountSettingsView[] holder = new AccountSettingsView[1];
+
+        SwingUtilities.invokeAndWait(() -> {
+            holder[0] = view(
+                    mock(RequestEmailVerificationInputBoundary.class),
+                    mock(ChangeEmailInputBoundary.class),
+                    mock(ChangePasswordInputBoundary.class),
+                    new AccountSettingsViewModel(),
+                    interactor,
+                    new DeleteAccountViewModel());
+            try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
+                optionPane.when(() -> JOptionPane.showConfirmDialog(any(), any(), any(), anyInt(), anyInt()))
+                        .thenReturn(JOptionPane.YES_OPTION);
+                button(holder[0], "Delete Account").doClick();
+            }
+        });
+
+        verify(interactor).execute();
+    }
+
+    @Test
+    void testDecliningDeleteAccountDialogDoesNotCallController() throws Exception {
+        final DeleteAccountInputBoundary interactor = mock(DeleteAccountInputBoundary.class);
+        final AccountSettingsView[] holder = new AccountSettingsView[1];
+
+        SwingUtilities.invokeAndWait(() -> {
+            holder[0] = view(
+                    mock(RequestEmailVerificationInputBoundary.class),
+                    mock(ChangeEmailInputBoundary.class),
+                    mock(ChangePasswordInputBoundary.class),
+                    new AccountSettingsViewModel(),
+                    interactor,
+                    new DeleteAccountViewModel());
+            try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
+                optionPane.when(() -> JOptionPane.showConfirmDialog(any(), any(), any(), anyInt(), anyInt()))
+                        .thenReturn(JOptionPane.NO_OPTION);
+                button(holder[0], "Delete Account").doClick();
+            }
+        });
+
+        verify(interactor, never()).execute();
+    }
+
+    @Test
+    void testDeleteAccountFailureShowsErrorDialogAndRemoveNotifyDetachesListener() throws Exception {
+        final DeleteAccountViewModel deleteAccountViewModel = new DeleteAccountViewModel();
+        final AccountSettingsView[] holder = new AccountSettingsView[1];
+
+        SwingUtilities.invokeAndWait(() -> {
+            holder[0] = view(
+                    mock(RequestEmailVerificationInputBoundary.class),
+                    mock(ChangeEmailInputBoundary.class),
+                    mock(ChangePasswordInputBoundary.class),
+                    new AccountSettingsViewModel(),
+                    mock(DeleteAccountInputBoundary.class),
+                    deleteAccountViewModel);
+
+            try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
+                deleteAccountViewModel.setErrorMessage("Could not delete account");
+
+                optionPane.verify(() -> JOptionPane.showMessageDialog(
+                        any(), eq("Could not delete account"), eq("Delete Account Failed"),
+                        eq(JOptionPane.ERROR_MESSAGE)));
+            }
+
+            try (MockedStatic<JOptionPane> optionPane = mockStatic(JOptionPane.class)) {
+                deleteAccountViewModel.setErrorMessage(null);
+                deleteAccountViewModel.setErrorMessage(" ");
+                optionPane.verifyNoInteractions();
+            }
+
+            holder[0].removeNotify();
+            deleteAccountViewModel.setErrorMessage("detached");
+        });
+    }
+
     private AccountSettingsView view(
             final RequestEmailVerificationInputBoundary request,
             final ChangeEmailInputBoundary changeEmail,
             final ChangePasswordInputBoundary changePassword,
             final AccountSettingsViewModel viewModel) {
+        return view(
+                request, changeEmail, changePassword, viewModel,
+                mock(DeleteAccountInputBoundary.class), new DeleteAccountViewModel());
+    }
+
+    private AccountSettingsView view(
+            final RequestEmailVerificationInputBoundary request,
+            final ChangeEmailInputBoundary changeEmail,
+            final ChangePasswordInputBoundary changePassword,
+            final AccountSettingsViewModel viewModel,
+            final DeleteAccountInputBoundary deleteAccountInteractor,
+            final DeleteAccountViewModel deleteAccountViewModel) {
         return new AccountSettingsView(
                 new RequestEmailVerificationController(request),
                 new ChangeEmailController(changeEmail),
                 new ChangePasswordController(changePassword),
-                viewModel);
+                viewModel,
+                new DeleteAccountController(deleteAccountInteractor),
+                deleteAccountViewModel);
     }
 
     private JButton button(final AccountSettingsView view, final String text) {

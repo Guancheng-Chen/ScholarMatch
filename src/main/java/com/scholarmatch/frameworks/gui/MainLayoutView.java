@@ -64,9 +64,10 @@ import java.util.function.Consumer;
 /**
  * Authenticated app layout.
  *
- * <p>NavigationBar as a left sidebar (Recommend / View Matched / Chat / Profile / Delete
- * Account / Logout) plus a center pane that swaps between the corresponding view as the
- * user navigates — Recommend is shown first.
+ * <p>NavigationBar as a left sidebar (Recommend / View Matched / Chat / Opportunities /
+ * My Postings / My Applications / Profile / Account Settings / Logout) plus a center pane
+ * that swaps between the corresponding view as the user navigates — Recommend is shown
+ * first.
  *
  * <p>Calls the given onLoggedOut callback once logout succeeds — the session is already
  * cleared by LogoutInteractor at that point, so this view only needs to signal the
@@ -186,13 +187,14 @@ final class MainLayoutView extends JPanel {
                 case "settings" -> centerHolder.add(
                     new AccountSettingsView(
                         requestEmailChangeController, changeEmailController,
-                        changePasswordController, accountSettingsViewModel),
+                        changePasswordController, accountSettingsViewModel,
+                        deleteAccountController, deleteAccountViewModel),
                     BorderLayout.CENTER);
                 default -> { }
             }
             centerHolder.revalidate();
             centerHolder.repaint();
-        }, logoutController::logout, deleteAccountController, deleteAccountViewModel);
+        }, logoutController::logout);
 
         final JPanel topBar = buildTopBar(updateProfileViewModel);
         loadProfileController.execute();
