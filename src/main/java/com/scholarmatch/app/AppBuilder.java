@@ -14,7 +14,6 @@ import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
 import com.scholarmatch.frameworks.data_access_object.localMockServer.ClasspathAcademicEmailDomainRepository;
 import com.scholarmatch.frameworks.data_access_object.localMockServer.InMemoryEmailVerificationChallengeRepository;
-import com.scholarmatch.frameworks.data_access_object.localMockServer.ResendEmailChangeCodeSender;
 import com.scholarmatch.frameworks.data_access_object.localMockServer.SecureVerificationCodeGenerator;
 import com.scholarmatch.frameworks.data_access_object.server.AccountSettingsGateway;
 import com.scholarmatch.frameworks.data_access_object.server.RemoteVerificationEmailSender;
@@ -349,9 +348,8 @@ public final class AppBuilder {
                 this.institutionCatalog,
                 new InMemoryEmailVerificationChallengeRepository(),
                 new SecureVerificationCodeGenerator(),
-                new ResendEmailChangeCodeSender(
-                        System.getenv("RESEND_API_KEY"),
-                        System.getenv("RESEND_FROM_EMAIL")),
+                (email, code) -> System.out.println(
+                        "[Offline demo] Verification code for " + email + ": " + code),
                 new ClasspathAcademicEmailDomainRepository(),
                 Clock.systemUTC());
 
