@@ -213,6 +213,21 @@ class PostingGatewayTest {
     }
 
     @Test
+    void testApplicationOwnerVerificationFallsBackToLegacyKeyName() {
+        this.fakeServer.bodyToReturn().set("""
+                [{"applicationId":"a-1","postingId":"p-1",
+                  "applicantUserId":"u-2","message":"hi","status":"PENDING",
+                  "appliedAt":"2026-07-26T12:00:00",
+                  "posterAcademicVerified":true}]
+                """);
+
+        final PostingApplication application =
+                this.gateway.getMyApplications().getFirst();
+
+        assertTrue(application.isPosterAcademicEmailVerified());
+    }
+
+    @Test
     void testApplicationOwnerVerificationIsMapped() {
         this.fakeServer.bodyToReturn().set("""
                 [{"applicationId":"a-1","postingId":"p-1",

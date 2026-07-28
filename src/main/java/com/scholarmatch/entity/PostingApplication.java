@@ -58,23 +58,6 @@ public final class PostingApplication {
             final LocalDateTime appliedAt,
             final String postingTitle,
             final String applicantName,
-            final String posterName,
-            final boolean posterAcademicEmailVerified) {
-        this(
-                applicationId, postingId, applicantUserId, message, status,
-                appliedAt, postingTitle, applicantName, "", posterName,
-                posterAcademicEmailVerified);
-    }
-
-    public PostingApplication(
-            final String applicationId,
-            final String postingId,
-            final String applicantUserId,
-            final String message,
-            final PostingApplicationStatus status,
-            final LocalDateTime appliedAt,
-            final String postingTitle,
-            final String applicantName,
             final String posterUserId,
             final String posterName,
             final boolean posterAcademicEmailVerified) {

@@ -20,7 +20,12 @@ public final class ClasspathAcademicEmailDomainRepository
     private final Set<String> domains;
 
     public ClasspathAcademicEmailDomainRepository() {
-        this.domains = loadDomains();
+        this(ClasspathAcademicEmailDomainRepository.class
+                .getClassLoader().getResourceAsStream(RESOURCE_NAME));
+    }
+
+    ClasspathAcademicEmailDomainRepository(final InputStream resourceStream) {
+        this.domains = loadDomains(resourceStream);
     }
 
     @Override
@@ -34,9 +39,7 @@ public final class ClasspathAcademicEmailDomainRepository
                         || domain.endsWith("." + academicDomain));
     }
 
-    private Set<String> loadDomains() {
-        final InputStream stream = ClasspathAcademicEmailDomainRepository.class
-                .getClassLoader().getResourceAsStream(RESOURCE_NAME);
+    private Set<String> loadDomains(final InputStream stream) {
         if (stream == null) {
             throw new IllegalStateException(
                     "University email domain catalog not found: " + RESOURCE_NAME);

@@ -495,8 +495,17 @@ public final class LocalServerRepository
                         "Request a verification code for this email first"));
         final EmailVerificationResult result =
                 challenge.verify(verificationCode, Instant.now(this.clock));
-        if (result.outcome() != EmailVerificationOutcome.VERIFIED) {
-            throw new InvalidRequestException(verificationFailureMessage(result));
+        // Every outcome other than VERIFIED rejects the request — checked as a chain of
+        // reachable conditions (rather than an enum switch) so there's no dead default/VERIFIED
+        // branch to satisfy exhaustiveness with: falling through past all three is what
+        // "verified" means here.
+        if (result.outcome() == EmailVerificationOutcome.EXPIRED) {
+            throw new InvalidRequestException("Verification code has expired");
+        } else if (result.outcome() == EmailVerificationOutcome.ATTEMPTS_EXHAUSTED) {
+            throw new InvalidRequestException("Verification failed after three incorrect attempts");
+        } else if (result.outcome() == EmailVerificationOutcome.INVALID_CODE) {
+            throw new InvalidRequestException("Verification code is incorrect. "
+                    + result.attemptsRemaining() + " attempts remaining");
         }
         user.setEmail(normalizedEmail);
         user.setEmailAccountType(
@@ -681,18 +690,6 @@ public final class LocalServerRepository
 
     private String normalizeEmail(final String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private String verificationFailureMessage(
-            final EmailVerificationResult result) {
-        return switch (result.outcome()) {
-            case EXPIRED -> "Verification code has expired";
-            case ATTEMPTS_EXHAUSTED ->
-                "Verification failed after three incorrect attempts";
-            case INVALID_CODE -> "Verification code is incorrect. "
-                    + result.attemptsRemaining() + " attempts remaining";
-            case VERIFIED -> "";
-        };
     }
 
     private boolean hasMutualConnection(
