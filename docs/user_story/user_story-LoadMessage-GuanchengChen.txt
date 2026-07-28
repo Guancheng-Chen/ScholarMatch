@@ -1,0 +1,2 @@
+As a scholar, I want to view my past conversation with a scholar I've matched with,
+so that I can pick up where we left off without losing context.

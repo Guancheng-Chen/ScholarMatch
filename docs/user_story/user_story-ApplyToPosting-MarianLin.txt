@@ -1,0 +1,2 @@
+As a scholar, I want to apply to an open posting with a short message introducing myself,
+so that the posting owner can consider me as a collaborator.

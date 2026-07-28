@@ -1,0 +1,2 @@
+As a posting owner, I want to decline a pending application to my posting,
+so that applicants who aren't a good fit for my project know their application was not accepted.

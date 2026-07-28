@@ -1,0 +1,2 @@
+As a scholar, I want to send a message to a scholar I've matched with,
+so that we can coordinate and discuss our potential collaboration.

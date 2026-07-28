@@ -1,0 +1,3 @@
+As a ScholarMatch user, I want to request a verification code be sent to an email address
+before it's accepted as mine, so that I can prove I actually own that email — whether I'm
+registering a new account or changing the email on an existing one.

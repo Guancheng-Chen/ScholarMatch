@@ -1,0 +1,2 @@
+As a scholar, I want to create a posting describing a research collaboration opportunity,
+so that other scholars can discover it and apply to work with me.

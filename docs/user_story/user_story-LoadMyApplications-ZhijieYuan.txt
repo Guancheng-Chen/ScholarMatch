@@ -1,0 +1,3 @@
+As a scholar, I want to view the postings I've applied to along with the status of each
+application, so that I can track whether I've been accepted, declined, or am still waiting
+to hear back.
