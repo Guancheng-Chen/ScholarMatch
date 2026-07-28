@@ -130,6 +130,15 @@
                             <excludes>
                                 <exclude>com/sun/tools/attach/**</exclude>
                                 <exclude>net/bytebuddy/**</exclude>
+                                <!-- These extend JDialog. Surefire runs with
+                                     -Djava.awt.headless=true (required for CI without a
+                                     display), and java.awt.Window's constructor throws
+                                     HeadlessException unconditionally in that mode, so their
+                                     constructors can never run under test — not a testing gap,
+                                     a JDK/environment constraint. -->
+                                <exclude>com/scholarmatch/frameworks/gui/component/ConfirmationDialog.class</exclude>
+                                <exclude>com/scholarmatch/frameworks/gui/component/CreatePostingDialog.class</exclude>
+                                <exclude>com/scholarmatch/frameworks/gui/component/ApplyToPostingDialog.class</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -139,6 +148,13 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/ConfirmationDialog.class</exclude>
+                                <exclude>**/CreatePostingDialog.class</exclude>
+                                <exclude>**/ApplyToPostingDialog.class</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
