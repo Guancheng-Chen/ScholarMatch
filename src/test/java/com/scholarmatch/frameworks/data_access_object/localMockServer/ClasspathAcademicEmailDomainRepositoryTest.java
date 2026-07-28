@@ -43,6 +43,14 @@ class ClasspathAcademicEmailDomainRepositoryTest {
     }
 
     @Test
+    void testTrailingDotInDomainIsTrimmedBeforeMatching() {
+        final ClasspathAcademicEmailDomainRepository repository =
+                new ClasspathAcademicEmailDomainRepository(csvStream("mit.edu"));
+
+        assertTrue(repository.isAcademicEmail("ada@mit.edu."));
+    }
+
+    @Test
     void testCommentAndBlankLinesAreIgnored() {
         final ClasspathAcademicEmailDomainRepository repository =
                 new ClasspathAcademicEmailDomainRepository(

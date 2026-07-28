@@ -48,6 +48,14 @@ class PaperLookupInteractorTest {
     }
 
     @Test
+    void rejectsNullSearchWithoutCallingGateway() {
+        this.interactor.searchAuthors(new SearchAuthorsInputData(null));
+
+        assertNull(this.gateway.lastQuery);
+        assertEquals("Enter an author name before searching.", this.presenter.errorMessage);
+    }
+
+    @Test
     void rejectsAuthorOutsideCurrentResults() {
         this.interactor.selectAuthor(new SelectAuthorInputData("unknown"));
 

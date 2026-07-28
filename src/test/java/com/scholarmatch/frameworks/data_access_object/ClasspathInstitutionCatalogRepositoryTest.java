@@ -1,5 +1,7 @@
 package com.scholarmatch.frameworks.data_access_object;
 
+import com.scholarmatch.entity.Institution;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +29,31 @@ class ClasspathInstitutionCatalogRepositoryTest {
                 repository.findById("comma_university").getDisplayName());
         assertEquals("Quote \"Academy\"",
                 repository.findById("quote_academy").getDisplayName());
-        assertEquals(3, repository.getAllInstitutions().size());
+        assertEquals("Mid, Quoted",
+                repository.findById("mid_quote").getDisplayName());
+        assertEquals(4, repository.getAllInstitutions().size());
+    }
+
+    @Test
+    void testBlankOrNullInstitutionIdReturnsOther() {
+        final ClasspathInstitutionCatalogRepository repository =
+                new ClasspathInstitutionCatalogRepository("institutions-test.csv");
+
+        assertEquals(Institution.OTHER, repository.findById(null));
+        assertEquals(Institution.OTHER, repository.findById("   "));
+    }
+
+    @Test
+    void testMalformedRowWithoutSecondColumnIsSkipped() {
+        final InputStream stream = new ByteArrayInputStream(
+                ("id,name\nno-comma-row\nexample,Example University\n")
+                        .getBytes(StandardCharsets.UTF_8));
+
+        final ClasspathInstitutionCatalogRepository repository =
+                new ClasspathInstitutionCatalogRepository(stream);
+
+        assertEquals("Example University",
+                repository.findById("example").getDisplayName());
     }
 
     @Test

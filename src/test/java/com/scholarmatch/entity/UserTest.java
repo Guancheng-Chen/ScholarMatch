@@ -71,6 +71,127 @@ class UserTest {
     }
 
     @Test
+    void testIsProfileCompleteFalseWhenFirstNameNull() {
+        final User user = new User(
+                "id1", null, "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenLastNameNull() {
+        final User user = new User(
+                "id1", "Alice", null, "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenEmailNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", null, "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenPhoneNumberNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", null,
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenCollaborationDescriptionNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                null, "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenResearchDescriptionBlank() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "   ",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenInstitutionNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                null, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenAcademicLevelNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, null,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenLookingForNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, null,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenWeeklyAvailabilityHoursNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                null, FundingStatus.INSTITUTIONAL_FUNDING, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
+    void testIsProfileCompleteFalseWhenFundingStatusNull() {
+        final User user = new User(
+                "id1", "Alice", "Zhang", "alice@example.com", "123-456-7890",
+                Institution.UNIVERSITY_OF_TORONTO, AcademicLevel.FACULTY,
+                ResearchField.MACHINE_LEARNING, CollaborationType.INTEREST_SHARING,
+                "Looking for someone to co-author a paper", "Deep learning for computer vision",
+                10, null, "hash");
+        assertFalse(user.isProfileComplete());
+    }
+
+    @Test
     void testMutableProfileFieldsAndPublications() {
         final User user = buildCompleteUser();
         final Publication publication = new Publication(

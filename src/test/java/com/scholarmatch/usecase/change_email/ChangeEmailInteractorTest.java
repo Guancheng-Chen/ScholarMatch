@@ -63,6 +63,18 @@ class ChangeEmailInteractorTest {
                 .execute(new ChangeEmailInputData(
                         "new@example.com", "password", "123456"));
         assertEquals("Verification code has expired", rejected.error);
+
+        final Output nullEmail = new Output();
+        new ChangeEmailInteractor(
+                (email, password, code) -> user(email), nullEmail)
+                .execute(new ChangeEmailInputData(null, "password", "123456"));
+        assertEquals("Enter a valid new email address.", nullEmail.error);
+
+        final Output nullPassword = new Output();
+        new ChangeEmailInteractor(
+                (email, password, code) -> user(email), nullPassword)
+                .execute(new ChangeEmailInputData("new@example.com", null, "123456"));
+        assertEquals("Current password is required.", nullPassword.error);
     }
 
     private static User user(final String email) {

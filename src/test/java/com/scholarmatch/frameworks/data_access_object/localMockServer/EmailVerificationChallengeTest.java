@@ -30,6 +30,14 @@ class EmailVerificationChallengeTest {
     }
 
     @Test
+    void testNullEmailNormalizesToEmptyString() {
+        final EmailVerificationChallenge challenge = new EmailVerificationChallenge(
+                null, "123456", CREATED_AT.plus(Duration.ofMinutes(10)));
+
+        assertEquals("", challenge.getEmail());
+    }
+
+    @Test
     void testExpiredChallengeReportsExpired() {
         final EmailVerificationChallenge challenge = new EmailVerificationChallenge(
                 "ada@example.com", "123456", CREATED_AT.plus(Duration.ofMinutes(10)));

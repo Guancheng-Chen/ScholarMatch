@@ -60,6 +60,29 @@ class PostingTest {
     }
 
     @Test
+    void testFullConstructorDefaultsNullPosterFieldsToEmptyString() {
+        final Posting posting = new Posting(
+                "posting-1", null, null, false, "Title", "Description",
+                ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                1, 0, 0, PostingStatus.OPEN, LocalDateTime.now());
+
+        assertEquals("", posting.getPosterUserId());
+        assertEquals("", posting.getPosterName());
+    }
+
+    @Test
+    void testOpenPostingAtCapacityIsNotActive() {
+        final Posting posting = new Posting(
+                "posting-1", "poster-1", "Title", "Description",
+                ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
+                1, 1, 1, PostingStatus.OPEN, LocalDateTime.now());
+
+        assertTrue(posting.isFull());
+        assertEquals(PostingStatus.OPEN, posting.getStatus());
+        assertFalse(posting.isActive());
+    }
+
+    @Test
     void testExposesSnapshotAndUpdatesApplicantCount() {
         final LocalDateTime createdAt = LocalDateTime.of(2026, 7, 26, 12, 0);
         final Posting posting = new Posting(

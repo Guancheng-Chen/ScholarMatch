@@ -57,6 +57,20 @@ class CreatePostingInteractorTest {
         verify(dao, never()).createPosting(any(), any(), any(), any(), any());
     }
 
+    @Test
+    void testNullCapacityIsTreatedAsUnlimited() {
+        final CreatePostingDataAccessInterface dao = mock(CreatePostingDataAccessInterface.class);
+        final CreatePostingOutputBoundary output = mock(CreatePostingOutputBoundary.class);
+        final CreatePostingInputData input = new CreatePostingInputData(
+                "Title", "Description", ResearchField.COMPUTER_SCIENCE,
+                CollaborationType.CO_AUTHOR, null);
+        when(dao.createPosting(any(), any(), any(), any(), any())).thenReturn(posting());
+
+        new CreatePostingInteractor(dao, output).execute(input);
+
+        verify(output).prepareSuccessView(any());
+    }
+
     private CreatePostingInputData input() {
         return new CreatePostingInputData(
                 "Title", "Description", ResearchField.COMPUTER_SCIENCE,

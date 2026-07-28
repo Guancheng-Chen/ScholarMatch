@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import java.time.Month;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -287,6 +288,26 @@ class UpdateProfileInteractorTest {
         assertTrue(captureFailMessage(params.build()).contains("must be at most 60 characters"));
     }
 
+    @Test
+    void testNullResearchInterestEntryIsSkippedByLengthCheck() {
+        when(dataAccessObject.updateProfile(any())).thenReturn(updatedUser());
+        final Params params = new Params();
+        params.researchInterests = new ArrayList<>(Arrays.asList("machine learning", null));
+
+        interactor.execute(params.build());
+
+        verify(dataAccessObject).updateProfile(any());
+        verify(outputBoundary, never()).prepareFailView(anyString());
+    }
+
+    @Test
+    void testFailsWhenCollaborationDescriptionNull() {
+        final Params params = new Params();
+        params.collaborationDescription = null;
+
+        assertTrue(captureFailMessage(params.build()).contains("Collaboration description is required."));
+    }
+
     // ----- education date validation -----
 
     private Education validOngoingEducation() {
@@ -401,6 +422,28 @@ class UpdateProfileInteractorTest {
                 new Education("", DegreeType.BACHELOR, 1800, Month.SEPTEMBER, null, null)));
 
         assertTrue(captureFailMessage(params.build()).contains("Education #1: start year"));
+    }
+
+    @Test
+    void testEducationErrorLabelOmitsNullInstitution() {
+        final Params params = new Params();
+        params.educations = new ArrayList<>(List.of(
+                new Education(null, DegreeType.BACHELOR, 1800, Month.SEPTEMBER, null, null)));
+
+        assertTrue(captureFailMessage(params.build()).contains("Education #1: start year"));
+    }
+
+    @Test
+    void testSucceedsWhenSameYearAndEndMonthNotBeforeStartMonth() {
+        when(dataAccessObject.updateProfile(any())).thenReturn(updatedUser());
+        final Params params = new Params();
+        params.educations = new ArrayList<>(List.of(
+                new Education("MIT", DegreeType.MASTER, 2023, Month.SEPTEMBER, 2023, Month.DECEMBER)));
+
+        interactor.execute(params.build());
+
+        verify(dataAccessObject).updateProfile(any());
+        verify(outputBoundary, never()).prepareFailView(anyString());
     }
 
     // ----- multiple errors reported together -----

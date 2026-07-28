@@ -1,3 +1,4 @@
 institution_id,display_name
 COMMA_UNIVERSITY,"University, Example"
 QUOTE_ACADEMY,"Quote ""Academy"""
+MID_QUOTE,"Mid, Quoted",ignored_extra_column
