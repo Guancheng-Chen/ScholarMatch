@@ -21,6 +21,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -98,7 +99,10 @@ class UpdateProfileInteractorTest {
 
         interactor.execute(new Params().build());
 
-        verify(dataAccessObject).updateProfile(any());
+        final ArgumentCaptor<UpdateProfileInputData> captor =
+                ArgumentCaptor.forClass(UpdateProfileInputData.class);
+        verify(dataAccessObject).updateProfile(captor.capture());
+        assertEquals("jane@example.com", captor.getValue().getEmail());
         verify(outputBoundary).prepareSuccessView(any());
         verify(outputBoundary, never()).prepareFailView(anyString());
     }

@@ -111,6 +111,13 @@ class LocalServerRepositoryAccountTest {
     }
 
     @Test
+    void testRequestVerificationCodeSucceedsWithDefaultNoOpDelivery() {
+        register("Ada", "ada@example.com");
+
+        this.repository.requestVerificationCode("new@example.com");
+    }
+
+    @Test
     void testRequestVerificationCodeRejectsEmailAlreadyRegisteredToAnotherUser() {
         register("Ada", "ada@example.com");
         final AuthResult other = register("Grace", "grace@example.com");
@@ -150,11 +157,46 @@ class LocalServerRepositoryAccountTest {
                 this.repository.changeEmail(
                         "new@mit.edu", "password", "123456"));
 
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changePassword("wrong", "new-password"));
         this.repository.changePassword("password", "new-password");
         assertEquals(registration.userId(),
                 this.repository.login("new@mit.edu", "new-password").userId());
         assertThrows(InvalidRequestException.class, () ->
                 this.repository.login("new@mit.edu", "password"));
+    }
+
+    @Test
+    void testFailedCodeDeliveryDeletesTheChallengeAndPropagates() {
+        final InMemoryEmailVerificationChallengeRepository emailChallenges =
+                new InMemoryEmailVerificationChallengeRepository();
+        this.repository = new LocalServerRepository(
+                this.session,
+                new ClasspathInstitutionCatalogRepository(),
+                emailChallenges,
+                () -> "123456",
+                (email, code) -> {
+                    throw new RuntimeException("delivery failed");
+                },
+                email -> false,
+                Clock.systemUTC());
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+
+        assertThrows(RuntimeException.class, () ->
+                this.repository.requestVerificationCode("new@example.com"));
+
+        assertEquals(java.util.Optional.empty(), emailChallenges.findByEmail("new@example.com"));
+    }
+
+    @Test
+    void testChangeEmailRejectsEmailAlreadyRegisteredToAnotherUser() {
+        register("Grace", "grace@example.com");
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+
+        assertThrows(InvalidRequestException.class, () ->
+                this.repository.changeEmail("grace@example.com", "password", "000000"));
     }
 
     @Test

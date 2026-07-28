@@ -75,6 +75,7 @@ class MainViewTest {
     private LogoutViewModel lastLogoutViewModel;
     private LoadMatchesViewModel lastMatchesViewModel;
     private UpdateProfileViewModel lastProfileViewModel;
+    private com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel lastAccountSettingsViewModel;
 
     @Test
     void testShowsAuthShellWhenNoSessionIsActive() {
@@ -96,6 +97,18 @@ class MainViewTest {
 
         assertEquals(1, view.getComponentCount());
         assertTrue(view.getComponent(0) instanceof MainLayoutView);
+    }
+
+    @Test
+    void testMainLayoutSeedsAccountSettingsEmailWhenProfileAlreadyLoaded() throws Exception {
+        final CurrentUserProvider session = new CurrentUserProvider();
+        session.setCurrentUserId("existing-user-id");
+        final UpdateProfileViewModel profileViewModel = new UpdateProfileViewModel();
+        profileViewModel.setCurrentUser(user());
+
+        SwingUtilities.invokeAndWait(() -> buildMainView(session, profileViewModel));
+
+        assertEquals("", this.lastAccountSettingsViewModel.currentEmailProperty().get());
     }
 
     @Test
@@ -132,9 +145,16 @@ class MainViewTest {
      * only responsibility: picking the initial shell based on {@code session.isLoggedIn()}.
      */
     private MainView buildMainView(final CurrentUserProvider session) {
+        return buildMainView(session, new UpdateProfileViewModel());
+    }
+
+    private MainView buildMainView(
+            final CurrentUserProvider session, final UpdateProfileViewModel profileViewModel) {
         this.lastLogoutViewModel = new LogoutViewModel();
         this.lastMatchesViewModel = new LoadMatchesViewModel();
-        this.lastProfileViewModel = new UpdateProfileViewModel();
+        this.lastProfileViewModel = profileViewModel;
+        this.lastAccountSettingsViewModel
+                = new com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel();
         return new MainView(
                 new LoginController(mock(LoginInputBoundary.class)),
                 new LoginViewModel(),
@@ -165,7 +185,7 @@ class MainViewTest {
                         mock(com.scholarmatch.usecase.change_email.ChangeEmailInputBoundary.class)),
                 new com.scholarmatch.interface_adapter.controller.ChangePasswordController(
                         mock(com.scholarmatch.usecase.change_password.ChangePasswordInputBoundary.class)),
-                new com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel(),
+                this.lastAccountSettingsViewModel,
                 new CreatePostingController(mock(CreatePostingInputBoundary.class)),
                 new ClosePostingController(mock(ClosePostingInputBoundary.class)),
                 new LoadPostingsController(mock(LoadPostingsInputBoundary.class)),

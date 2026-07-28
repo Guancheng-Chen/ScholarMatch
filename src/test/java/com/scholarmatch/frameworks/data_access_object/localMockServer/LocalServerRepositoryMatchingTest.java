@@ -53,6 +53,21 @@ class LocalServerRepositoryMatchingTest {
     }
 
     @Test
+    void testSeedUserConnectingFirstStillMatchesInstantlyOnRealUsersTurn() {
+        final AuthResult current = register("Current", "current@example.com");
+        this.session.setCurrentUserId(current.userId());
+        final User seedUser = this.repository.getRecommendations().getFirst();
+
+        final AuthResult seed = this.repository.login(seedUser.getEmail(), "12345678");
+        this.session.setCurrentUserId(seed.userId());
+        assertFalse(this.repository.connect(current.userId()));
+
+        this.session.setCurrentUserId(current.userId());
+        assertTrue(this.repository.connect(seedUser.getUserId()));
+        assertEquals(List.of(seedUser), this.repository.getMatches());
+    }
+
+    @Test
     void testDislikeRemovesUserFromRecommendations() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
