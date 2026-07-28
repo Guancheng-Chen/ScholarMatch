@@ -14,9 +14,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/UI-Swing%20%7C%20FlatLaf-4B8BBE?style=flat-square" alt="UI"/>
-  <img src="https://img.shields.io/badge/backend-Spring%20Boot%20%7C%20Postgres-6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Backend"/>
   <img src="https://img.shields.io/badge/API-Semantic%20Scholar-1857B6?style=flat-square" alt="Semantic Scholar API"/>
-  <img src="https://img.shields.io/badge/auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
   <img src="https://img.shields.io/badge/coverage-100%25%20branches-F8952D?style=flat-square&logo=jacoco&logoColor=white" alt="JaCoCo"/>
 </p>
 
