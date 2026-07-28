@@ -8,8 +8,9 @@ import java.util.HexFormat;
 import java.util.Locale;
 
 /**
- * Verification-code state for one normalized email, as tracked by {@link LocalServerRepository}'s
- * offline simulation of the server's own code-expiry and attempt-limit rules.
+ * Verification-code state for one normalized email, as tracked by
+ * {@link LocalAccountSettingsRepository}'s offline simulation of the server's own code-expiry
+ * and attempt-limit rules.
  */
 public final class EmailVerificationChallenge {
 
