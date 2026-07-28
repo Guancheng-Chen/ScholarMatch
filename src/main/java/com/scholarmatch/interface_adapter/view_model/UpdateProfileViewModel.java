@@ -2,7 +2,11 @@ package com.scholarmatch.interface_adapter.view_model;
 
 import com.scholarmatch.interface_adapter.view_model.support.ObservableValue;
 import com.scholarmatch.usecase.dto.UserData;
+import com.scholarmatch.entity.AcademicLevel;
+import com.scholarmatch.entity.CollaborationType;
+import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
+import com.scholarmatch.entity.ResearchField;
 
 import java.util.List;
 
@@ -15,6 +19,10 @@ public final class UpdateProfileViewModel {
     private final ObservableValue<String> saveSuccessMessage = new ObservableValue<>("");
     private final ObservableValue<UserData> currentUser = new ObservableValue<>(null);
     private List<Institution> institutions = List.of();
+    private final List<AcademicLevel> academicLevels = List.of(AcademicLevel.values());
+    private final List<CollaborationType> collaborationTypes = List.of(CollaborationType.values());
+    private final List<ResearchField> researchFields = List.of(ResearchField.values());
+    private final List<FundingStatus> fundingStatuses = List.of(FundingStatus.values());
 
     /**
      * Returns the property holding the current user's full saved profile, populated once
@@ -69,5 +77,45 @@ public final class UpdateProfileViewModel {
 
     public void setInstitutions(final List<Institution> institutions) {
         this.institutions = List.copyOf(institutions);
+    }
+
+    /**
+     * Returns every selectable {@link AcademicLevel}, for the view to populate its dropdown
+     * without needing to call {@code AcademicLevel.values()} itself.
+     *
+     * @return the full set of academic levels
+     */
+    public List<AcademicLevel> getAcademicLevels() {
+        return this.academicLevels;
+    }
+
+    /**
+     * Returns every selectable {@link CollaborationType}, for the view to populate its
+     * dropdown without needing to call {@code CollaborationType.values()} itself.
+     *
+     * @return the full set of collaboration types
+     */
+    public List<CollaborationType> getCollaborationTypes() {
+        return this.collaborationTypes;
+    }
+
+    /**
+     * Returns every selectable {@link ResearchField}, for the view to populate its dropdown
+     * without needing to call {@code ResearchField.values()} itself.
+     *
+     * @return the full set of research fields
+     */
+    public List<ResearchField> getResearchFields() {
+        return this.researchFields;
+    }
+
+    /**
+     * Returns every selectable {@link FundingStatus}, for the view to populate its dropdown
+     * without needing to call {@code FundingStatus.values()} itself.
+     *
+     * @return the full set of funding statuses
+     */
+    public List<FundingStatus> getFundingStatuses() {
+        return this.fundingStatuses;
     }
 }

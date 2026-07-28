@@ -99,7 +99,8 @@ final class MainLayoutView extends JPanel {
      * @param logoutViewModel         observable logout state
      * @param deleteAccountController handles account-deletion confirmation
      * @param deleteAccountViewModel  observable state for a failed deletion attempt
-     * @param currentUserProvider     the shared session (used by ChatView to tell "mine" from "theirs")
+     * @param currentUserProvider     the shared session (its user ID seeds chatViewModel so
+     *                                ChatView can tell "mine" messages from "theirs")
      * @param onLoggedOut             invoked once logout succeeds
      */
     MainLayoutView(
@@ -142,6 +143,10 @@ final class MainLayoutView extends JPanel {
         super(new BorderLayout());
         setBackground(Theme.BG_DEFAULT);
 
+        // MainLayoutView is only ever shown once a session is established (see MainView),
+        // so the session's user ID is available here to hand off to the chat view model.
+        chatViewModel.setCurrentUserId(currentUserProvider.getCurrentUserId());
+
         final JPanel centerHolder = new JPanel(new BorderLayout());
         centerHolder.setOpaque(false);
 
@@ -163,7 +168,7 @@ final class MainLayoutView extends JPanel {
                     new LoadMatchesView(loadMatchesController, loadMatchesViewModel), BorderLayout.CENTER);
                 case "chat" -> centerHolder.add(
                     new ChatView(sendMessageController, loadMessageController, loadMatchesController,
-                        chatViewModel, loadMatchesViewModel, currentUserProvider),
+                        chatViewModel, loadMatchesViewModel),
                     BorderLayout.CENTER);
                 case "opportunities" -> centerHolder.add(
                     new OpportunitiesView(

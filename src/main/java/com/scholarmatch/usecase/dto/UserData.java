@@ -219,6 +219,16 @@ public final class UserData  {
     }
 
     /**
+     * Returns whether the registered email is a verified academic address, so display
+     * code can branch on this without needing to know about {@link EmailAccountType} itself.
+     *
+     * @return true if the email account type is {@link EmailAccountType#ACADEMIC}
+     */
+    public boolean isAcademicEmail() {
+        return this.emailAccountType == EmailAccountType.ACADEMIC;
+    }
+
+    /**
      * Returns the user's phone number.
      *
      * @return the phone number
