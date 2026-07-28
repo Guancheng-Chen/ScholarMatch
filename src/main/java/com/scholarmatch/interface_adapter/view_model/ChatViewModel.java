@@ -18,6 +18,7 @@ public final class ChatViewModel {
 
     private final ObservableListModel<MessageData> messages = new ObservableListModel<>();
     private final ObservableValue<String> errorMessage = new ObservableValue<>("");
+    private String currentUserId;
 
 
     /**
@@ -47,5 +48,22 @@ public final class ChatViewModel {
      */
     public void setErrorMessage(final String message) {
         this.errorMessage.set(message);
+    }
+
+    /**
+     * Returns the ID of the currently authenticated user, so the view can tell "mine" from
+     * "theirs" without depending on the session provider directly.
+     *
+     * @return the current user's ID
+     */
+    public String getCurrentUserId() {
+        return this.currentUserId;
+    }
+
+    /**
+     * @param currentUserId the ID of the currently authenticated user
+     */
+    public void setCurrentUserId(final String currentUserId) {
+        this.currentUserId = currentUserId;
     }
 }

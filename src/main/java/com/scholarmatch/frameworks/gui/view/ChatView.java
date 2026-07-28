@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.gui.view;
 
-import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Theme;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
@@ -76,23 +75,23 @@ public final class ChatView extends JPanel {
      * @param sendMessageController  sends a chat message to the selected match
      * @param loadMessageController  loads the conversation history with the selected match
      * @param loadMatchesController  loads the current user's confirmed matches
-     * @param chatViewModel          observable state for the currently open conversation
+     * @param chatViewModel          observable state for the currently open conversation,
+     *                               including the current user's ID, used to tell "mine"
+     *                               messages from "theirs"
      * @param loadMatchesViewModel   observable state for the matched-users list
-     * @param currentUserProvider    the shared session, used to tell "mine" messages from "theirs"
      */
     public ChatView(
         final SendMessageController sendMessageController,
         final LoadMessageController loadMessageController,
         final LoadMatchesController loadMatchesController,
         final ChatViewModel chatViewModel,
-        final LoadMatchesViewModel loadMatchesViewModel,
-        final CurrentUserProvider currentUserProvider) {
+        final LoadMatchesViewModel loadMatchesViewModel) {
         super(new BorderLayout());
         this.sendMessageController = sendMessageController;
         this.loadMessageController = loadMessageController;
         this.chatViewModel = chatViewModel;
         this.loadMatchesViewModel = loadMatchesViewModel;
-        this.currentUserId = currentUserProvider.getCurrentUserId();
+        this.currentUserId = chatViewModel.getCurrentUserId();
         setBackground(Theme.BG_DEFAULT);
 
         this.matchList = new JPanel();

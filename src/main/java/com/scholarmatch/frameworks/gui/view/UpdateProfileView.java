@@ -2,7 +2,6 @@ package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.entity.AcademicLevel;
 import com.scholarmatch.entity.CollaborationType;
-import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
@@ -44,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 /**
@@ -101,16 +101,16 @@ public final class UpdateProfileView extends JPanel {
                 new JComboBox<>(sortedInstitutions(viewModel.getInstitutions()));
         styleInstitutionCombo(institutionCombo);
 
-        final JComboBox<AcademicLevel> academicLevelCombo = new JComboBox<>(AcademicLevel.values());
+        final JComboBox<AcademicLevel> academicLevelCombo = new JComboBox<>(new Vector<>(viewModel.getAcademicLevels()));
         styleCombo(academicLevelCombo);
 
-        final JComboBox<CollaborationType> lookingForCombo = new JComboBox<>(CollaborationType.values());
+        final JComboBox<CollaborationType> lookingForCombo = new JComboBox<>(new Vector<>(viewModel.getCollaborationTypes()));
         styleCombo(lookingForCombo);
 
-        final JComboBox<ResearchField> researchFieldCombo = new JComboBox<>(ResearchField.values());
+        final JComboBox<ResearchField> researchFieldCombo = new JComboBox<>(new Vector<>(viewModel.getResearchFields()));
         styleCombo(researchFieldCombo);
 
-        final JComboBox<FundingStatus> fundingStatusCombo = new JComboBox<>(FundingStatus.values());
+        final JComboBox<FundingStatus> fundingStatusCombo = new JComboBox<>(new Vector<>(viewModel.getFundingStatuses()));
         styleCombo(fundingStatusCombo);
 
         final JTextField weeklyAvailabilityField = field("Weekly Availability (hours)");
@@ -137,7 +137,7 @@ public final class UpdateProfileView extends JPanel {
                 return;
             }
             emailField.setText(user.getEmail());
-            final boolean academic = user.getEmailAccountType() == EmailAccountType.ACADEMIC;
+            final boolean academic = user.isAcademicEmail();
             emailAccountTypeLabel.setText(academic
                 ? "Verified university email" : "Regular email");
             emailAccountTypeLabel.setForeground(academic ? Theme.ACCENT_FG : Theme.FG_MUTED);
