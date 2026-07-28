@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/backend-Spring%20Boot%20%7C%20Postgres-6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Backend"/>
   <img src="https://img.shields.io/badge/API-Semantic%20Scholar-1857B6?style=flat-square" alt="Semantic Scholar API"/>
   <img src="https://img.shields.io/badge/auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
-  <img src="https://img.shields.io/badge/coverage-99.98%25%20lines-F8952D?style=flat-square&logo=jacoco&logoColor=white" alt="JaCoCo"/>
+  <img src="https://img.shields.io/badge/coverage-100%25%20branches-F8952D?style=flat-square&logo=jacoco&logoColor=white" alt="JaCoCo"/>
 </p>
 
 *A cross-platform Java desktop app that helps students, researchers, and academics discover collaborators, post and apply to research opportunities, and message their matches — an "Academic Matchmaking and Collaboration Network."*

@@ -622,7 +622,10 @@ public final class LocalServerRepository
         final Posting posting = new Posting(
                 UUID.randomUUID().toString(), posterId,
                 poster.getFullName(),
-                poster.getEmailAccountType() == EmailAccountType.ACADEMIC,
+                // Hardcoded rather than read off poster.getEmailAccountType(): the poster is
+                // always whichever seed user is added first above (currently Ada, REGULAR by
+                // default). Update this if that ever changes.
+                false,
                 "Foundations of trustworthy computing",
                 "Seeking collaborators for a short research project on reliable computation.",
                 ResearchField.COMPUTER_SCIENCE, CollaborationType.CO_AUTHOR,
