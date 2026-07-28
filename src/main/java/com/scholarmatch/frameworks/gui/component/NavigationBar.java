@@ -4,8 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
-import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
@@ -15,23 +13,22 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.function.Consumer;
 
 /**
  * Left-hand navigation sidebar shown once the user is logged in.
  *
  * <p>Contains a vertical, full-width segmented group of toggle buttons — Recommend,
- * View Matched, Chat, Profile — each laid out icon-left/text-right, plus Delete Account
- * and Logout buttons anchored to the bottom. Selecting a nav button invokes the provided
- * NavSelectionListener, which causes the center pane of MainView to switch its
- * displayed view.
+ * View Matched, Chat, Opportunities, My Postings, My Applications, Profile, and Account
+ * Settings — each laid out icon-left/text-right, plus a Logout button anchored to the
+ * bottom. Selecting a nav button invokes the provided NavSelectionListener, which causes
+ * the center pane of MainView to switch its displayed view. Account deletion lives on the
+ * Account Settings screen rather than here.
  */
 public final class NavigationBar extends JPanel {
 
@@ -43,14 +40,6 @@ public final class NavigationBar extends JPanel {
     private static final String TOGGLE_STYLE =
         "arc:8;selectedBackground:#e2f3ee;selectedForeground:#0c6e58;focusWidth:0;borderWidth:0;"
             + "background:#ffffff;hoverBackground:#f3f4f6;foreground:#1c2624";
-
-    private static final String DELETE_ACCOUNT_WARNING =
-        "This will permanently delete your account, password, and personal information "
-            + "from ScholarMatch. To use the app again, you will need to register a new "
-            + "account. This action cannot be undone.";
-
-    private final DeleteAccountViewModel deleteAccountViewModel;
-    private final Consumer<String> deleteErrorListener;
 
     /**
      * Callback interface for screen-selection events raised by this bar.
@@ -67,24 +56,13 @@ public final class NavigationBar extends JPanel {
     /**
      * Constructs a NavigationBar.
      *
-     * @param listener                the callback invoked when a nav item is selected
-     * @param onLogout                the callback invoked when the user clicks Logout
-     * @param deleteAccountController handles account-deletion confirmation
-     * @param deleteAccountViewModel  observable state for a failed deletion attempt
+     * @param listener  the callback invoked when a nav item is selected
+     * @param onLogout  the callback invoked when the user clicks Logout
      */
     public NavigationBar(
         final NavSelectionListener listener,
-        final Runnable onLogout,
-        final DeleteAccountController deleteAccountController,
-        final DeleteAccountViewModel deleteAccountViewModel) {
+        final Runnable onLogout) {
         super();
-        this.deleteAccountViewModel = deleteAccountViewModel;
-        this.deleteErrorListener = errorMessage -> {
-            if (errorMessage != null && !errorMessage.isBlank()) {
-                JOptionPane.showMessageDialog(
-                    this, errorMessage, "Delete Account Failed", JOptionPane.ERROR_MESSAGE);
-            }
-        };
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
         setBackground(Theme.BG_SUBTLE);
         setBorder(BorderFactory.createCompoundBorder(
@@ -115,7 +93,7 @@ public final class NavigationBar extends JPanel {
 
         for (final JToggleButton button
             : new JToggleButton[] {recommendButton, matchedButton, chatButton, opportunitiesButton,
-                myPostingsButton, myApplicationsButton, profileButton}) {
+                myPostingsButton, myApplicationsButton, profileButton, settingsButton}) {
             navGroup.add(button);
             button.putClientProperty(FlatClientProperties.STYLE, TOGGLE_STYLE);
         }
@@ -128,26 +106,6 @@ public final class NavigationBar extends JPanel {
         myApplicationsButton.addActionListener(evt -> listener.onSelected("my-applications"));
         profileButton.addActionListener(evt -> listener.onSelected("profile"));
         settingsButton.addActionListener(evt -> listener.onSelected("settings"));
-        navGroup.add(settingsButton);
-        settingsButton.putClientProperty(FlatClientProperties.STYLE, TOGGLE_STYLE);
-
-        final JButton deleteAccountButton = new JButton(
-            "Delete Account", Icons.of(FontAwesomeSolid.TRASH_ALT, TRAILING_ICON_SIZE, Theme.FG_EMPHASIS));
-        Buttons.danger(deleteAccountButton);
-        deleteAccountButton.setIconTextGap(8);
-        styleSidebarButton(deleteAccountButton);
-        deleteAccountButton.addActionListener(evt -> {
-            final int choice = JOptionPane.showConfirmDialog(
-                this,
-                DELETE_ACCOUNT_WARNING,
-                "Delete Account?",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
-            if (choice == JOptionPane.YES_OPTION) {
-                deleteAccountController.deleteAccount();
-            }
-        });
-        deleteAccountViewModel.errorMessageProperty().addListener(this.deleteErrorListener);
 
         final JButton logoutButton = new JButton(
             "Logout", Icons.of(FontAwesomeSolid.SIGN_OUT_ALT, TRAILING_ICON_SIZE, Theme.FG_DEFAULT));
@@ -170,18 +128,10 @@ public final class NavigationBar extends JPanel {
         add(myApplicationsButton);
         add(Box.createVerticalStrut(4));
         add(profileButton);
-        add(Box.createVerticalGlue());
+        add(Box.createVerticalStrut(4));
         add(settingsButton);
-        add(Box.createVerticalStrut(8));
+        add(Box.createVerticalGlue());
         add(logoutButton);
-        add(Box.createVerticalStrut(8));
-        add(deleteAccountButton);
-    }
-
-    @Override
-    public void removeNotify() {
-        this.deleteAccountViewModel.errorMessageProperty().removeListener(this.deleteErrorListener);
-        super.removeNotify();
     }
 
     /**
