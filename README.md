@@ -33,6 +33,7 @@ ScholarMatch pairs a recommendation feed (ranked by shared research interests) w
 
 * [Quick Facts](#quick-facts)
 * [Team & Use-Case Owners](#team--use-case-owners)
+* [Features](#features)
 * [Architecture](#architecture)
 * [Getting Started](#getting-started)
   * [Online Mode (default)](#online-mode-default)
@@ -83,6 +84,30 @@ frameworks/
 
 ---
 
+## Features
+
+**Ranked Recommendations & Matching**
+- **Interest-Ranked Feed:** Browse a recommendation feed of other researchers, ranked by shared research interests, with an academic-email verification badge on each card.
+- **Mutual-Match Flow:** Connect or skip candidates; a match only unlocks messaging once both sides connect, with a dedicated matches list to track who you're paired with.
+
+**Profile & Paper Lookup**
+- **Rich Academic Profile:** Build a profile with institution, academic level, research field, funding status, collaboration preferences, education, and publications.
+- **Semantic Scholar Autofill:** Search for yourself on Semantic Scholar and pull in your h-index, citation count, and publication list instead of typing them by hand.
+
+**Research Postings & Applications**
+- **Create & Browse Postings:** Post a research opportunity with a title, description, research field, collaboration type, and team capacity, then browse active postings from other researchers.
+- **Apply & Review Applicants:** Apply to a posting with a message, and as a poster, accept or decline applicants and track your own application history — postings close automatically once full.
+
+**Private Messaging**
+- **Match-Only Conversations:** Message only the people you've mutually matched with, keeping conversations scoped to real connections rather than open to anyone.
+- **Persistent Conversation History:** Revisit past messages with a match at any time from the chat view.
+
+**Account & Security**
+- **Verified Email Changes:** Change your account email through a code-verification flow rather than a plain, unchecked update.
+- **Full Account Lifecycle:** Register, log in/out, change your password, and delete your account (and its associated data) whenever you choose.
+
+---
+
 ## Architecture
 
 ScholarMatch follows **Clean Architecture**. Every feature is wired through the same four layers, and `AppBuilder` assembles them at startup in a fixed order (session → repositories → view models → presenters → interactors → controllers):
@@ -92,7 +117,7 @@ ScholarMatch follows **Clean Architecture**. Every feature is wired through the 
 3. **Interface Adapters** (`interface_adapter/`) — controllers translate GUI events into use-case input; presenters translate use-case output into view-model state.
 4. **Frameworks & Drivers** (`frameworks/`) — Swing views under `gui/`, and the two interchangeable data-access implementations under `data_access_object/`:
    * `server/` — real HTTP gateways that call the ScholarMatch backend (see [`docs/api/BACKEND_SERVER_API.md`](docs/api/BACKEND_SERVER_API.md)).
-   * `localMockServer/` — `LocalServerRepository`, an in-memory fake used for offline/demo mode.
+   * `localMockServer/` — the `Local*Repository` classes (auth, profile, matching, messaging, postings, account settings), an in-memory fake used for offline/demo mode.
 
 `AppBuilder` decides once at startup, per feature, whether a use case talks to the real server or to the in-memory offline repository — see [Getting Started](#getting-started) below.
 
@@ -127,7 +152,7 @@ If the server is unreachable, the client automatically falls back to offline mod
 
 ### Offline Mode
 
-Offline mode runs the entire app against an **in-memory fake repository** (`LocalServerRepository`) — no server, no database, no real emails sent. It's pre-seeded with a few demo scholars (Ada Lovelace, Alan Turing, Grace Hopper, Demo Student) so Recommend/Connect/Matches work immediately, and connecting with any seeded user always reports an instant mutual match.
+Offline mode runs the entire app against **in-memory fake repositories** (the `Local*Repository` classes) — no server, no database, no real emails sent. It's pre-seeded with a few demo scholars (Ada Lovelace, Alan Turing, Grace Hopper, Demo Student) so Recommend/Connect/Matches work immediately, and connecting with any seeded user always reports an instant mutual match.
 
 ```bash
 OFFLINE_MODE=true mvn exec:java
@@ -144,7 +169,7 @@ Just copy the code from the terminal into the app's verification field — no re
 | Mode        | Trigger                                              | Data                                   | Verification code delivery                    |
 | ----------- | ----------------------------------------------------- | --------------------------------------- | ------------------------------------------------ |
 | **Online**  | Default; server reachable                              | Real REST API + Postgres (Railway)      | Real email, via the server's Resend integration   |
-| **Offline** | `OFFLINE_MODE=true`, *or* automatically if the server's health check fails | In-memory (`LocalServerRepository`), resets every run | Printed to the console (`[Offline demo] ...`)     |
+| **Offline** | `OFFLINE_MODE=true`, *or* automatically if the server's health check fails | In-memory (the `Local*Repository` classes), resets every run | Printed to the console (`[Offline demo] ...`)     |
 
 ### Environment Variables
 
