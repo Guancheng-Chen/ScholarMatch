@@ -3,7 +3,13 @@ package com.scholarmatch.app;
 import com.scholarmatch.frameworks.data_access_object.server.AuthGateway;
 import com.scholarmatch.frameworks.data_access_object.FallbackUserApiGateway;
 import com.scholarmatch.frameworks.data_access_object.LocalUserApiGateway;
-import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalServerRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalAccountSettingsRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalAuthRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalMatchingRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalMessagingRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalPostingRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalProfileRepository;
+import com.scholarmatch.frameworks.data_access_object.localMockServer.LocalServerState;
 import com.scholarmatch.frameworks.data_access_object.server.MatchingGateway;
 import com.scholarmatch.frameworks.data_access_object.server.MessagingGateway;
 import com.scholarmatch.frameworks.data_access_object.server.PostingGateway;
@@ -150,12 +156,14 @@ import java.util.function.BooleanSupplier;
  *   <li>SERVER_URL — ScholarMatch REST API base URL
  *       (defaults to the Railway production URL if not set)</li>
  *   <li>OFFLINE_MODE — if set to true, skips the live server entirely and
- *       uses LocalServerRepository for auth/profile/match/connect, for demo control</li>
+ *       uses the offline Local*Repository classes for auth/profile/match/connect,
+ *       for demo control</li>
  * </ul>
  *
  * <p>If OFFLINE_MODE is not set, {@link #addRepositories()} pings SERVER_URL's health
- * endpoint once at startup; if it is unreachable, it falls back to LocalServerRepository
- * automatically so a live demo is not derailed by the server being down. Paper lookup
+ * endpoint once at startup; if it is unreachable, it falls back to the offline
+ * Local*Repository classes automatically so a live demo is not derailed by the server
+ * being down. Paper lookup
  * (UserAPIGatewayInterface) instead falls back per-call, since it is stateless —
  * see FallbackUserApiGateway.
  */
@@ -344,42 +352,52 @@ public final class AppBuilder {
         final MatchingGateway matchingGateway = new MatchingGateway(httpClient, this.institutionCatalog);
         final MessagingGateway messagingGateway = new MessagingGateway(httpClient);
         final PostingGateway postingGateway = new PostingGateway(httpClient);
-        final LocalServerRepository localRepo = new LocalServerRepository(
+        final LocalServerState localState = new LocalServerState(this.institutionCatalog);
+        final LocalAuthRepository localAuthRepo = new LocalAuthRepository(localState);
+        final LocalProfileRepository localProfileRepo = new LocalProfileRepository(
+                localState, this.currentUserProvider, this.institutionCatalog);
+        final LocalAccountSettingsRepository localAccountSettingsRepo = new LocalAccountSettingsRepository(
+                localState,
                 this.currentUserProvider,
-                this.institutionCatalog,
                 new InMemoryEmailVerificationChallengeRepository(),
                 new SecureVerificationCodeGenerator(),
                 (email, code) -> System.out.println(
                         "[Offline demo] Verification code for " + email + ": " + code),
                 new ClasspathAcademicEmailDomainRepository(),
                 Clock.systemUTC());
+        final LocalMatchingRepository localMatchingRepo =
+                new LocalMatchingRepository(localState, this.currentUserProvider);
+        final LocalMessagingRepository localMessagingRepo =
+                new LocalMessagingRepository(localState, this.currentUserProvider);
+        final LocalPostingRepository localPostingRepo =
+                new LocalPostingRepository(localState, this.currentUserProvider);
 
-        this.loginDataAccessObject = offline ? localRepo : authGateway;
-        this.registerDataAccessObject = offline ? localRepo : authGateway;
+        this.loginDataAccessObject = offline ? localAuthRepo : authGateway;
+        this.registerDataAccessObject = offline ? localAuthRepo : authGateway;
         this.registerVerificationDataAccessObject =
-                offline ? localRepo : new RemoteVerificationEmailSender(SERVER_URL);
-        this.recommendDataAccessObject = offline ? localRepo : matchingGateway;
-        this.connectDataAccessObject = offline ? localRepo : matchingGateway;
-        this.dislikeDataAccessObject = offline ? localRepo : matchingGateway;
-        this.loadMatchesDataAccessObject = offline ? localRepo : matchingGateway;
-        this.loadProfileDataAccessObject = offline ? localRepo : profileGateway;
-        this.updateProfileDataAccessObject = offline ? localRepo : profileGateway;
+                offline ? localAccountSettingsRepo : new RemoteVerificationEmailSender(SERVER_URL);
+        this.recommendDataAccessObject = offline ? localMatchingRepo : matchingGateway;
+        this.connectDataAccessObject = offline ? localMatchingRepo : matchingGateway;
+        this.dislikeDataAccessObject = offline ? localMatchingRepo : matchingGateway;
+        this.loadMatchesDataAccessObject = offline ? localMatchingRepo : matchingGateway;
+        this.loadProfileDataAccessObject = offline ? localProfileRepo : profileGateway;
+        this.updateProfileDataAccessObject = offline ? localProfileRepo : profileGateway;
         this.requestEmailChangeDataAccessObject =
-                offline ? localRepo : accountSettingsGateway;
+                offline ? localAccountSettingsRepo : accountSettingsGateway;
         this.changeEmailDataAccessObject =
-                offline ? localRepo : accountSettingsGateway;
+                offline ? localAccountSettingsRepo : accountSettingsGateway;
         this.changePasswordDataAccessObject =
-                offline ? localRepo : accountSettingsGateway;
-        this.deleteAccountDataAccessObject = offline ? localRepo : profileGateway;
-        this.sendMessageDataAccessObject = offline ? localRepo : messagingGateway;
-        this.loadMessageDataAccessObject = offline ? localRepo : messagingGateway;
-        this.createPostingDataAccessObject = offline ? localRepo : postingGateway;
-        this.closePostingDataAccessObject = offline ? localRepo : postingGateway;
-        this.loadPostingsDataAccessObject = offline ? localRepo : postingGateway;
-        this.applyToPostingDataAccessObject = offline ? localRepo : postingGateway;
-        this.acceptApplicationDataAccessObject = offline ? localRepo : postingGateway;
-        this.declineApplicationDataAccessObject = offline ? localRepo : postingGateway;
-        this.loadMyApplicationsDataAccessObject = offline ? localRepo : postingGateway;
+                offline ? localAccountSettingsRepo : accountSettingsGateway;
+        this.deleteAccountDataAccessObject = offline ? localProfileRepo : profileGateway;
+        this.sendMessageDataAccessObject = offline ? localMessagingRepo : messagingGateway;
+        this.loadMessageDataAccessObject = offline ? localMessagingRepo : messagingGateway;
+        this.createPostingDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.closePostingDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.loadPostingsDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.applyToPostingDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.acceptApplicationDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.declineApplicationDataAccessObject = offline ? localPostingRepo : postingGateway;
+        this.loadMyApplicationsDataAccessObject = offline ? localPostingRepo : postingGateway;
         // Falls back to a small offline dataset per-call if the live Semantic User API is
         // rate limited or unreachable, so a demo isn't derailed by a third-party outage.
         this.userApiGateway = new FallbackUserApiGateway(new SemanticScholarGateway(), new LocalUserApiGateway());

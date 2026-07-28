@@ -1,6 +1,5 @@
 package com.scholarmatch.frameworks.gui.view;
 
-import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
 import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
 import com.scholarmatch.interface_adapter.controller.LoadMessageController;
@@ -39,13 +38,12 @@ class ChatViewTest {
         final LoadMessageInputBoundary loadMessages = mock(LoadMessageInputBoundary.class);
         final LoadMatchesInputBoundary loadMatches = mock(LoadMatchesInputBoundary.class);
         final ChatViewModel chatVm = new ChatViewModel();
+        chatVm.setCurrentUserId("me");
         final LoadMatchesViewModel matchesVm = new LoadMatchesViewModel();
-        final CurrentUserProvider currentUser = new CurrentUserProvider();
-        currentUser.setCurrentUserId("me");
         SwingUtilities.invokeAndWait(() -> {
             final ChatView view = new ChatView(
                     new SendMessageController(send), new LoadMessageController(loadMessages),
-                    new LoadMatchesController(loadMatches), chatVm, matchesVm, currentUser);
+                    new LoadMatchesController(loadMatches), chatVm, matchesVm);
             final JButton sendButton = button(view, "Send");
             final JTextField message = SwingTestSupport.find(view, JTextField.class, 0);
             sendButton.doClick();
@@ -86,13 +84,12 @@ class ChatViewTest {
         final LoadMessageInputBoundary loadMessages = mock(LoadMessageInputBoundary.class);
         final LoadMatchesInputBoundary loadMatches = mock(LoadMatchesInputBoundary.class);
         final ChatViewModel chatVm = new ChatViewModel();
+        chatVm.setCurrentUserId("me");
         final LoadMatchesViewModel matchesVm = new LoadMatchesViewModel();
-        final CurrentUserProvider currentUser = new CurrentUserProvider();
-        currentUser.setCurrentUserId("me");
         SwingUtilities.invokeAndWait(() -> {
             final ChatView view = new ChatView(
                     new SendMessageController(send), new LoadMessageController(loadMessages),
-                    new LoadMatchesController(loadMatches), chatVm, matchesVm, currentUser);
+                    new LoadMatchesController(loadMatches), chatVm, matchesVm);
             matchesVm.getMatchedUsers().setAll(List.of(user("partner", "Ada", "Lovelace")));
             button(view, "Ada Lovelace").doClick();
 

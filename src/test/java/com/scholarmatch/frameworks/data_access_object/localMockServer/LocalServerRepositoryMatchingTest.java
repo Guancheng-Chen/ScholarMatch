@@ -2,9 +2,11 @@ package com.scholarmatch.frameworks.data_access_object.localMockServer;
 
 import com.scholarmatch.entity.Message;
 import com.scholarmatch.entity.User;
+import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
+import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 import com.scholarmatch.usecase.register.RegisterAccountData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,63 +21,79 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LocalServerRepositoryMatchingTest {
 
     private CurrentUserProvider session;
-    private LocalServerRepository repository;
+    private LocalAuthRepository authRepo;
+    private LocalMatchingRepository matchingRepo;
+    private LocalMessagingRepository messagingRepo;
 
     @BeforeEach
     void setUp() {
         this.session = new CurrentUserProvider();
-        this.repository = new LocalServerRepository(this.session);
+        final LocalServerState state =
+                new LocalServerState(new ClasspathInstitutionCatalogRepository());
+        this.authRepo = new LocalAuthRepository(state);
+        this.matchingRepo = new LocalMatchingRepository(state, this.session);
+        this.messagingRepo = new LocalMessagingRepository(state, this.session);
     }
 
     @Test
     void testSeedUsersRequireReciprocalConnect() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
-        final List<User> recommendations = this.repository.getRecommendations();
+        final List<User> recommendations = this.matchingRepo.getRecommendations();
         final User seedUser = recommendations.getFirst();
 
-        assertFalse(this.repository.connect(seedUser.getUserId()));
-        assertTrue(this.repository.getMatches().isEmpty());
+        assertFalse(this.matchingRepo.connect(seedUser.getUserId()));
+        assertTrue(this.matchingRepo.getMatches().isEmpty());
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.sendMessage(seedUser.getUserId(), "Too early"));
+                () -> this.messagingRepo.sendMessage(seedUser.getUserId(), "Too early"));
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.getConversation(seedUser.getUserId()));
+                () -> this.messagingRepo.getConversation(seedUser.getUserId()));
 
-        final AuthResult seed = this.repository.login(seedUser.getEmail(), "12345678");
+        final AuthResult seed = this.authRepo.login(seedUser.getEmail(), "12345678");
         this.session.setCurrentUserId(seed.userId());
-        assertTrue(this.repository.connect(current.userId()));
+        assertTrue(this.matchingRepo.connect(current.userId()));
 
         this.session.setCurrentUserId(current.userId());
-        assertEquals(List.of(seedUser), this.repository.getMatches());
-        final Message message = this.repository.sendMessage(seedUser.getUserId(), "Hello");
+        assertEquals(List.of(seedUser), this.matchingRepo.getMatches());
+        final Message message = this.messagingRepo.sendMessage(seedUser.getUserId(), "Hello");
         assertEquals(List.of(message),
-                this.repository.getConversation(seedUser.getUserId()));
+                this.messagingRepo.getConversation(seedUser.getUserId()));
     }
 
     @Test
     void testSeedUserConnectingFirstStillMatchesInstantlyOnRealUsersTurn() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
-        final User seedUser = this.repository.getRecommendations().getFirst();
+        final User seedUser = this.matchingRepo.getRecommendations().getFirst();
 
-        final AuthResult seed = this.repository.login(seedUser.getEmail(), "12345678");
+        final AuthResult seed = this.authRepo.login(seedUser.getEmail(), "12345678");
         this.session.setCurrentUserId(seed.userId());
-        assertFalse(this.repository.connect(current.userId()));
+        assertFalse(this.matchingRepo.connect(current.userId()));
 
         this.session.setCurrentUserId(current.userId());
-        assertTrue(this.repository.connect(seedUser.getUserId()));
-        assertEquals(List.of(seedUser), this.repository.getMatches());
+        assertTrue(this.matchingRepo.connect(seedUser.getUserId()));
+        assertEquals(List.of(seedUser), this.matchingRepo.getMatches());
     }
 
     @Test
     void testDislikeRemovesUserFromRecommendations() {
         final AuthResult current = register("Current", "current@example.com");
         this.session.setCurrentUserId(current.userId());
-        final User disliked = this.repository.getRecommendations().getFirst();
+        final User disliked = this.matchingRepo.getRecommendations().getFirst();
 
-        this.repository.dislike(disliked.getUserId());
+        this.matchingRepo.dislike(disliked.getUserId());
 
-        assertFalse(this.repository.getRecommendations().contains(disliked));
+        assertFalse(this.matchingRepo.getRecommendations().contains(disliked));
+    }
+
+    @Test
+    void testGetProfileReturnsCurrentUserOrThrowsWhenMissing() {
+        this.session.setCurrentUserId("missing-user");
+        assertThrows(ResourceNotFoundException.class, this.matchingRepo::getProfile);
+
+        final AuthResult current = register("Current", "current@example.com");
+        this.session.setCurrentUserId(current.userId());
+        assertEquals(current.userId(), this.matchingRepo.getProfile().getUserId());
     }
 
     @Test
@@ -84,39 +102,39 @@ class LocalServerRepositoryMatchingTest {
         final AuthResult second = register("Second", "second@example.com");
 
         this.session.setCurrentUserId(first.userId());
-        assertFalse(this.repository.connect(second.userId()));
-        assertTrue(this.repository.getMatches().isEmpty());
+        assertFalse(this.matchingRepo.connect(second.userId()));
+        assertTrue(this.matchingRepo.getMatches().isEmpty());
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.sendMessage(second.userId(), "Too early"));
+                () -> this.messagingRepo.sendMessage(second.userId(), "Too early"));
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.getConversation(second.userId()));
+                () -> this.messagingRepo.getConversation(second.userId()));
 
         this.session.setCurrentUserId(second.userId());
-        assertTrue(this.repository.connect(first.userId()));
-        final Message reply = this.repository.sendMessage(first.userId(), "Now matched");
-        assertEquals(List.of(reply), this.repository.getConversation(first.userId()));
+        assertTrue(this.matchingRepo.connect(first.userId()));
+        final Message reply = this.messagingRepo.sendMessage(first.userId(), "Now matched");
+        assertEquals(List.of(reply), this.messagingRepo.getConversation(first.userId()));
 
         final AuthResult third = register("Third", "third@example.com");
         final AuthResult fourth = register("Fourth", "fourth@example.com");
         this.session.setCurrentUserId(third.userId());
-        assertFalse(this.repository.connect(fourth.userId()));
-        assertFalse(this.repository.connect(first.userId()));
+        assertFalse(this.matchingRepo.connect(fourth.userId()));
+        assertFalse(this.matchingRepo.connect(first.userId()));
         this.session.setCurrentUserId(fourth.userId());
-        assertTrue(this.repository.connect(third.userId()));
-        this.repository.sendMessage(third.userId(), "Unrelated conversation");
+        assertTrue(this.matchingRepo.connect(third.userId()));
+        this.messagingRepo.sendMessage(third.userId(), "Unrelated conversation");
         this.session.setCurrentUserId(first.userId());
-        assertTrue(this.repository.connect(third.userId()));
-        this.repository.sendMessage(third.userId(), "First messaging a third party");
+        assertTrue(this.matchingRepo.connect(third.userId()));
+        this.messagingRepo.sendMessage(third.userId(), "First messaging a third party");
         this.session.setCurrentUserId(second.userId());
-        assertFalse(this.repository.connect(fourth.userId()));
+        assertFalse(this.matchingRepo.connect(fourth.userId()));
         this.session.setCurrentUserId(fourth.userId());
-        assertTrue(this.repository.connect(second.userId()));
+        assertTrue(this.matchingRepo.connect(second.userId()));
         this.session.setCurrentUserId(second.userId());
-        this.repository.sendMessage(fourth.userId(), "Second messaging fourth, not first");
+        this.messagingRepo.sendMessage(fourth.userId(), "Second messaging fourth, not first");
 
         this.session.setCurrentUserId(first.userId());
-        assertEquals(List.of(reply), this.repository.getConversation(second.userId()));
-        assertEquals(second.userId(), this.repository.getMatches().getFirst().getUserId());
+        assertEquals(List.of(reply), this.messagingRepo.getConversation(second.userId()));
+        assertEquals(second.userId(), this.matchingRepo.getMatches().getFirst().getUserId());
     }
 
     @Test
@@ -125,23 +143,23 @@ class LocalServerRepositoryMatchingTest {
         final AuthResult second = register("Second", "second@example.com");
 
         this.session.setCurrentUserId(first.userId());
-        assertFalse(this.repository.connect(second.userId()));
+        assertFalse(this.matchingRepo.connect(second.userId()));
         this.session.setCurrentUserId(second.userId());
-        assertTrue(this.repository.connect(first.userId()));
-        this.repository.dislike(first.userId());
+        assertTrue(this.matchingRepo.connect(first.userId()));
+        this.matchingRepo.dislike(first.userId());
 
-        assertTrue(this.repository.getMatches().isEmpty());
+        assertTrue(this.matchingRepo.getMatches().isEmpty());
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.sendMessage(first.userId(), "Blocked"));
+                () -> this.messagingRepo.sendMessage(first.userId(), "Blocked"));
 
         this.session.setCurrentUserId(first.userId());
-        assertTrue(this.repository.getMatches().isEmpty());
+        assertTrue(this.matchingRepo.getMatches().isEmpty());
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.getConversation(second.userId()));
+                () -> this.messagingRepo.getConversation(second.userId()));
     }
 
     private AuthResult register(final String firstName, final String email) {
-        return this.repository.register(new RegisterAccountData(
+        return this.authRepo.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
     }
 }
