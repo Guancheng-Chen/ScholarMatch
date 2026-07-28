@@ -49,11 +49,29 @@ class ObservableModelsTest {
         assertEquals("a", values.remove(0));
         assertTrue(values.remove("b"));
         assertFalse(values.remove("missing"));
+        assertEquals("c", values.set(0, "c-replaced"));
         values.clear();
 
-        assertEquals(6, notifications.get());
+        assertEquals(7, notifications.get());
         values.removeListener(listener);
         values.add("unobserved");
-        assertEquals(6, notifications.get());
+        assertEquals(7, notifications.get());
+    }
+
+    @Test
+    void testObservableListIteratorAndSortRouteThroughOverriddenMethods() {
+        final ObservableListModel<String> values = new ObservableListModel<>();
+        final AtomicInteger notifications = new AtomicInteger();
+        values.addListener(notifications::incrementAndGet);
+        values.setAll(List.of("b", "a", "c"));
+
+        final var iterator = values.iterator();
+        assertEquals("b", iterator.next());
+        iterator.remove();
+        assertEquals(List.of("a", "c"), values);
+
+        values.sort(null);
+        assertEquals(List.of("a", "c"), values);
+        assertTrue(notifications.get() > 1);
     }
 }

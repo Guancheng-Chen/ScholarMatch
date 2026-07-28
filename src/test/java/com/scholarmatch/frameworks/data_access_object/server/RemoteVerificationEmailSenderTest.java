@@ -59,6 +59,20 @@ class RemoteVerificationEmailSenderTest {
     }
 
     @Test
+    void testBelow200StatusCodeFails() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(100, "{}"));
+        final RemoteVerificationEmailSender sender = new RemoteVerificationEmailSender(
+                httpSender, new ObjectMapper(), "https://scholarmatch-server-production.up.railway.app");
+
+        final ExternalServiceException exception = assertThrows(
+                ExternalServiceException.class,
+                () -> sender.requestVerificationCode("ada@example.com"));
+
+        assertTrue(exception.getMessage().contains("HTTP 100"));
+    }
+
+    @Test
     void testInterruptedDeliveryIsTranslatedAndInterruptFlagRestored() throws Exception {
         final HttpSender httpSender = mock(HttpSender.class);
         when(httpSender.send(any())).thenThrow(new InterruptedException("interrupted"));

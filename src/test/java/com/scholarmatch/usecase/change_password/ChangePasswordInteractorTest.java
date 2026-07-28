@@ -58,6 +58,25 @@ class ChangePasswordInteractorTest {
                 .execute(new ChangePasswordInputData(
                         "wrongpass", "abcdefgh", "abcdefgh"));
         assertEquals("Current password is incorrect", rejected.error);
+
+        final Output nullCurrent = new Output();
+        new ChangePasswordInteractor(accepted, nullCurrent).execute(
+                new ChangePasswordInputData(null, "abcdefgh", "abcdefgh"));
+        assertEquals("Current password is required.", nullCurrent.error);
+
+        final Output nullNew = new Output();
+        new ChangePasswordInteractor(accepted, nullNew).execute(
+                new ChangePasswordInputData("12345678", null, null));
+        assertEquals(
+                "New password must be between 8 and 64 characters.",
+                nullNew.error);
+
+        final Output longPassword = new Output();
+        new ChangePasswordInteractor(accepted, longPassword).execute(
+                new ChangePasswordInputData("12345678", "x".repeat(65), "x".repeat(65)));
+        assertEquals(
+                "New password must be between 8 and 64 characters.",
+                longPassword.error);
     }
 
     private static final class Output implements ChangePasswordOutputBoundary {

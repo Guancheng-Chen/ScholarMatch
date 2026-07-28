@@ -57,6 +57,19 @@ class RegisterInteractorTest {
     }
 
     @Test
+    void testNullNamesFailValidationWithoutCallingDao() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData(null, null, "ada@example.com", "supersecret", "123456"));
+
+        verify(output).prepareFailView("First name is required.\nLast name is required.");
+        verify(dao, never()).register(any());
+    }
+
+    @Test
     void testInvalidEmailFormatFailsValidation() {
         final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
         final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
@@ -105,6 +118,33 @@ class RegisterInteractorTest {
                 new RegisterInputData("Ada", "Lovelace", "ada@example.com", "", "123456"));
 
         verify(output).prepareFailView("Password is required.");
+        verify(dao, never()).register(any());
+    }
+
+    @Test
+    void testNullPasswordFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "ada@example.com", null, "123456"));
+
+        verify(output).prepareFailView("Password is required.");
+        verify(dao, never()).register(any());
+    }
+
+    @Test
+    void testPasswordTooLongFailsValidation() {
+        final RegisterDataAccessInterface dao = mock(RegisterDataAccessInterface.class);
+        final SessionWriterInterface sessionManager = mock(SessionWriterInterface.class);
+        final RegisterOutputBoundary output = mock(RegisterOutputBoundary.class);
+        final String tooLong = "x".repeat(65);
+
+        new RegisterInteractor(dao, sessionManager, output).execute(
+                new RegisterInputData("Ada", "Lovelace", "ada@example.com", tooLong, "123456"));
+
+        verify(output).prepareFailView("Password must be between 8 and 64 characters (currently 65).");
         verify(dao, never()).register(any());
     }
 

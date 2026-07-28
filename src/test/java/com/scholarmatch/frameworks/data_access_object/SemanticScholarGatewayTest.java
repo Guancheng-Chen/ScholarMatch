@@ -217,6 +217,56 @@ class SemanticScholarGatewayTest {
     }
 
     @Test
+    void sendsApiKeyHeaderWhenConfigured() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, "{\"data\":[]}"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper(), "secret-key");
+
+        gateway.searchAuthors("Ada Lovelace");
+
+        final ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpSender).send(requestCaptor.capture());
+        assertEquals(List.of("secret-key"), requestCaptor.getValue().headers().allValues("x-api-key"));
+    }
+
+    @Test
+    void serverErrorStatusIsTranslated() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(500, ""));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertThrows(ExternalServiceException.class,
+                () -> gateway.searchAuthors("Ada Lovelace"));
+    }
+
+    @Test
+    void informationalStatusBelow200IsTranslated() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(100, ""));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper());
+
+        assertThrows(ExternalServiceException.class,
+                () -> gateway.searchAuthors("Ada Lovelace"));
+    }
+
+    @Test
+    void blankApiKeyDoesNotSendHeader() throws Exception {
+        final HttpSender httpSender = mock(HttpSender.class);
+        when(httpSender.send(any())).thenReturn(new HttpSenderResponse(200, "{\"data\":[]}"));
+        final SemanticScholarGateway gateway =
+                new SemanticScholarGateway(httpSender, new ObjectMapper(), "   ");
+
+        gateway.searchAuthors("Ada Lovelace");
+
+        final ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpSender).send(requestCaptor.capture());
+        assertTrue(requestCaptor.getValue().headers().allValues("x-api-key").isEmpty());
+    }
+
+    @Test
     void interruptedRequestIsTranslated() throws Exception {
         final HttpSender httpSender = mock(HttpSender.class);
         when(httpSender.send(any())).thenThrow(new InterruptedException("interrupted"));

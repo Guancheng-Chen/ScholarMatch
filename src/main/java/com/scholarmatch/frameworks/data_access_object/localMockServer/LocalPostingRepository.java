@@ -184,8 +184,11 @@ public final class LocalPostingRepository implements
         if (application == null) {
             throw new InvalidRequestException("Application not found");
         }
+        // Every application whose posting is removed is also removed by
+        // LocalProfileRepository#deleteAccount(), so a surviving application's posting is
+        // always present here.
         final Posting posting = this.state.postingsById().get(application.getPostingId());
-        if (posting == null || !posting.getPosterUserId().equals(this.session.getCurrentUserId())) {
+        if (!posting.getPosterUserId().equals(this.session.getCurrentUserId())) {
             throw new InvalidRequestException("You are not the poster of this posting");
         }
         if (application.getStatus() != PostingApplicationStatus.PENDING) {

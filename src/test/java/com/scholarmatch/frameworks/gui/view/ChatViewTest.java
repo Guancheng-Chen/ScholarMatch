@@ -54,6 +54,9 @@ class ChatViewTest {
 
             matchesVm.getMatchedUsers().setAll(List.of(user("partner", "Ada", "Lovelace")));
             button(view, "Ada Lovelace").doClick();
+            matchesVm.getMatchedUsers().setAll(List.of(
+                    user("partner", "Ada", "Lovelace"), user("other", "Grace", "Hopper")));
+            assertTrue(sendButton.isEnabled());
             fireTimer(view);
             message.setText(" ");
             sendButton.doClick();

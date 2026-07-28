@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -158,19 +159,30 @@ class PostingGatewayTest {
     @Test
     void testSparsePostingUsesDefaultsAndLegacyCapacity() {
         this.fakeServer.bodyToReturn().set("""
-                [{"postingId":"p-1","posterUserId":"u-1","title":"Title",
+                [{"postingId":"p-1","title":"Title",
                   "maxApplicants":null,"applicantCount":0,
                   "createdAt":"2026-07-26T12:00:00"}]
                 """);
 
         final Posting posting = this.gateway.loadPostings(PostingScope.ALL_ACTIVE).getFirst();
 
+        assertEquals("", posting.getPosterUserId());
         assertEquals("", posting.getDescription());
         assertEquals(ResearchField.OTHER, posting.getResearchField());
         assertEquals(CollaborationType.INTEREST_SHARING, posting.getCollaborationType());
         assertEquals(null, posting.getCapacity());
         assertEquals(PostingStatus.OPEN, posting.getStatus());
         assertEquals(0, posting.getAcceptedCount());
+    }
+
+    @Test
+    void testCreatePostingOmitsNullResearchFieldAndCollaborationType() {
+        this.fakeServer.bodyToReturn().set(POSTING_JSON);
+
+        this.gateway.createPosting("Title", "Desc", null, null, 3);
+
+        assertFalse(this.fakeServer.lastRequestBody().get().contains("researchField"));
+        assertFalse(this.fakeServer.lastRequestBody().get().contains("collaborationType"));
     }
 
     @Test

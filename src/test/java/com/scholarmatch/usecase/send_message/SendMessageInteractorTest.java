@@ -94,6 +94,12 @@ class SendMessageInteractorTest {
     }
 
     @Test
+    void testFailsWhenReceiverIdNull() {
+        assertTrue(captureFailMessage(new SendMessageInputData(null, "Hello!"))
+                .contains("Receiver is required."));
+    }
+
+    @Test
     void testExecuteFailsWhenServerRejectsMessage() {
         when(dataAccessObject.sendMessage(anyString(), anyString()))
                 .thenThrow(new InvalidRequestException("Users have not mutually matched"));

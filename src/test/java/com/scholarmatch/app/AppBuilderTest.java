@@ -49,6 +49,24 @@ class AppBuilderTest {
     }
 
     @Test
+    void testOfflineVerificationCodeIsPrintedToConsole() throws Exception {
+        final AppBuilder[] builder = new AppBuilder[1];
+        SwingUtilities.invokeAndWait(() -> builder[0] = new AppBuilder(true)
+                .addSession()
+                .addRepositories());
+
+        final java.io.ByteArrayOutputStream captured = new java.io.ByteArrayOutputStream();
+        final java.io.PrintStream originalOut = System.out;
+        System.setOut(new java.io.PrintStream(captured));
+        try {
+            builder[0].registerVerificationDataAccessObject().requestVerificationCode("ada@example.com");
+        } finally {
+            System.setOut(originalOut);
+        }
+        assertTrue(captured.toString().contains("Verification code for ada@example.com"));
+    }
+
+    @Test
     void testInterruptedRetryRestoresInterruptFlag() throws Exception {
         final AppBuilder builder = new AppBuilder();
         final var sleep = AppBuilder.class.getDeclaredMethod("sleep", java.time.Duration.class);

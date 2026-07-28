@@ -111,6 +111,33 @@ class LocalServerRepositoryAccountTest {
     }
 
     @Test
+    void testUpdateProfileLeavesFieldsUnchangedWhenNull() {
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+        this.profileRepo.updateProfile(input(
+                "ada@example.com", "FACULTY", "COMPUTER_SCIENCE",
+                "CO_AUTHOR", "SELF_FUNDED"));
+
+        final User updated = this.profileRepo.updateProfile(new UpdateProfileInputData(
+                null, null, null, null, null,
+                null, null, null, null,
+                List.of("new interest"), null, null, null, List.of(), List.of()));
+
+        assertEquals(Institution.MIT, updated.getInstitution());
+        assertEquals(AcademicLevel.FACULTY, updated.getAcademicLevel());
+        assertEquals(ResearchField.COMPUTER_SCIENCE, updated.getResearchField());
+        assertEquals(CollaborationType.CO_AUTHOR, updated.getLookingFor());
+        assertEquals("Collaboration", updated.getCollaborationDescription());
+        assertEquals("Research", updated.getResearchDescription());
+        assertEquals(12, updated.getWeeklyAvailabilityHours());
+        assertEquals(FundingStatus.SELF_FUNDED, updated.getFundingStatus());
+        assertEquals("555-1234", updated.getPhoneNumber());
+        assertEquals(5, updated.gethIndex());
+        assertEquals(100, updated.getTotalCitations());
+        assertEquals(List.of("new interest"), updated.getResearchInterests());
+    }
+
+    @Test
     void testUpdateProfileFallsBackForUnknownEnums() {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
@@ -125,10 +152,33 @@ class LocalServerRepositoryAccountTest {
     }
 
     @Test
+    void testChangePasswordThrowsWhenCurrentUserHasNoProfile() {
+        this.session.setCurrentUserId("missing-user");
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                this.accountSettingsRepo.changePassword("password", "new-password"));
+    }
+
+    @Test
     void testRequestVerificationCodeSucceedsWithDefaultNoOpDelivery() {
         register("Ada", "ada@example.com");
 
         this.accountSettingsRepo.requestVerificationCode("new@example.com");
+    }
+
+    @Test
+    void testRequestVerificationCodeNormalizesNullEmailToEmptyString() {
+        register("Ada", "ada@example.com");
+
+        this.accountSettingsRepo.requestVerificationCode(null);
+    }
+
+    @Test
+    void testRequestVerificationCodeAllowsReRequestingOwnCurrentEmail() {
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+
+        this.accountSettingsRepo.requestVerificationCode("ada@example.com");
     }
 
     @Test
@@ -176,6 +226,25 @@ class LocalServerRepositoryAccountTest {
                 this.authRepo.login("new@mit.edu", "new-password").userId());
         assertThrows(InvalidRequestException.class, () ->
                 this.authRepo.login("new@mit.edu", "password"));
+    }
+
+    @Test
+    void testChangeEmailToNonAcademicDomainSetsRegularAccountType() {
+        useCustomAccountSettings(
+                new InMemoryEmailVerificationChallengeRepository(),
+                () -> "123456",
+                (email, code) -> { },
+                email -> email.endsWith("@mit.edu"),
+                Clock.systemUTC());
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+        this.profileRepo.getProfile().setEmailAccountType(EmailAccountType.ACADEMIC);
+
+        this.accountSettingsRepo.requestVerificationCode("new@other.com");
+        final User updated = this.accountSettingsRepo.changeEmail(
+                "new@other.com", "password", "123456");
+
+        assertEquals(EmailAccountType.REGULAR, updated.getEmailAccountType());
     }
 
     @Test

@@ -111,13 +111,12 @@ public final class LocalProfileRepository implements
             }
             return remove;
         });
+        // A user can never apply to their own posting, so an application made by currentId can
+        // never point at one of the postings just removed above — its posting always survives.
         for (final PostingApplication application : this.state.applicationsById().values()) {
-            if (application.getApplicantUserId().equals(currentId)
-                    && !removedPostingIds.contains(application.getPostingId())) {
+            if (application.getApplicantUserId().equals(currentId)) {
                 final Posting posting = this.state.postingsById().get(application.getPostingId());
-                if (posting != null) {
-                    posting.setApplicantCount(Math.max(0, posting.getApplicantCount() - 1));
-                }
+                posting.setApplicantCount(Math.max(0, posting.getApplicantCount() - 1));
             }
         }
         this.state.applicationsById().values().removeIf(application ->

@@ -604,6 +604,14 @@ public final class AppBuilder {
                 this.currentUserProvider);
     }
 
+    /**
+     * Exposes the wired offline/online verification email sender so a test can exercise it
+     * directly, without driving the full GUI to reach the same call.
+     */
+    VerificationEmailSenderDataAccessInterface registerVerificationDataAccessObject() {
+        return this.registerVerificationDataAccessObject;
+    }
+
     private void requireStep(final boolean stepAlreadyRan, final String missingStepName) {
         if (!stepAlreadyRan) {
             throw new IllegalStateException(

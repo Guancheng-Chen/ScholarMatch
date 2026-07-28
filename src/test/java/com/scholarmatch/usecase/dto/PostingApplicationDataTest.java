@@ -54,6 +54,17 @@ class PostingApplicationDataTest {
     }
 
     @Test
+    void testCanonicalConstructorDefaultsNullPosterFieldsToEmptyString() {
+        final PostingApplicationData data = new PostingApplicationData(
+                "application-1", "posting-1", "applicant-1", "Hello",
+                PostingApplicationStatus.PENDING, LocalDateTime.now(),
+                "Posting Title", "Ada Lovelace", null, null, false);
+
+        assertEquals("", data.getPosterUserId());
+        assertEquals("", data.getPosterName());
+    }
+
+    @Test
     void testOwnerSummaryTrimsProvidedIdentity() {
         final PostingApplicationData data = new PostingApplicationData(
                 "application-1", "posting-1", "applicant-1", "Hello",

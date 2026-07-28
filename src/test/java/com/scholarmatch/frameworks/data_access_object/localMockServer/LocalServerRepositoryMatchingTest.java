@@ -6,6 +6,7 @@ import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalo
 import com.scholarmatch.frameworks.data_access_object.CurrentUserProvider;
 import com.scholarmatch.usecase.data_access_interface.AuthResult;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
+import com.scholarmatch.usecase.exception.ResourceNotFoundException;
 import com.scholarmatch.usecase.register.RegisterAccountData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,16 @@ class LocalServerRepositoryMatchingTest {
     }
 
     @Test
+    void testGetProfileReturnsCurrentUserOrThrowsWhenMissing() {
+        this.session.setCurrentUserId("missing-user");
+        assertThrows(ResourceNotFoundException.class, this.matchingRepo::getProfile);
+
+        final AuthResult current = register("Current", "current@example.com");
+        this.session.setCurrentUserId(current.userId());
+        assertEquals(current.userId(), this.matchingRepo.getProfile().getUserId());
+    }
+
+    @Test
     void testRegisteredUsersRequireReciprocalConnect() {
         final AuthResult first = register("First", "first@example.com");
         final AuthResult second = register("Second", "second@example.com");
@@ -101,6 +112,25 @@ class LocalServerRepositoryMatchingTest {
         this.session.setCurrentUserId(second.userId());
         assertTrue(this.matchingRepo.connect(first.userId()));
         final Message reply = this.messagingRepo.sendMessage(first.userId(), "Now matched");
+        assertEquals(List.of(reply), this.messagingRepo.getConversation(first.userId()));
+
+        final AuthResult third = register("Third", "third@example.com");
+        final AuthResult fourth = register("Fourth", "fourth@example.com");
+        this.session.setCurrentUserId(third.userId());
+        assertFalse(this.matchingRepo.connect(fourth.userId()));
+        assertFalse(this.matchingRepo.connect(first.userId()));
+        this.session.setCurrentUserId(fourth.userId());
+        assertTrue(this.matchingRepo.connect(third.userId()));
+        this.messagingRepo.sendMessage(third.userId(), "Unrelated conversation");
+        this.session.setCurrentUserId(first.userId());
+        assertTrue(this.matchingRepo.connect(third.userId()));
+        this.messagingRepo.sendMessage(third.userId(), "First messaging a third party");
+        this.session.setCurrentUserId(second.userId());
+        assertFalse(this.matchingRepo.connect(fourth.userId()));
+        this.session.setCurrentUserId(fourth.userId());
+        assertTrue(this.matchingRepo.connect(second.userId()));
+        this.session.setCurrentUserId(second.userId());
+        this.messagingRepo.sendMessage(fourth.userId(), "Second messaging fourth, not first");
 
         this.session.setCurrentUserId(first.userId());
         assertEquals(List.of(reply), this.messagingRepo.getConversation(second.userId()));

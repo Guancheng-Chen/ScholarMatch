@@ -66,9 +66,9 @@ public final class ProfileGateway
         if (data.getPhoneNumber() != null) {
             body.put("phoneNumber", data.getPhoneNumber());
         }
-        if (data.getResearchInterests() != null) {
-            body.put("researchInterests", data.getResearchInterests());
-        }
+        // UpdateProfileInputData never returns a null research-interests list (its constructor
+        // rejects null), unlike the other fields here, so this one is always sent.
+        body.put("researchInterests", data.getResearchInterests());
         if (data.getHIndex() != null) {
             body.put("hIndex", data.getHIndex());
         }

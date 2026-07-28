@@ -48,6 +48,17 @@ class PostingApplicationTest {
         assertEquals("", application.getApplicantName());
     }
 
+    @Test
+    void testFullConstructorDefaultsNullPosterFieldsToEmptyString() {
+        final PostingApplication application = new PostingApplication(
+                "application-1", "posting-1", "applicant-1", "Please consider me",
+                PostingApplicationStatus.PENDING, LocalDateTime.now(), "Title", "Applicant",
+                null, null, false);
+
+        assertEquals("", application.getPosterUserId());
+        assertEquals("", application.getPosterName());
+    }
+
     private PostingApplication application() {
         return new PostingApplication(
                 "application-1", "posting-1", "applicant-1", "Please consider me",
