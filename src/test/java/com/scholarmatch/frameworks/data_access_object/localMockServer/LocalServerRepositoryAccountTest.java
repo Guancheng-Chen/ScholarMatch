@@ -30,12 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class LocalServerRepositoryAccountTest {
 
     private CurrentUserProvider session;
-    private LocalServerRepository repository;
+    private LocalAuthRepository authRepo;
+    private LocalProfileRepository profileRepo;
+    private LocalAccountSettingsRepository accountSettingsRepo;
 
     @BeforeEach
     void setUp() {
         this.session = new CurrentUserProvider();
-        this.repository = new LocalServerRepository(this.session);
+        final ClasspathInstitutionCatalogRepository institutions =
+                new ClasspathInstitutionCatalogRepository();
+        final LocalServerState state = new LocalServerState(institutions);
+        this.authRepo = new LocalAuthRepository(state);
+        this.profileRepo = new LocalProfileRepository(state, this.session, institutions);
+        this.accountSettingsRepo = new LocalAccountSettingsRepository(
+                state,
+                this.session,
+                new InMemoryEmailVerificationChallengeRepository(),
+                new SecureVerificationCodeGenerator(),
+                (email, code) -> { },
+                new ClasspathAcademicEmailDomainRepository(),
+                Clock.systemUTC());
     }
 
     @Test
@@ -44,11 +58,11 @@ class LocalServerRepositoryAccountTest {
 
         assertEquals("Ada User", registration.displayName());
         assertEquals(registration.userId(),
-                this.repository.login("ADA@example.com", "password").userId());
+                this.authRepo.login("ADA@example.com", "password").userId());
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.login("ada@example.com", "wrong"));
+                () -> this.authRepo.login("ada@example.com", "wrong"));
         assertThrows(InvalidRequestException.class,
-                () -> this.repository.login("missing@example.com", "password"));
+                () -> this.authRepo.login("missing@example.com", "password"));
         assertThrows(InvalidRequestException.class,
                 () -> register("Other", "ada@example.com"));
     }
@@ -56,12 +70,12 @@ class LocalServerRepositoryAccountTest {
     @Test
     void testProfileNotFoundAndProfileUpdateCannotChangeEmail() {
         this.session.setCurrentUserId("missing-user");
-        assertThrows(ResourceNotFoundException.class, this.repository::getProfile);
+        assertThrows(ResourceNotFoundException.class, this.profileRepo::getProfile);
 
         final AuthResult first = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(first.userId());
 
-        final User updated = this.repository.updateProfile(input(
+        final User updated = this.profileRepo.updateProfile(input(
                 "grace@example.com", "FACULTY", "COMPUTER_SCIENCE",
                 "CO_AUTHOR", "SELF_FUNDED"));
 
@@ -72,11 +86,11 @@ class LocalServerRepositoryAccountTest {
     void testUpdateProfileMapsAllFieldsWithoutChangingAccountEmail() {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
-        final User user = this.repository.getProfile();
+        final User user = this.profileRepo.getProfile();
         user.addResearchInterest("old interest");
         user.setEmailAccountType(EmailAccountType.ACADEMIC);
 
-        final User updated = this.repository.updateProfile(input(
+        final User updated = this.profileRepo.updateProfile(input(
                 "new@example.com", "FACULTY", "COMPUTER_SCIENCE",
                 "CO_AUTHOR", "SELF_FUNDED"));
 
@@ -101,7 +115,7 @@ class LocalServerRepositoryAccountTest {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
 
-        final User updated = this.repository.updateProfile(input(
+        final User updated = this.profileRepo.updateProfile(input(
                 "ada@example.com", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"));
 
         assertEquals(AcademicLevel.UNDERGRADUATE, updated.getAcademicLevel());
@@ -114,7 +128,7 @@ class LocalServerRepositoryAccountTest {
     void testRequestVerificationCodeSucceedsWithDefaultNoOpDelivery() {
         register("Ada", "ada@example.com");
 
-        this.repository.requestVerificationCode("new@example.com");
+        this.accountSettingsRepo.requestVerificationCode("new@example.com");
     }
 
     @Test
@@ -124,7 +138,7 @@ class LocalServerRepositoryAccountTest {
         this.session.setCurrentUserId(other.userId());
 
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.requestVerificationCode("ada@example.com"));
+                this.accountSettingsRepo.requestVerificationCode("ada@example.com"));
     }
 
     @Test
@@ -132,9 +146,7 @@ class LocalServerRepositoryAccountTest {
         final AtomicReference<String> deliveredCode = new AtomicReference<>();
         final MutableClock clock = new MutableClock(
                 Instant.parse("2026-07-26T12:00:00Z"));
-        this.repository = new LocalServerRepository(
-                this.session,
-                new ClasspathInstitutionCatalogRepository(),
+        useCustomAccountSettings(
                 new InMemoryEmailVerificationChallengeRepository(),
                 () -> "123456",
                 (email, code) -> deliveredCode.set(code),
@@ -143,36 +155,34 @@ class LocalServerRepositoryAccountTest {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
 
-        this.repository.requestVerificationCode("new@mit.edu");
+        this.accountSettingsRepo.requestVerificationCode("new@mit.edu");
         assertEquals("123456", deliveredCode.get());
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "new@mit.edu", "wrong", "123456"));
 
-        final User updated = this.repository.changeEmail(
+        final User updated = this.accountSettingsRepo.changeEmail(
                 "new@mit.edu", "password", "123456");
         assertEquals("new@mit.edu", updated.getEmail());
         assertEquals(EmailAccountType.ACADEMIC, updated.getEmailAccountType());
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "new@mit.edu", "password", "123456"));
 
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changePassword("wrong", "new-password"));
-        this.repository.changePassword("password", "new-password");
+                this.accountSettingsRepo.changePassword("wrong", "new-password"));
+        this.accountSettingsRepo.changePassword("password", "new-password");
         assertEquals(registration.userId(),
-                this.repository.login("new@mit.edu", "new-password").userId());
+                this.authRepo.login("new@mit.edu", "new-password").userId());
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.login("new@mit.edu", "password"));
+                this.authRepo.login("new@mit.edu", "password"));
     }
 
     @Test
     void testFailedCodeDeliveryDeletesTheChallengeAndPropagates() {
         final InMemoryEmailVerificationChallengeRepository emailChallenges =
                 new InMemoryEmailVerificationChallengeRepository();
-        this.repository = new LocalServerRepository(
-                this.session,
-                new ClasspathInstitutionCatalogRepository(),
+        useCustomAccountSettings(
                 emailChallenges,
                 () -> "123456",
                 (email, code) -> {
@@ -184,7 +194,7 @@ class LocalServerRepositoryAccountTest {
         this.session.setCurrentUserId(registration.userId());
 
         assertThrows(RuntimeException.class, () ->
-                this.repository.requestVerificationCode("new@example.com"));
+                this.accountSettingsRepo.requestVerificationCode("new@example.com"));
 
         assertEquals(java.util.Optional.empty(), emailChallenges.findByEmail("new@example.com"));
     }
@@ -196,16 +206,14 @@ class LocalServerRepositoryAccountTest {
         this.session.setCurrentUserId(registration.userId());
 
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail("grace@example.com", "password", "000000"));
+                this.accountSettingsRepo.changeEmail("grace@example.com", "password", "000000"));
     }
 
     @Test
     void testEmailCodeExpiresAndStopsAfterThreeInvalidAttempts() {
         final MutableClock clock = new MutableClock(
                 Instant.parse("2026-07-26T12:00:00Z"));
-        this.repository = new LocalServerRepository(
-                this.session,
-                new ClasspathInstitutionCatalogRepository(),
+        useCustomAccountSettings(
                 new InMemoryEmailVerificationChallengeRepository(),
                 () -> "123456",
                 (email, code) -> { },
@@ -214,29 +222,55 @@ class LocalServerRepositoryAccountTest {
         final AuthResult registration = register("Ada", "ada@example.com");
         this.session.setCurrentUserId(registration.userId());
 
-        this.repository.requestVerificationCode("first@example.com");
+        this.accountSettingsRepo.requestVerificationCode("first@example.com");
         clock.advance(Duration.ofMinutes(10));
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "first@example.com", "password", "123456"));
 
-        this.repository.requestVerificationCode("second@example.com");
+        this.accountSettingsRepo.requestVerificationCode("second@example.com");
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "second@example.com", "password", "000000"));
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "second@example.com", "password", "000000"));
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "second@example.com", "password", "000000"));
         assertThrows(InvalidRequestException.class, () ->
-                this.repository.changeEmail(
+                this.accountSettingsRepo.changeEmail(
                         "second@example.com", "password", "123456"));
     }
 
+    /**
+     * Rebuilds every repository around a fresh {@link LocalServerState} with the given
+     * verification collaborators, so a test can control the code/clock/delivery/domain-check
+     * behavior without disturbing the other test methods' default setup.
+     */
+    private void useCustomAccountSettings(
+            final InMemoryEmailVerificationChallengeRepository emailChallenges,
+            final VerificationCodeGeneratorInterface codeGenerator,
+            final EmailChangeCodeDeliveryDataAccessInterface codeDelivery,
+            final AcademicEmailDomainDataAccessInterface academicEmailDomains,
+            final Clock clock) {
+        final ClasspathInstitutionCatalogRepository institutions =
+                new ClasspathInstitutionCatalogRepository();
+        final LocalServerState state = new LocalServerState(institutions);
+        this.authRepo = new LocalAuthRepository(state);
+        this.profileRepo = new LocalProfileRepository(state, this.session, institutions);
+        this.accountSettingsRepo = new LocalAccountSettingsRepository(
+                state,
+                this.session,
+                emailChallenges,
+                codeGenerator,
+                codeDelivery,
+                academicEmailDomains,
+                clock);
+    }
+
     private AuthResult register(final String firstName, final String email) {
-        return this.repository.register(new RegisterAccountData(
+        return this.authRepo.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
     }
 

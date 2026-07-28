@@ -26,14 +26,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LocalServerRepositoryPostingTest {
 
     private CurrentUserProvider session;
-    private LocalServerRepository repository;
+    private LocalAuthRepository authRepo;
+    private LocalProfileRepository profileRepo;
+    private LocalMatchingRepository matchingRepo;
+    private LocalMessagingRepository messagingRepo;
+    private LocalPostingRepository repository;
 
     @BeforeEach
     void setUp() {
         session = new CurrentUserProvider();
         final ClasspathInstitutionCatalogRepository institutions =
                 new ClasspathInstitutionCatalogRepository();
-        repository = new LocalServerRepository(session, institutions);
+        final LocalServerState state = new LocalServerState(institutions);
+        authRepo = new LocalAuthRepository(state);
+        profileRepo = new LocalProfileRepository(state, session, institutions);
+        matchingRepo = new LocalMatchingRepository(state, session);
+        messagingRepo = new LocalMessagingRepository(state, session);
+        repository = new LocalPostingRepository(state, session);
     }
 
     @Test
@@ -121,14 +130,14 @@ class LocalServerRepositoryPostingTest {
                 "alan@demo.local",
                 "grace@demo.local",
                 "demo.student@utoronto.ca")) {
-            repository.login(email, "12345678");
+            authRepo.login(email, "12345678");
         }
-        final AuthResult result = repository.login(
+        final AuthResult result = authRepo.login(
                 "demo.student@utoronto.ca", "12345678");
         session.setCurrentUserId(result.userId());
 
-        assertEquals(EmailAccountType.ACADEMIC, repository.getProfile().getEmailAccountType());
-        assertEquals("UNIVERSITY_OF_TORONTO", repository.getProfile().getInstitution().name());
+        assertEquals(EmailAccountType.ACADEMIC, profileRepo.getProfile().getEmailAccountType());
+        assertEquals("UNIVERSITY_OF_TORONTO", profileRepo.getProfile().getInstitution().name());
         final Posting posting = repository.createPosting(
                 "Verified poster", "Description", ResearchField.COMPUTER_SCIENCE,
                 CollaborationType.CO_AUTHOR, 1);
@@ -262,16 +271,16 @@ class LocalServerRepositoryPostingTest {
 
         session.setCurrentUserId(applicant.userId());
         repository.applyToPosting(posting.getPostingId(), "message");
-        final String seedId = repository.getRecommendations().getFirst().getUserId();
-        assertFalse(repository.connect(seedId));
-        repository.dislike(seedId);
+        final String seedId = matchingRepo.getRecommendations().getFirst().getUserId();
+        assertFalse(matchingRepo.connect(seedId));
+        matchingRepo.dislike(seedId);
 
         session.setCurrentUserId(poster.userId());
-        assertFalse(repository.connect(applicant.userId()));
+        assertFalse(matchingRepo.connect(applicant.userId()));
         session.setCurrentUserId(applicant.userId());
-        assertTrue(repository.connect(poster.userId()));
+        assertTrue(matchingRepo.connect(poster.userId()));
         session.setCurrentUserId(poster.userId());
-        repository.sendMessage(applicant.userId(), "Received by applicant");
+        messagingRepo.sendMessage(applicant.userId(), "Received by applicant");
 
         final AuthResult unrelatedPoster = register("Unrelated", "unrelated@example.com");
         final AuthResult unrelatedApplicant = register("Third", "third@example.com");
@@ -281,13 +290,13 @@ class LocalServerRepositoryPostingTest {
                 CollaborationType.CO_AUTHOR, 2);
         session.setCurrentUserId(unrelatedApplicant.userId());
         repository.applyToPosting(unrelatedPosting.getPostingId(), "unrelated application");
-        assertFalse(repository.connect(unrelatedPoster.userId()));
+        assertFalse(matchingRepo.connect(unrelatedPoster.userId()));
         session.setCurrentUserId(unrelatedPoster.userId());
-        assertTrue(repository.connect(unrelatedApplicant.userId()));
-        repository.sendMessage(unrelatedApplicant.userId(), "Unrelated message");
+        assertTrue(matchingRepo.connect(unrelatedApplicant.userId()));
+        messagingRepo.sendMessage(unrelatedApplicant.userId(), "Unrelated message");
 
         session.setCurrentUserId(applicant.userId());
-        repository.deleteAccount();
+        profileRepo.deleteAccount();
 
         session.setCurrentUserId(poster.userId());
         assertEquals(0, posting.getApplicantCount());
@@ -298,12 +307,12 @@ class LocalServerRepositoryPostingTest {
         session.setCurrentUserId(secondApplicant.userId());
         repository.applyToPosting(posting.getPostingId(), "message");
         session.setCurrentUserId(poster.userId());
-        repository.deleteAccount();
+        profileRepo.deleteAccount();
         assertTrue(repository.loadPostings(PostingScope.MINE).isEmpty());
     }
 
     private AuthResult register(final String firstName, final String email) {
-        return repository.register(new RegisterAccountData(
+        return authRepo.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
     }
 }
