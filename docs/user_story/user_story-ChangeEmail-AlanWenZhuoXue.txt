@@ -1,0 +1,3 @@
+As a ScholarMatch user, I want to change the email address on my account after confirming my
+current password and a verification code sent to the new address, so that I can keep my
+contact information up to date without risking someone else taking over my account.

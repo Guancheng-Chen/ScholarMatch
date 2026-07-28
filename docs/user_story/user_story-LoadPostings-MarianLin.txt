@@ -1,0 +1,3 @@
+As a scholar, I want to browse open postings from other scholars and also view the postings
+I've created along with the applications they've received, so that I can find opportunities
+to join and manage the ones I've posted.

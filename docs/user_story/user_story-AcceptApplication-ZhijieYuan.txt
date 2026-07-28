@@ -1,0 +1,2 @@
+As a posting owner, I want to accept a pending application to my posting,
+so that the applicant is confirmed as a collaborator on my project.
