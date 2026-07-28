@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/java-21-blue?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
   <img src="https://img.shields.io/badge/build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven"/>
   <img src="https://img.shields.io/badge/architecture-Clean%20Architecture-8A2BE2?style=flat-square" alt="Clean Architecture"/>
-  <img src="https://img.shields.io/badge/tests-420%20passing-brightgreen?style=flat-square&logo=junit5&logoColor=white" alt="Tests"/>
+  <img src="https://img.shields.io/badge/tests-484%20passing-brightgreen?style=flat-square&logo=junit5&logoColor=white" alt="Tests"/>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"/>
 </p>
 
@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/backend-Spring%20Boot%20%7C%20Postgres-6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Backend"/>
   <img src="https://img.shields.io/badge/API-Semantic%20Scholar-1857B6?style=flat-square" alt="Semantic Scholar API"/>
   <img src="https://img.shields.io/badge/auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
-  <img src="https://img.shields.io/badge/coverage-JaCoCo-F8952D?style=flat-square" alt="JaCoCo"/>
+  <img src="https://img.shields.io/badge/coverage-99.98%25%20lines-F8952D?style=flat-square&logo=jacoco&logoColor=white" alt="JaCoCo"/>
 </p>
 
 *A cross-platform Java desktop app that helps students, researchers, and academics discover collaborators, post and apply to research opportunities, and message their matches — an "Academic Matchmaking and Collaboration Network."*

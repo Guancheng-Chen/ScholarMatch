@@ -86,7 +86,7 @@ class ProfileGatewayTest {
     void testGetProfileFallsBackToDefaultsWhenOptionalFieldsMissingOrInvalid() {
         this.fakeServer.bodyToReturn().set("""
             {"scholarId": "u-1", "firstName": "Ada", "lastName": "Lovelace",
-             "academicLevel": "NOT_REAL", "educations": [{"school": "MIT", "degree": "NOT_REAL"}]}""");
+             "academicLevel": "", "educations": [{"school": "MIT", "degree": "NOT_REAL"}]}""");
 
         final User user = this.gateway.getProfile();
 
@@ -99,6 +99,19 @@ class ProfileGatewayTest {
         assertEquals(com.scholarmatch.entity.Institution.OTHER, user.getInstitution());
         assertEquals(null, user.getWeeklyAvailabilityHours());
         assertEquals(DegreeType.BACHELOR, user.getEducations().get(0).getDegreeType());
+    }
+
+    @Test
+    void testGetProfileTreatsExplicitJsonNullOptionalNumbersAsUnset() {
+        this.fakeServer.bodyToReturn().set("""
+            {"scholarId": "u-1", "firstName": "Ada", "lastName": "Lovelace",
+             "weeklyAvailabilityHours": null, "hIndex": null, "totalCitations": null}""");
+
+        final User user = this.gateway.getProfile();
+
+        assertEquals(null, user.getWeeklyAvailabilityHours());
+        assertEquals(null, user.gethIndex());
+        assertEquals(null, user.getTotalCitations());
     }
 
     @Test

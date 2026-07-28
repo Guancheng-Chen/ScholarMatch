@@ -94,6 +94,25 @@ class LocalServerRepositoryMatchingTest {
         this.session.setCurrentUserId(second.userId());
         assertTrue(this.repository.connect(first.userId()));
         final Message reply = this.repository.sendMessage(first.userId(), "Now matched");
+        assertEquals(List.of(reply), this.repository.getConversation(first.userId()));
+
+        final AuthResult third = register("Third", "third@example.com");
+        final AuthResult fourth = register("Fourth", "fourth@example.com");
+        this.session.setCurrentUserId(third.userId());
+        assertFalse(this.repository.connect(fourth.userId()));
+        assertFalse(this.repository.connect(first.userId()));
+        this.session.setCurrentUserId(fourth.userId());
+        assertTrue(this.repository.connect(third.userId()));
+        this.repository.sendMessage(third.userId(), "Unrelated conversation");
+        this.session.setCurrentUserId(first.userId());
+        assertTrue(this.repository.connect(third.userId()));
+        this.repository.sendMessage(third.userId(), "First messaging a third party");
+        this.session.setCurrentUserId(second.userId());
+        assertFalse(this.repository.connect(fourth.userId()));
+        this.session.setCurrentUserId(fourth.userId());
+        assertTrue(this.repository.connect(second.userId()));
+        this.session.setCurrentUserId(second.userId());
+        this.repository.sendMessage(fourth.userId(), "Second messaging fourth, not first");
 
         this.session.setCurrentUserId(first.userId());
         assertEquals(List.of(reply), this.repository.getConversation(second.userId()));

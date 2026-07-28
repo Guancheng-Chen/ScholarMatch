@@ -324,8 +324,10 @@ public final class LocalServerRepository
         if (application == null) {
             throw new InvalidRequestException("Application not found");
         }
+        // Every application whose posting is removed is also removed by deleteAccount(), so a
+        // surviving application's posting is always present here.
         final Posting posting = this.postingsById.get(application.getPostingId());
-        if (posting == null || !posting.getPosterUserId().equals(this.session.getCurrentUserId())) {
+        if (!posting.getPosterUserId().equals(this.session.getCurrentUserId())) {
             throw new InvalidRequestException("You are not the poster of this posting");
         }
         if (application.getStatus() != PostingApplicationStatus.PENDING) {
@@ -542,13 +544,12 @@ public final class LocalServerRepository
             }
             return remove;
         });
+        // A user can never apply to their own posting, so an application made by currentId can
+        // never point at one of the postings just removed above — its posting always survives.
         for (final PostingApplication application : this.applicationsById.values()) {
-            if (application.getApplicantUserId().equals(currentId)
-                    && !removedPostingIds.contains(application.getPostingId())) {
+            if (application.getApplicantUserId().equals(currentId)) {
                 final Posting posting = this.postingsById.get(application.getPostingId());
-                if (posting != null) {
-                    posting.setApplicantCount(Math.max(0, posting.getApplicantCount() - 1));
-                }
+                posting.setApplicantCount(Math.max(0, posting.getApplicantCount() - 1));
             }
         }
         this.applicationsById.values().removeIf(application ->

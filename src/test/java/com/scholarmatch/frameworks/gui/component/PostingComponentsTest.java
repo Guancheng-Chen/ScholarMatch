@@ -223,6 +223,8 @@ class PostingComponentsTest {
                     " Ada Lovelace ", true);
             final PostingOwnerSummary unnamed = new PostingOwnerSummary(
                     " ", false);
+            final PostingOwnerSummary nullnamed = new PostingOwnerSummary(
+                    null, false);
 
             assertEquals("Posted by Ada Lovelace",
                     named(named, JLabel.class, "postingOwner").getText());
@@ -231,6 +233,8 @@ class PostingComponentsTest {
                             "academicVerificationBadge").getText());
             assertEquals("Posted by Unknown user",
                     named(unnamed, JLabel.class, "postingOwner").getText());
+            assertEquals("Posted by Unknown user",
+                    named(nullnamed, JLabel.class, "postingOwner").getText());
             assertTrue(SwingTestSupport.findAll(named, JButton.class).isEmpty());
             assertTrue(SwingTestSupport.findAll(unnamed, JButton.class).isEmpty());
             assertFalse(SwingTestSupport.findAll(unnamed, JLabel.class).stream()

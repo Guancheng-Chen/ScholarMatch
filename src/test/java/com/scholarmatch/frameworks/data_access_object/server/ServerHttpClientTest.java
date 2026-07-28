@@ -198,6 +198,15 @@ class ServerHttpClientTest {
     }
 
     @Test
+    void testDeleteFallsBackToStatusCodeWhenBodyIsNull() throws Exception {
+        when(this.httpSender.send(any())).thenReturn(new HttpSenderResponse(400, null));
+
+        final InvalidRequestException thrown =
+                assertThrows(InvalidRequestException.class, () -> this.http.delete("/api/profile"));
+        assertTrue(thrown.getMessage().contains("request was invalid"));
+    }
+
+    @Test
     void testDeleteFallsBackToStatusCodeWhenBodyIsNotJson() throws Exception {
         when(this.httpSender.send(any())).thenReturn(new HttpSenderResponse(404, "<html>gateway error</html>"));
 

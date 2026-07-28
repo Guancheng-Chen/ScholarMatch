@@ -272,6 +272,8 @@ class LocalServerRepositoryPostingTest {
         assertTrue(repository.connect(poster.userId()));
         session.setCurrentUserId(poster.userId());
         repository.sendMessage(applicant.userId(), "Received by applicant");
+        session.setCurrentUserId(applicant.userId());
+        repository.sendMessage(poster.userId(), "Reply from applicant");
 
         final AuthResult unrelatedPoster = register("Unrelated", "unrelated@example.com");
         final AuthResult unrelatedApplicant = register("Third", "third@example.com");
