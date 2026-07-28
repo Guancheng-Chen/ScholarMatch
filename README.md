@@ -22,9 +22,9 @@
 
 *A cross-platform Java desktop app that helps students, researchers, and academics discover collaborators, post and apply to research opportunities, and message their matches — an "Academic Matchmaking and Collaboration Network."*
 
-ScholarMatch pairs a swipe-style recommendation feed (ranked by shared research interests) with a lightweight job board for research postings and a private chat for confirmed matches. Around that core are:
+ScholarMatch pairs a recommendation feed (ranked by shared research interests) with a lightweight job board for research postings and a private chat for confirmed matches. Around that core are:
 
-* Profile building with paper/author lookup autofill (Semantic Scholar)
+* Profile building with paper lookup autofill (Semantic Scholar)
 * Mutual-match connect/dislike, with a dedicated matches list and messaging
 * Research postings: create, browse, apply, accept/decline applicants
 * Account settings with verified email changes and password changes
@@ -119,19 +119,13 @@ mvn clean verify   # compiles, runs checkstyle, runs the test suite
 
 ### Online Mode (default)
 
-Just running the app with no configuration uses **online mode**: the client talks to the live ScholarMatch server over HTTP, and registration / email-change verification codes are delivered to your **real inbox** via the server's Resend integration.
+Just running the app with no configuration uses **online mode**: the client talks directly to our own hosted ScholarMatch server, with registration / email-change verification codes delivered to your **real inbox** via the server's Resend integration.
 
 ```bash
 mvn exec:java
 ```
 
-* The client defaults to the hosted server at `https://scholarmatch-server-production.up.railway.app`. To point at a different server (e.g. one you're running locally), set `SERVER_URL`:
-
-  ```bash
-  SERVER_URL=http://localhost:8080 mvn exec:java
-  ```
-* On startup, the client pings `GET /api/health` (up to 3 retries, 2 seconds apart — Railway's free tier can return a cold-start 502 on the first hit). **If the server is unreachable, the client automatically falls back to offline mode** so a demo isn't derailed by the server being down.
-* Because the code is emailed for real in this mode, registering or changing your email requires access to the inbox for the address you enter.
+If the server is unreachable, the client automatically falls back to offline mode so a demo isn't derailed by the server being down.
 
 ### Offline Mode
 
@@ -168,8 +162,8 @@ See [`docs/api/BACKEND_SERVER_API.md`](docs/api/BACKEND_SERVER_API.md) for the f
 ## Usage
 
 1. **Register or log in.** New accounts need a verification code first — request one, then check either your inbox (online) or the terminal (offline) for the code.
-2. **Build your profile.** Add your institution, research interests, and papers — use the built-in author/paper lookup to autofill publications from Semantic Scholar.
-3. **Recommend.** Swipe through candidate profile cards; connect or pass. A mutual connect is an instant match.
+2. **Build your profile.** Add your institution, research interests, and papers — use the built-in paper lookup to autofill publications from Semantic Scholar.
+3. **Recommend.** Review candidate profile cards; connect or pass. A mutual connect is an instant match.
 4. **Matches & Messaging.** View your matches list and open a chat with anyone you've matched with.
 5. **Opportunities.** Browse open postings, apply with a short message, or create your own posting and manage incoming applications (accept/decline).
 6. **Account Settings.** Change your password, or change your email (requires a fresh verification code sent to the new address).
@@ -191,7 +185,7 @@ mvn verify               # tests + Checkstyle + JaCoCo coverage report
 ## Documentation
 
 * [`docs/api/BACKEND_SERVER_API.md`](docs/api/BACKEND_SERVER_API.md) — full REST API reference and client wiring notes
-* [`docs/api/SEMANTIC_SCHOLAR_API.md`](docs/api/SEMANTIC_SCHOLAR_API.md) — third-party paper/author lookup API
+* [`docs/api/SEMANTIC_SCHOLAR_API.md`](docs/api/SEMANTIC_SCHOLAR_API.md) — third-party paper lookup API
 * [`docs/uml/`](docs/uml) — Clean Architecture class diagrams and sequence diagrams, one per use case
 * [`docs/user_story/`](docs/user_story) — user stories behind each use case
 * [`docs/sketch-views/`](docs/sketch-views) — early UI sketches
