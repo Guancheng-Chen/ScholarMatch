@@ -185,6 +185,7 @@ public final class AppBuilder {
     private LoadMatchesDataAccessInterface loadMatchesDataAccessObject;
     private LoadProfileDataAccessInterface loadProfileDataAccessObject;
     private UpdateProfileDataAccessInterface updateProfileDataAccessObject;
+    private VerificationEmailSenderDataAccessInterface registerVerificationDataAccessObject;
     private VerificationEmailSenderDataAccessInterface requestEmailChangeDataAccessObject;
     private ChangeEmailDataAccessInterface changeEmailDataAccessObject;
     private ChangePasswordDataAccessInterface changePasswordDataAccessObject;
@@ -355,6 +356,8 @@ public final class AppBuilder {
 
         this.loginDataAccessObject = offline ? localRepo : authGateway;
         this.registerDataAccessObject = offline ? localRepo : authGateway;
+        this.registerVerificationDataAccessObject =
+                offline ? localRepo : new RemoteVerificationEmailSender(SERVER_URL);
         this.recommendDataAccessObject = offline ? localRepo : matchingGateway;
         this.connectDataAccessObject = offline ? localRepo : matchingGateway;
         this.dislikeDataAccessObject = offline ? localRepo : matchingGateway;
@@ -463,7 +466,7 @@ public final class AppBuilder {
         this.registerInteractor = new RegisterInteractor(
                 this.registerDataAccessObject, this.currentUserProvider, this.registerPresenter);
         this.verificationInteractor = new RequestEmailVerificationInteractor(
-                new RemoteVerificationEmailSender(SERVER_URL), this.verificationPresenter);
+                this.registerVerificationDataAccessObject, this.verificationPresenter);
         this.paperLookupInteractor = new PaperLookupInteractor(this.userApiGateway, this.paperLookupPresenter);
         this.recommendInteractor =
                 new RecommendInteractor(this.recommendDataAccessObject, this.recommendPresenter);
