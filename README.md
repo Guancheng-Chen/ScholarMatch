@@ -219,7 +219,7 @@ mvn verify               # tests + Checkstyle + JaCoCo coverage report
 
 ## Accessibility
 
-ScholarMatch follows the **social model of disability**: one UI for everyone, no separate "accessible mode." See the full [Accessibility Report](docs/accessibility_report.md) for a principle-by-principle status (equitable use, flexibility, error tolerance, etc.) and the prioritized next steps — currently the weakest areas are text scaling/dark theme and a complete keyboard-only path.
+ScholarMatch follows the **social model of disability**: one UI for everyone, no separate "accessible mode." See the full [Accessibility Report](docs/accessibility-report.md) for a principle-by-principle status (equitable use, flexibility, error tolerance, etc.) and the prioritized next steps — text scaling/dark theme and a complete keyboard-only path currently have the most room to grow.
 
 ---
 
