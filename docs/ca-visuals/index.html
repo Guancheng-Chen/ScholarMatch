@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScholarMatch — Clean Architecture Visuals</title>
+<style>
+    :root {
+        --bg: #ffffff;
+        --bg-alt: #f5f6f8;
+        --text: #1a1f2b;
+        --text-muted: #5b6472;
+        --border: #e2e5ea;
+        --accent: #6d4bd6;
+        --accent-bg: #f2edfd;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #14161c;
+            --bg-alt: #1c1f27;
+            --text: #eceef2;
+            --text-muted: #9aa2b1;
+            --border: #2b2f3a;
+            --accent: #b39dff;
+            --accent-bg: #262038;
+        }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        min-height: 100vh;
+    }
+
+    nav {
+        width: 260px;
+        flex-shrink: 0;
+        background: var(--bg-alt);
+        border-right: 1px solid var(--border);
+        padding: 24px 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+    }
+
+    nav h1 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 20px 4px;
+        letter-spacing: 0.02em;
+    }
+
+    nav p.subtitle {
+        margin: 0 20px 20px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    nav a {
+        display: block;
+        padding: 8px 20px;
+        font-size: 13px;
+        color: var(--text);
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        transition: background 0.12s, border-color 0.12s;
+    }
+
+    nav a:hover {
+        background: var(--accent-bg);
+    }
+
+    nav a.active {
+        border-left-color: var(--accent);
+        background: var(--accent-bg);
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    main {
+        flex: 1;
+        min-width: 0;
+        padding: 40px clamp(20px, 5vw, 64px);
+    }
+
+    main > header {
+        margin-bottom: 40px;
+    }
+
+    main > header h1 {
+        font-size: 26px;
+        margin: 0 0 8px;
+    }
+
+    main > header p {
+        color: var(--text-muted);
+        margin: 0;
+        max-width: 640px;
+        line-height: 1.5;
+    }
+
+    section.usecase {
+        margin-bottom: 56px;
+        scroll-margin-top: 24px;
+    }
+
+    section.usecase h2 {
+        font-size: 18px;
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    section.usecase .frame {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: auto;
+        background: var(--bg-alt);
+    }
+
+    section.usecase img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    a.top-link {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: none;
+    }
+
+    a.top-link:hover {
+        color: var(--accent);
+    }
+</style>
+</head>
+<body id="top">
+
+<nav>
+    <h1>Clean Architecture Visuals</h1>
+    <p class="subtitle">Click a use case to jump to its diagram</p>
+    <ul id="nav-list"></ul>
+</nav>
+
+<main>
+    <header>
+        <h1>ScholarMatch — Clean Architecture Visuals</h1>
+        <p>
+            One diagram per use case, showing how each layer of the Clean Architecture
+            (Frameworks, Interface Adapters, Use Cases, Entities) is implemented for that flow.
+            Pick a use case from the list on the left to jump straight to it.
+        </p>
+    </header>
+
+    <div id="usecase-list"></div>
+</main>
+
+<script>
+    const useCases = [
+        "AcceptApplication",
+        "ApplyToPosting",
+        "ChangeEmail",
+        "ChangePassword",
+        "ClosePosting",
+        "Connect",
+        "CreatePosting",
+        "DeclineApplication",
+        "DeleteAccount",
+        "Dislike",
+        "LoadMatches",
+        "LoadMessage",
+        "LoadMyApplications",
+        "LoadPostings",
+        "LoadProfile",
+        "Login",
+        "Logout",
+        "PaperLookup",
+        "Recommend",
+        "Register",
+        "RequestEmailVerification",
+        "SendMessage",
+        "Skip",
+        "UpdateProfile"
+    ];
+
+    function toTitle(slug) {
+        return slug.replace(/([a-z])([A-Z])/g, "$1 $2");
+    }
+
+    const navList = document.getElementById("nav-list");
+    const usecaseList = document.getElementById("usecase-list");
+
+    for (const slug of useCases) {
+        const title = toTitle(slug);
+        const anchorId = "uc-" + slug;
+
+        const navItem = document.createElement("li");
+        const navLink = document.createElement("a");
+        navLink.href = "#" + anchorId;
+        navLink.textContent = title;
+        navLink.dataset.target = anchorId;
+        navItem.appendChild(navLink);
+        navList.appendChild(navItem);
+
+        const section = document.createElement("section");
+        section.className = "usecase";
+        section.id = anchorId;
+
+        const heading = document.createElement("h2");
+        heading.textContent = title;
+        section.appendChild(heading);
+
+        const frame = document.createElement("div");
+        frame.className = "frame";
+        const img = document.createElement("img");
+        img.src = slug + "-ca-visuals.png";
+        img.alt = title + " — Clean Architecture layers";
+        img.loading = "lazy";
+        frame.appendChild(img);
+        section.appendChild(frame);
+
+        const topLink = document.createElement("a");
+        topLink.className = "top-link";
+        topLink.href = "#top";
+        topLink.textContent = "↑ back to top";
+        section.appendChild(topLink);
+
+        usecaseList.appendChild(section);
+    }
+
+    const navLinks = Array.from(navList.querySelectorAll("a"));
+    const sections = Array.from(usecaseList.querySelectorAll("section.usecase"));
+
+    const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                const id = entry.target.id;
+                for (const link of navLinks) {
+                    link.classList.toggle("active", link.dataset.target === id);
+                }
+            }
+        }
+    }, { rootMargin: "-10% 0px -80% 0px" });
+
+    for (const section of sections) {
+        observer.observe(section);
+    }
+</script>
+
+</body>
+</html>
