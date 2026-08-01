@@ -131,14 +131,17 @@ ScholarMatch follows **Clean Architecture**. Every feature is wired through the 
 * **Maven 3.9+**
 * OS: **Windows / macOS / Linux**
 
-### Clone & Build
+### Clone, Build & Run
 
 ```bash
 git clone https://github.com/Guancheng-Chen/ScholarMatch.git
 cd ScholarMatch
 
 mvn clean verify   # compiles, runs checkstyle, runs the test suite
+mvn exec:java      # launches the app
 ```
+
+`mvn clean verify` only builds and tests the project — it does **not** launch the app. Run `mvn exec:java` afterward to actually open the ScholarMatch window (it needs compiled classes on disk, so don't skip straight to it on a fresh clone — `mvn clean verify` or `mvn compile` has to run at least once first).
 
 ### Online Mode (default)
 
