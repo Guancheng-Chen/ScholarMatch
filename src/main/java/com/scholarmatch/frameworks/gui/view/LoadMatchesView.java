@@ -3,8 +3,8 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.component.MatchedUserCard;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
-import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
+import com.scholarmatch.interface_adapter.load_matches.LoadMatchesController;
+import com.scholarmatch.interface_adapter.view_model.load_matches.LoadMatchesViewModel;
 import com.scholarmatch.usecase.dto.UserData;
 
 import javax.swing.Box;

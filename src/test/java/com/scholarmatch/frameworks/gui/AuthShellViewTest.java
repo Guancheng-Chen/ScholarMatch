@@ -1,11 +1,11 @@
 package com.scholarmatch.frameworks.gui;
 
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
-import com.scholarmatch.interface_adapter.controller.LoginController;
-import com.scholarmatch.interface_adapter.controller.RegisterController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
-import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
-import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
+import com.scholarmatch.interface_adapter.login.LoginController;
+import com.scholarmatch.interface_adapter.register.RegisterController;
+import com.scholarmatch.interface_adapter.request_email_verification.RequestEmailVerificationController;
+import com.scholarmatch.interface_adapter.view_model.login.LoginViewModel;
+import com.scholarmatch.interface_adapter.view_model.register.RegisterViewModel;
 import com.scholarmatch.usecase.login.LoginInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;

@@ -1,8 +1,8 @@
 package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
-import com.scholarmatch.interface_adapter.controller.LoginController;
-import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
+import com.scholarmatch.interface_adapter.login.LoginController;
+import com.scholarmatch.interface_adapter.view_model.login.LoginViewModel;
 import com.scholarmatch.usecase.login.LoginInputBoundary;
 import com.scholarmatch.usecase.login.LoginInputData;
 

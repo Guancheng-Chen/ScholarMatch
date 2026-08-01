@@ -4,8 +4,8 @@ import com.scholarmatch.entity.PostingApplicationStatus;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Reflowable;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
-import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.accept_application.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.decline_application.DeclineApplicationController;
 import com.scholarmatch.usecase.dto.PostingApplicationData;
 
 import javax.swing.BorderFactory;

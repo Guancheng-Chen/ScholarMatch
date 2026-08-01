@@ -4,8 +4,8 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.LoginController;
-import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
+import com.scholarmatch.interface_adapter.login.LoginController;
+import com.scholarmatch.interface_adapter.view_model.login.LoginViewModel;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
 import javax.swing.Box;

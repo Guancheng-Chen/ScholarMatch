@@ -6,9 +6,9 @@ import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.RegisterController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
-import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
+import com.scholarmatch.interface_adapter.register.RegisterController;
+import com.scholarmatch.interface_adapter.request_email_verification.RequestEmailVerificationController;
+import com.scholarmatch.interface_adapter.view_model.register.RegisterViewModel;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 

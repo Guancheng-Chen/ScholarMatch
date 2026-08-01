@@ -6,12 +6,12 @@ import com.scholarmatch.frameworks.gui.component.OwnedPostingCard;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.AcceptApplicationController;
-import com.scholarmatch.interface_adapter.controller.ClosePostingController;
-import com.scholarmatch.interface_adapter.controller.CreatePostingController;
-import com.scholarmatch.interface_adapter.controller.DeclineApplicationController;
-import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
-import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.accept_application.AcceptApplicationController;
+import com.scholarmatch.interface_adapter.close_posting.ClosePostingController;
+import com.scholarmatch.interface_adapter.create_posting.CreatePostingController;
+import com.scholarmatch.interface_adapter.decline_application.DeclineApplicationController;
+import com.scholarmatch.interface_adapter.load_postings.LoadPostingsController;
+import com.scholarmatch.interface_adapter.view_model.my_postings.MyPostingsViewModel;
 import com.scholarmatch.usecase.dto.PostingData;
 import com.scholarmatch.usecase.load_postings.PostingScope;
 

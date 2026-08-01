@@ -1,11 +1,19 @@
 package com.scholarmatch.interface_adapter.presenter;
 
-import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
-import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
-import com.scholarmatch.interface_adapter.view_model.LoginViewModel;
-import com.scholarmatch.interface_adapter.view_model.LogoutViewModel;
-import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
-import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.account_settings.AccountSettingsPresenter;
+import com.scholarmatch.interface_adapter.delete_account.DeleteAccountPresenter;
+import com.scholarmatch.interface_adapter.load_profile.LoadProfilePresenter;
+import com.scholarmatch.interface_adapter.login.LoginPresenter;
+import com.scholarmatch.interface_adapter.logout.LogoutPresenter;
+import com.scholarmatch.interface_adapter.register.RegisterPresenter;
+import com.scholarmatch.interface_adapter.request_email_verification.RequestEmailVerificationPresenter;
+import com.scholarmatch.interface_adapter.update_profile.UpdateProfilePresenter;
+import com.scholarmatch.interface_adapter.view_model.delete_account.DeleteAccountViewModel;
+import com.scholarmatch.interface_adapter.view_model.account_settings.AccountSettingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.login.LoginViewModel;
+import com.scholarmatch.interface_adapter.view_model.logout.LogoutViewModel;
+import com.scholarmatch.interface_adapter.view_model.register.RegisterViewModel;
+import com.scholarmatch.interface_adapter.view_model.update_profile.UpdateProfileViewModel;
 import com.scholarmatch.usecase.dto.UserData;
 import com.scholarmatch.usecase.change_email.ChangeEmailOutputData;
 import com.scholarmatch.usecase.change_password.ChangePasswordOutputData;

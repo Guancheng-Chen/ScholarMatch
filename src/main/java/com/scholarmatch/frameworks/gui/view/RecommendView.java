@@ -5,11 +5,11 @@ import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Icons;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.ConnectController;
-import com.scholarmatch.interface_adapter.controller.DislikeController;
-import com.scholarmatch.interface_adapter.controller.RecommendController;
-import com.scholarmatch.interface_adapter.controller.SkipController;
-import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
+import com.scholarmatch.interface_adapter.connect.ConnectController;
+import com.scholarmatch.interface_adapter.dislike.DislikeController;
+import com.scholarmatch.interface_adapter.recommend.RecommendController;
+import com.scholarmatch.interface_adapter.skip.SkipController;
+import com.scholarmatch.interface_adapter.view_model.recommend.RecommendViewModel;
 import com.scholarmatch.usecase.dto.UserData;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
