@@ -1,8 +1,15 @@
 package com.scholarmatch.interface_adapter.presenter;
 
-import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
-import com.scholarmatch.interface_adapter.view_model.MyPostingsViewModel;
-import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.accept_application.AcceptApplicationPresenter;
+import com.scholarmatch.interface_adapter.apply_to_posting.ApplyToPostingPresenter;
+import com.scholarmatch.interface_adapter.close_posting.ClosePostingPresenter;
+import com.scholarmatch.interface_adapter.create_posting.CreatePostingPresenter;
+import com.scholarmatch.interface_adapter.decline_application.DeclineApplicationPresenter;
+import com.scholarmatch.interface_adapter.load_my_applications.LoadMyApplicationsPresenter;
+import com.scholarmatch.interface_adapter.load_postings.LoadPostingsPresenter;
+import com.scholarmatch.interface_adapter.view_model.my_applications.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.my_postings.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.opportunities.OpportunitiesViewModel;
 import com.scholarmatch.usecase.accept_application.AcceptApplicationOutputData;
 import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingOutputData;
 import com.scholarmatch.usecase.close_posting.ClosePostingOutputData;

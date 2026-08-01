@@ -12,11 +12,11 @@ import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.LoadProfileController;
-import com.scholarmatch.interface_adapter.controller.PaperLookupController;
-import com.scholarmatch.interface_adapter.controller.UpdateProfileController;
-import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
-import com.scholarmatch.interface_adapter.view_model.UpdateProfileViewModel;
+import com.scholarmatch.interface_adapter.load_profile.LoadProfileController;
+import com.scholarmatch.interface_adapter.paper_lookup.PaperLookupController;
+import com.scholarmatch.interface_adapter.update_profile.UpdateProfileController;
+import com.scholarmatch.interface_adapter.view_model.paper_lookup.PaperLookupViewModel;
+import com.scholarmatch.interface_adapter.view_model.update_profile.UpdateProfileViewModel;
 import com.scholarmatch.interface_adapter.view_model.support.ObservableValue;
 
 import javax.swing.Box;

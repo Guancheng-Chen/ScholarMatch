@@ -1,11 +1,11 @@
 package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
-import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
-import com.scholarmatch.interface_adapter.controller.LoadMessageController;
-import com.scholarmatch.interface_adapter.controller.SendMessageController;
-import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
-import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
+import com.scholarmatch.interface_adapter.load_matches.LoadMatchesController;
+import com.scholarmatch.interface_adapter.load_message.LoadMessageController;
+import com.scholarmatch.interface_adapter.send_message.SendMessageController;
+import com.scholarmatch.interface_adapter.view_model.chat.ChatViewModel;
+import com.scholarmatch.interface_adapter.view_model.load_matches.LoadMatchesViewModel;
 import com.scholarmatch.usecase.dto.MessageData;
 import com.scholarmatch.usecase.dto.UserData;
 import com.scholarmatch.usecase.load_matches.LoadMatchesInputBoundary;

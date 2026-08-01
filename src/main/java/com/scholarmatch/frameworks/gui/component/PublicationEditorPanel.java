@@ -3,8 +3,8 @@ package com.scholarmatch.frameworks.gui.component;
 import com.scholarmatch.entity.Publication;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.PaperLookupController;
-import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
+import com.scholarmatch.interface_adapter.paper_lookup.PaperLookupController;
+import com.scholarmatch.interface_adapter.view_model.paper_lookup.PaperLookupViewModel;
 import com.scholarmatch.usecase.paper_lookup.AuthorCandidateData;
 
 import javax.swing.BoxLayout;

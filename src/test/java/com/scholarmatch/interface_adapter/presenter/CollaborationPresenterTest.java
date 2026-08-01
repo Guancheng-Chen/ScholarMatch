@@ -1,10 +1,18 @@
 package com.scholarmatch.interface_adapter.presenter;
 
 import com.scholarmatch.entity.Publication;
-import com.scholarmatch.interface_adapter.view_model.ChatViewModel;
-import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
-import com.scholarmatch.interface_adapter.view_model.PaperLookupViewModel;
-import com.scholarmatch.interface_adapter.view_model.RecommendViewModel;
+import com.scholarmatch.interface_adapter.connect.ConnectPresenter;
+import com.scholarmatch.interface_adapter.dislike.DislikePresenter;
+import com.scholarmatch.interface_adapter.load_matches.LoadMatchesPresenter;
+import com.scholarmatch.interface_adapter.load_message.LoadMessagePresenter;
+import com.scholarmatch.interface_adapter.paper_lookup.PaperLookupPresenter;
+import com.scholarmatch.interface_adapter.recommend.RecommendPresenter;
+import com.scholarmatch.interface_adapter.send_message.SendMessagePresenter;
+import com.scholarmatch.interface_adapter.skip.SkipPresenter;
+import com.scholarmatch.interface_adapter.view_model.chat.ChatViewModel;
+import com.scholarmatch.interface_adapter.view_model.load_matches.LoadMatchesViewModel;
+import com.scholarmatch.interface_adapter.view_model.paper_lookup.PaperLookupViewModel;
+import com.scholarmatch.interface_adapter.view_model.recommend.RecommendViewModel;
 import com.scholarmatch.usecase.connect.ConnectOutputData;
 import com.scholarmatch.usecase.dto.MessageData;
 import com.scholarmatch.usecase.dto.UserData;

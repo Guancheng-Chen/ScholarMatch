@@ -1,9 +1,9 @@
 package com.scholarmatch.frameworks.gui.view;
 
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
-import com.scholarmatch.interface_adapter.controller.RegisterController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
-import com.scholarmatch.interface_adapter.view_model.RegisterViewModel;
+import com.scholarmatch.interface_adapter.register.RegisterController;
+import com.scholarmatch.interface_adapter.request_email_verification.RequestEmailVerificationController;
+import com.scholarmatch.interface_adapter.view_model.register.RegisterViewModel;
 import com.scholarmatch.usecase.register.RegisterInputBoundary;
 import com.scholarmatch.usecase.register.RegisterInputData;
 import com.scholarmatch.usecase.request_email_verification.RequestEmailVerificationInputBoundary;

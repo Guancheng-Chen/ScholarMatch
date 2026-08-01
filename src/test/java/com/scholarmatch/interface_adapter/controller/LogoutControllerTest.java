@@ -1,5 +1,6 @@
 package com.scholarmatch.interface_adapter.controller;
 
+import com.scholarmatch.interface_adapter.logout.LogoutController;
 import com.scholarmatch.usecase.logout.LogoutInputBoundary;
 import com.scholarmatch.usecase.logout.LogoutInputData;
 import org.junit.jupiter.api.Test;

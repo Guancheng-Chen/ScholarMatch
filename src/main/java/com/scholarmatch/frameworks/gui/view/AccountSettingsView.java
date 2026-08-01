@@ -3,12 +3,12 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.style.Buttons;
 import com.scholarmatch.frameworks.gui.style.RoundedPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.ChangeEmailController;
-import com.scholarmatch.interface_adapter.controller.ChangePasswordController;
-import com.scholarmatch.interface_adapter.controller.DeleteAccountController;
-import com.scholarmatch.interface_adapter.controller.RequestEmailVerificationController;
-import com.scholarmatch.interface_adapter.view_model.AccountSettingsViewModel;
-import com.scholarmatch.interface_adapter.view_model.DeleteAccountViewModel;
+import com.scholarmatch.interface_adapter.change_email.ChangeEmailController;
+import com.scholarmatch.interface_adapter.change_password.ChangePasswordController;
+import com.scholarmatch.interface_adapter.delete_account.DeleteAccountController;
+import com.scholarmatch.interface_adapter.request_email_verification.RequestEmailVerificationController;
+import com.scholarmatch.interface_adapter.view_model.account_settings.AccountSettingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.delete_account.DeleteAccountViewModel;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;

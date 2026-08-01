@@ -3,8 +3,8 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.component.ApplicationCard;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.LoadMyApplicationsController;
-import com.scholarmatch.interface_adapter.view_model.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.load_my_applications.LoadMyApplicationsController;
+import com.scholarmatch.interface_adapter.view_model.my_applications.MyApplicationsViewModel;
 import com.scholarmatch.usecase.dto.PostingApplicationData;
 
 import javax.swing.Box;

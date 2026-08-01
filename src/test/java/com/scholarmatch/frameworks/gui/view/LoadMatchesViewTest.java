@@ -8,8 +8,8 @@ import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.frameworks.gui.testsupport.SwingTestSupport;
-import com.scholarmatch.interface_adapter.controller.LoadMatchesController;
-import com.scholarmatch.interface_adapter.view_model.LoadMatchesViewModel;
+import com.scholarmatch.interface_adapter.load_matches.LoadMatchesController;
+import com.scholarmatch.interface_adapter.view_model.load_matches.LoadMatchesViewModel;
 import com.scholarmatch.usecase.dto.UserData;
 import com.scholarmatch.usecase.load_matches.LoadMatchesInputBoundary;
 

@@ -2,6 +2,16 @@ package com.scholarmatch.interface_adapter.view_model;
 
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Publication;
+import com.scholarmatch.interface_adapter.view_model.chat.ChatViewModel;
+import com.scholarmatch.interface_adapter.view_model.load_matches.LoadMatchesViewModel;
+import com.scholarmatch.interface_adapter.view_model.login.LoginViewModel;
+import com.scholarmatch.interface_adapter.view_model.logout.LogoutViewModel;
+import com.scholarmatch.interface_adapter.view_model.my_applications.MyApplicationsViewModel;
+import com.scholarmatch.interface_adapter.view_model.my_postings.MyPostingsViewModel;
+import com.scholarmatch.interface_adapter.view_model.opportunities.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.view_model.paper_lookup.PaperLookupViewModel;
+import com.scholarmatch.interface_adapter.view_model.register.RegisterViewModel;
+import com.scholarmatch.interface_adapter.view_model.update_profile.UpdateProfileViewModel;
 import com.scholarmatch.usecase.dto.MessageData;
 import com.scholarmatch.usecase.dto.PostingApplicationData;
 import com.scholarmatch.usecase.dto.PostingData;

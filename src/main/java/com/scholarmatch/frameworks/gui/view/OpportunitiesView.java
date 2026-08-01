@@ -3,9 +3,9 @@ package com.scholarmatch.frameworks.gui.view;
 import com.scholarmatch.frameworks.gui.component.PostingCard;
 import com.scholarmatch.frameworks.gui.style.CenteringScrollPanel;
 import com.scholarmatch.frameworks.gui.style.Theme;
-import com.scholarmatch.interface_adapter.controller.ApplyToPostingController;
-import com.scholarmatch.interface_adapter.controller.LoadPostingsController;
-import com.scholarmatch.interface_adapter.view_model.OpportunitiesViewModel;
+import com.scholarmatch.interface_adapter.apply_to_posting.ApplyToPostingController;
+import com.scholarmatch.interface_adapter.load_postings.LoadPostingsController;
+import com.scholarmatch.interface_adapter.view_model.opportunities.OpportunitiesViewModel;
 import com.scholarmatch.usecase.dto.PostingData;
 import com.scholarmatch.usecase.load_postings.PostingScope;
 

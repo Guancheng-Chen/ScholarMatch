@@ -1,5 +1,6 @@
 package com.scholarmatch.interface_adapter.controller;
 
+import com.scholarmatch.interface_adapter.apply_to_posting.ApplyToPostingController;
 import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInputBoundary;
 import com.scholarmatch.usecase.apply_to_posting.ApplyToPostingInputData;
 
