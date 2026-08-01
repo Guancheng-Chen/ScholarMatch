@@ -36,6 +36,9 @@ ScholarMatch pairs a recommendation feed (ranked by shared research interests) w
 * [Features](#features)
 * [Architecture](#architecture)
 * [Getting Started](#getting-started)
+  * [Requirements](#requirements)
+  * [Step-by-Step Setup](#step-by-step-setup)
+  * [Troubleshooting](#troubleshooting)
   * [Online Mode (default)](#online-mode-default)
   * [Offline Mode](#offline-mode)
 * [Usage](#usage)
@@ -127,21 +130,85 @@ ScholarMatch follows **Clean Architecture**. Every feature is wired through the 
 
 ### Requirements
 
-* **Java 21** (JDK)
-* **Maven 3.9+**
-* OS: **Windows / macOS / Linux**
+| Tool       | Version required | Check yours       |
+| ---------- | ----------------- | ------------------ |
+| **JDK**    | 21 (not older, not newer) | `java -version` |
+| **Maven**  | 3.9+               | `mvn -version`      |
+| **OS**     | Windows / macOS / Linux | —              |
 
-### Clone, Build & Run
+Both commands print a version banner — the important line is `java version "21...."` (for `java -version`) and `Java version: 21...` (for `mvn -version`, near the bottom of its banner). If either shows a different major version, see [I have multiple JDKs installed](#i-have-multiple-jdks-installed) below before continuing — Maven silently uses whatever JDK is first on your `PATH`/`JAVA_HOME`, which is not always the one you expect.
+
+### Step-by-Step Setup
+
+**1. Clone the repo and move into it:**
 
 ```bash
 git clone https://github.com/Guancheng-Chen/ScholarMatch.git
 cd ScholarMatch
-
-mvn clean verify   # compiles, runs checkstyle, runs the test suite
-mvn exec:java      # launches the app
 ```
 
-`mvn clean verify` only builds and tests the project — it does **not** launch the app. Run `mvn exec:java` afterward to actually open the ScholarMatch window (it needs compiled classes on disk, so don't skip straight to it on a fresh clone — `mvn clean verify` or `mvn compile` has to run at least once first).
+**2. Build and run the test suite:**
+
+```bash
+mvn clean verify
+```
+
+This compiles every class, runs [Checkstyle](#testing--code-quality) against `mystyle.xml`, and runs all ~490 JUnit tests. A successful run ends with:
+
+```text
+[INFO] Tests run: 487, Failures: 0, Errors: 0, Skipped: 0
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+```
+
+If you instead see `BUILD FAILURE`, jump to [Troubleshooting](#troubleshooting) — the most common first-run causes (wrong JDK version, Checkstyle violations) are listed there with fixes.
+
+**3. Launch the app:**
+
+```bash
+mvn exec:java
+```
+
+`mvn clean verify` only *builds and tests* the project — it does **not** open the app window on its own. This is a separate, deliberate step. `mvn exec:java` needs compiled classes already on disk (under `target/classes`), so it depends on step 2 having run at least once; running it on a completely untouched clone fails with `ClassNotFoundException: com.scholarmatch.app.ScholarMatchApp` (also covered in Troubleshooting). After step 2 has run once, you can re-run `mvn exec:java` on its own for subsequent launches — Maven does not require re-running `verify` every time, though `mvn compile exec:java` is the safest one-liner if you've since edited source files.
+
+A window titled **"ScholarMatch"** (1318×801px) should open, defaulting to [Online Mode](#online-mode-default). If no server is reachable, it falls back to [Offline Mode](#offline-mode) automatically, so a first run never blocks on network access.
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `mvn exec:java` fails with `ClassNotFoundException: com.scholarmatch.app.ScholarMatchApp` | Nothing has been compiled yet — `target/classes` doesn't exist | Run `mvn clean verify` (or just `mvn compile`) once first |
+| `mvn test` / `mvn verify` fails deep in a stack trace mentioning `JaCoCo` and `Unsupported class file major version NN` | Maven is running on a JDK newer than 21 (JaCoCo 0.8.x can't instrument bytecode from newer JDKs) — see [below](#i-have-multiple-jdks-installed) | Point `JAVA_HOME` at a JDK 21 install and re-run |
+| Build fails at the `validate` phase with a wall of `[ERROR] ... mystyle.xml` output | A Checkstyle rule was violated (unused import, missing brace, line too long, etc.) | Read the file/line Checkstyle reports and fix the style issue — the build intentionally fails on any violation (`failsOnError=true`) |
+| `Mockito is currently self-attaching to enable the inline-mock-maker...` printed during tests | A version-compatibility warning from Mockito's self-attach mechanism on newer JDKs | Harmless — it's a warning, not a failure; tests still run and pass |
+| The app window never appears and the process just hangs | Usually a slow/unreachable network call during the online-mode server health check on startup | Wait a few seconds for the fallback to Offline Mode, or force it immediately with `OFFLINE_MODE=true mvn exec:java` |
+
+#### I Have Multiple JDKs Installed
+
+Maven picks up whatever JDK its own launcher resolves to, which is **not necessarily** the `java` on your shell `PATH`. Check what Maven itself sees:
+
+```bash
+mvn -version
+```
+
+Look at the `Java version:` line in the output. If it isn't `21.x`, list the JDKs you have installed and pin `JAVA_HOME` to a 21 install:
+
+```bash
+# macOS — list installed JDKs
+/usr/libexec/java_home -V
+
+# then pin Maven to JDK 21 for this shell session
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+
+# Windows (PowerShell) — set JAVA_HOME for the session
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+
+# Linux — point at wherever your JDK 21 is installed, e.g.
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+```
+
+Re-run `mvn -version` to confirm it now reports `21.x`, then retry the build.
 
 ### Online Mode (default)
 
