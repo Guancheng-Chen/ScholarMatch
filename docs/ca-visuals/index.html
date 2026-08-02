@@ -175,111 +175,8 @@
         outline: none;
     }
 
-    .hotspot.expand-trigger {
-        border: 2px dashed transparent;
-    }
-
-    .hotspot.expand-trigger:hover,
-    .hotspot.expand-trigger:focus-visible {
-        border-style: dashed;
-    }
-
-    .popover-backdrop {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(10, 12, 18, 0.45);
-        z-index: 10;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-    }
-
-    .popover-backdrop.open {
-        display: flex;
-    }
-
-    .popover-panel {
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        width: min(720px, 100%);
-        max-height: min(640px, 85vh);
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-    }
-
-    .popover-panel header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
-    }
-
-    .popover-panel header h3 {
-        font-size: 15px;
-        margin: 0;
-    }
-
-    .popover-close {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 20px;
-        line-height: 1;
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-
-    .popover-close:hover {
-        background: var(--accent-bg);
-        color: var(--accent);
-    }
-
-    .popover-list {
-        overflow-y: auto;
-        padding: 8px;
-    }
-
-    .popover-item {
-        display: block;
-        width: 100%;
-        text-align: left;
-        background: none;
-        border: none;
+    .hotspot.uc-hotspot {
         border-radius: 8px;
-        padding: 10px 12px;
-        cursor: pointer;
-        color: var(--text);
-        text-decoration: none;
-    }
-
-    .popover-item:hover,
-    .popover-item:focus-visible {
-        background: var(--accent-bg);
-        outline: none;
-    }
-
-    .popover-item .uc-title {
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 3px;
-    }
-
-    .popover-item .uc-classes {
-        font-size: 11.5px;
-        color: var(--text-muted);
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        line-height: 1.5;
-    }
-
-    .popover-item .uc-classes b {
-        color: var(--text);
-        font-weight: 600;
     }
 </style>
 </head>
@@ -303,16 +200,6 @@
 
     <div id="usecase-list"></div>
 </main>
-
-<div class="popover-backdrop" id="usecase-popover">
-    <div class="popover-panel">
-        <header>
-            <h3>All 24 use cases — Interactor / Boundary / Data</h3>
-            <button type="button" class="popover-close" id="popover-close" aria-label="Close">&times;</button>
-        </header>
-        <div class="popover-list" id="popover-list"></div>
-    </div>
-</div>
 
 <script>
     const useCases = [
@@ -342,67 +229,49 @@
         "UpdateProfile"
     ];
 
-    // Boxes in Overall-ca-visuals.png, measured directly from the image's pixel grid
-    // (3362x1460) and expressed as percentages so the overlay scales with the image.
-    // Several classes (ChatView, MyPostingsView, MatchingGateway, User, ...) are shared by
-    // more than one use case in the real codebase — each hotspot links to one representative
-    // use case, not an exhaustive list of everywhere that class is used.
+    // Boxes in Overall-ca-visuals.png, measured directly from the rendered diagram's DOM
+    // (getBoundingClientRect, before it was flattened to a PNG) and expressed as percentages
+    // so the overlay scales with the image. The Use Cases row now pictures all 24 use cases
+    // directly (Name + Interactor/Boundary/Data), so those 24 hotspots map 1:1 to their own
+    // use case. The GUI/Gateway/Entities rows still only picture 5 examples each — those
+    // classes (ChatView, MyPostingsView, MatchingGateway, User, ...) are shared by more than
+    // one use case in the real codebase, so each hotspot there links to one representative
+    // example rather than an exhaustive list.
     const overallHotspots = [
-        { top: 10.82, left: 2.38, width: 11.30, height: 9.25, label: "RecommendView", target: "Recommend" },
-        { top: 10.82, left: 14.87, width: 11.30, height: 9.25, label: "ChatView", target: "SendMessage" },
-        { top: 10.82, left: 27.36, width: 11.30, height: 9.25, label: "LoginView", target: "Login" },
-        { top: 10.82, left: 39.86, width: 11.30, height: 9.25, label: "MyPostingsView", target: "CreatePosting" },
-        { top: 10.82, left: 52.35, width: 11.30, height: 9.25, label: "UpdateProfileView", target: "UpdateProfile" },
+        { top: 9.15, left: 2.82, width: 11.98, height: 6.62, label: "RecommendView", target: "Recommend" },
+        { top: 9.15, left: 15.74, width: 11.98, height: 6.62, label: "ChatView", target: "SendMessage" },
+        { top: 9.15, left: 28.67, width: 11.98, height: 6.62, label: "LoginView", target: "Login" },
+        { top: 9.15, left: 41.59, width: 11.98, height: 6.62, label: "MyPostingsView", target: "CreatePosting" },
+        { top: 9.15, left: 54.51, width: 11.98, height: 6.62, label: "UpdateProfileView", target: "UpdateProfile" },
 
-        { top: 27.60, left: 2.38, width: 11.30, height: 9.25, label: "MatchingGateway", target: "LoadMatches" },
-        { top: 27.60, left: 14.87, width: 11.30, height: 9.25, label: "MessagingGateway", target: "SendMessage" },
-        { top: 27.60, left: 27.36, width: 11.30, height: 9.25, label: "PostingGateway", target: "LoadPostings" },
-        { top: 27.60, left: 39.86, width: 11.30, height: 9.25, label: "LocalAuthRepository", target: "Login" },
-        { top: 27.60, left: 52.35, width: 11.30, height: 9.25, label: "ProfileGateway", target: "LoadProfile" },
+        { top: 18.90, left: 2.82, width: 11.98, height: 6.62, label: "MatchingGateway", target: "LoadMatches" },
+        { top: 18.90, left: 15.74, width: 11.98, height: 6.62, label: "MessagingGateway", target: "SendMessage" },
+        { top: 18.90, left: 28.67, width: 11.98, height: 6.62, label: "PostingGateway", target: "LoadPostings" },
+        { top: 18.90, left: 41.59, width: 11.98, height: 6.62, label: "LocalAuthRepository", target: "Login" },
+        { top: 18.90, left: 54.51, width: 11.98, height: 6.62, label: "ProfileGateway", target: "LoadProfile" },
 
-        { top: 61.16, left: 2.38, width: 11.30, height: 11.78, label: "RecommendInteractor", target: "Recommend" },
-        { top: 61.16, left: 14.87, width: 11.30, height: 11.78, label: "LoginInputBoundary", target: "Login" },
-        { top: 61.16, left: 27.36, width: 11.30, height: 11.78, label: "SendMessageOutputBoundary", target: "SendMessage" },
-        { top: 61.16, left: 39.86, width: 11.30, height: 11.78, label: "CreatePostingInputData", target: "CreatePosting" },
-        { top: 61.16, left: 52.35, width: 11.30, height: 11.78, label: "AcceptApplicationDataAccessInterface", target: "AcceptApplication" },
-
-        { top: 80.68, left: 2.38, width: 11.30, height: 9.25, label: "User", target: "Register" },
-        { top: 80.68, left: 14.87, width: 11.30, height: 9.25, label: "Posting", target: "LoadPostings" },
-        { top: 80.68, left: 27.36, width: 11.30, height: 9.25, label: "Message", target: "LoadMessage" },
-        { top: 80.68, left: 39.86, width: 11.30, height: 9.25, label: "PostingApplication", target: "ApplyToPosting" },
-        { top: 80.68, left: 52.35, width: 11.30, height: 9.25, label: "Publication", target: "PaperLookup" }
+        { top: 85.28, left: 2.82, width: 11.98, height: 6.62, label: "User", target: "Register" },
+        { top: 85.28, left: 15.74, width: 11.98, height: 6.62, label: "Posting", target: "LoadPostings" },
+        { top: 85.28, left: 28.67, width: 11.98, height: 6.62, label: "Message", target: "LoadMessage" },
+        { top: 85.28, left: 41.59, width: 11.98, height: 6.62, label: "PostingApplication", target: "ApplyToPosting" },
+        { top: 85.28, left: 54.51, width: 11.98, height: 6.62, label: "Publication", target: "PaperLookup" }
     ];
 
-    // Real Interactor / Boundary / Data class names per use case, taken directly from
-    // src/main/java/com/scholarmatch/usecase/<slug>/ — not every use case has both an
-    // InputData and OutputData class (or any at all), so those are listed as-is rather
-    // than invented to fit a uniform pattern.
-    const usecaseArtifacts = {
-        AcceptApplication: { interactor: "AcceptApplicationInteractor", boundary: "AcceptApplicationInputBoundary / OutputBoundary", data: "AcceptApplicationInputData / OutputData" },
-        ApplyToPosting: { interactor: "ApplyToPostingInteractor", boundary: "ApplyToPostingInputBoundary / OutputBoundary", data: "ApplyToPostingInputData / OutputData" },
-        ChangeEmail: { interactor: "ChangeEmailInteractor", boundary: "ChangeEmailInputBoundary / OutputBoundary", data: "ChangeEmailInputData / OutputData" },
-        ChangePassword: { interactor: "ChangePasswordInteractor", boundary: "ChangePasswordInputBoundary / OutputBoundary", data: "ChangePasswordInputData / OutputData" },
-        ClosePosting: { interactor: "ClosePostingInteractor", boundary: "ClosePostingInputBoundary / OutputBoundary", data: "ClosePostingInputData / OutputData" },
-        Connect: { interactor: "ConnectInteractor", boundary: "ConnectInputBoundary / OutputBoundary", data: "ConnectInputData / OutputData" },
-        CreatePosting: { interactor: "CreatePostingInteractor", boundary: "CreatePostingInputBoundary / OutputBoundary", data: "CreatePostingInputData / OutputData" },
-        DeclineApplication: { interactor: "DeclineApplicationInteractor", boundary: "DeclineApplicationInputBoundary / OutputBoundary", data: "DeclineApplicationInputData / OutputData" },
-        DeleteAccount: { interactor: "DeleteAccountInteractor", boundary: "DeleteAccountInputBoundary / OutputBoundary", data: "—" },
-        Dislike: { interactor: "DislikeInteractor", boundary: "DislikeInputBoundary / OutputBoundary", data: "DislikeInputData" },
-        LoadMatches: { interactor: "LoadMatchesInteractor", boundary: "LoadMatchesInputBoundary / OutputBoundary", data: "LoadMatchesOutputData" },
-        LoadMessage: { interactor: "LoadMessageInteractor", boundary: "LoadMessageInputBoundary / OutputBoundary", data: "LoadMessageInputData / OutputData" },
-        LoadMyApplications: { interactor: "LoadMyApplicationsInteractor", boundary: "LoadMyApplicationsInputBoundary / OutputBoundary", data: "LoadMyApplicationsOutputData" },
-        LoadPostings: { interactor: "LoadPostingsInteractor", boundary: "LoadPostingsInputBoundary / OutputBoundary", data: "LoadPostingsInputData / OutputData" },
-        LoadProfile: { interactor: "LoadProfileInteractor", boundary: "LoadProfileInputBoundary / OutputBoundary", data: "LoadProfileOutputData" },
-        Login: { interactor: "LoginInteractor", boundary: "LoginInputBoundary / OutputBoundary", data: "LoginInputData / OutputData" },
-        Logout: { interactor: "LogoutInteractor", boundary: "LogoutInputBoundary / OutputBoundary", data: "LogoutInputData / OutputData" },
-        PaperLookup: { interactor: "PaperLookupInteractor", boundary: "PaperLookupInputBoundary / OutputBoundary", data: "SearchAuthorsInputData / SelectAuthorInputData" },
-        Recommend: { interactor: "RecommendInteractor", boundary: "RecommendInputBoundary / OutputBoundary", data: "RecommendOutputData" },
-        Register: { interactor: "RegisterInteractor", boundary: "RegisterInputBoundary / OutputBoundary", data: "RegisterInputData / OutputData" },
-        RequestEmailVerification: { interactor: "RequestEmailVerificationInteractor", boundary: "RequestEmailVerificationInputBoundary / OutputBoundary", data: "RequestEmailVerificationInputData / OutputData" },
-        SendMessage: { interactor: "SendMessageInteractor", boundary: "SendMessageInputBoundary / OutputBoundary", data: "SendMessageInputData / OutputData" },
-        Skip: { interactor: "SkipInteractor", boundary: "SkipInputBoundary / OutputBoundary", data: "SkipInputData" },
-        UpdateProfile: { interactor: "UpdateProfileInteractor", boundary: "UpdateProfileInputBoundary / OutputBoundary", data: "UpdateProfileInputData / OutputData" }
-    };
+    // The 24 Use Cases cards: a 6-column x 4-row grid, each cell mapping to itself.
+    const useCaseGridCols = [2.82, 15.74, 28.67, 41.59, 54.51, 67.43];
+    const useCaseGridRows = [38.41, 49.74, 61.06, 72.39];
+    for (let i = 0; i < useCases.length; i++) {
+        const slug = useCases[i];
+        overallHotspots.push({
+            top: useCaseGridRows[Math.floor(i / 6)],
+            left: useCaseGridCols[i % 6],
+            width: 11.98,
+            height: 9.76,
+            label: slug,
+            target: slug,
+            extraClass: "uc-hotspot"
+        });
+    }
 
     function toTitle(slug) {
         return slug.replace(/([a-z])([A-Z])/g, "$1 $2");
@@ -431,9 +300,10 @@
 
         const hint = document.createElement("p");
         hint.className = "hint";
-        hint.textContent = "Hover a component to see which use case it links to, and click " +
-            "to jump there. Some components are shared by more than one use case in the real " +
-            "codebase — each one here links to a single representative example.";
+        hint.textContent = "The Use Cases row pictures all 24 use cases directly. Hover any " +
+            "component to see which use case it links to, and click to jump there — a few " +
+            "GUI/Gateway/Entity classes are shared by more than one use case in the real " +
+            "codebase, so those link to one representative example.";
         section.appendChild(hint);
 
         const frame = document.createElement("div");
@@ -445,30 +315,15 @@
 
         for (const spot of overallHotspots) {
             const hotspot = document.createElement("a");
-            hotspot.className = "hotspot";
+            hotspot.className = "hotspot" + (spot.extraClass ? " " + spot.extraClass : "");
             hotspot.href = "#uc-" + spot.target;
-            hotspot.title = spot.label + " → " + toTitle(spot.target);
+            hotspot.title = spot.label === spot.target ? toTitle(spot.target) : spot.label + " → " + toTitle(spot.target);
             hotspot.style.top = spot.top + "%";
             hotspot.style.left = spot.left + "%";
             hotspot.style.width = spot.width + "%";
             hotspot.style.height = spot.height + "%";
             frame.appendChild(hotspot);
         }
-
-        // The "..." box in the Use Cases row only shows 5 example use cases in the image
-        // itself — this hotspot opens a popover listing all 24, each with its real
-        // Interactor / Boundary / Data class names, so every use case is reachable from
-        // the Overall diagram, not just the 5 pictured.
-        const allUseCasesHotspot = document.createElement("button");
-        allUseCasesHotspot.type = "button";
-        allUseCasesHotspot.className = "hotspot expand-trigger";
-        allUseCasesHotspot.title = "All 24 use cases — Interactor / Boundary / Data";
-        allUseCasesHotspot.style.top = "61.16%";
-        allUseCasesHotspot.style.left = "64.84%";
-        allUseCasesHotspot.style.width = "11.30%";
-        allUseCasesHotspot.style.height = "11.78%";
-        allUseCasesHotspot.addEventListener("click", openUsecasePopover);
-        frame.appendChild(allUseCasesHotspot);
 
         section.appendChild(frame);
 
@@ -536,54 +391,6 @@
     for (const section of sections) {
         observer.observe(section);
     }
-
-    const popoverBackdrop = document.getElementById("usecase-popover");
-    const popoverList = document.getElementById("popover-list");
-    const popoverCloseButton = document.getElementById("popover-close");
-
-    for (const slug of useCases) {
-        const artifacts = usecaseArtifacts[slug];
-
-        const item = document.createElement("a");
-        item.className = "popover-item";
-        item.href = "#uc-" + slug;
-
-        const title = document.createElement("div");
-        title.className = "uc-title";
-        title.textContent = toTitle(slug);
-        item.appendChild(title);
-
-        const classes = document.createElement("div");
-        classes.className = "uc-classes";
-        classes.innerHTML =
-            "<b>Interactor</b> " + artifacts.interactor + "<br>" +
-            "<b>Boundary</b> " + artifacts.boundary + "<br>" +
-            "<b>Data</b> " + artifacts.data;
-        item.appendChild(classes);
-
-        item.addEventListener("click", closeUsecasePopover);
-        popoverList.appendChild(item);
-    }
-
-    function openUsecasePopover() {
-        popoverBackdrop.classList.add("open");
-    }
-
-    function closeUsecasePopover() {
-        popoverBackdrop.classList.remove("open");
-    }
-
-    popoverCloseButton.addEventListener("click", closeUsecasePopover);
-    popoverBackdrop.addEventListener("click", (event) => {
-        if (event.target === popoverBackdrop) {
-            closeUsecasePopover();
-        }
-    });
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            closeUsecasePopover();
-        }
-    });
 </script>
 
 </body>
