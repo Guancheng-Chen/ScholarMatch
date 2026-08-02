@@ -147,6 +147,33 @@
     a.top-link:hover {
         color: var(--accent);
     }
+
+    section.overall .frame {
+        position: relative;
+    }
+
+    section.overall p.hint {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin: 0 0 16px;
+        max-width: 640px;
+        line-height: 1.5;
+    }
+
+    .hotspot {
+        position: absolute;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.1s, border-color 0.1s;
+    }
+
+    .hotspot:hover,
+    .hotspot:focus-visible {
+        background: rgba(109, 75, 214, 0.16);
+        border-color: var(--accent);
+        outline: none;
+    }
 </style>
 </head>
 <body id="top">
@@ -198,12 +225,98 @@
         "UpdateProfile"
     ];
 
+    // Boxes in Overall-ca-visuals.png, measured directly from the image's pixel grid
+    // (3362x1460) and expressed as percentages so the overlay scales with the image.
+    // Several classes (ChatView, MyPostingsView, MatchingGateway, User, ...) are shared by
+    // more than one use case in the real codebase — each hotspot links to one representative
+    // use case, not an exhaustive list of everywhere that class is used.
+    const overallHotspots = [
+        { top: 10.82, left: 2.38, width: 11.30, height: 9.25, label: "RecommendView", target: "Recommend" },
+        { top: 10.82, left: 14.87, width: 11.30, height: 9.25, label: "ChatView", target: "SendMessage" },
+        { top: 10.82, left: 27.36, width: 11.30, height: 9.25, label: "LoginView", target: "Login" },
+        { top: 10.82, left: 39.86, width: 11.30, height: 9.25, label: "MyPostingsView", target: "CreatePosting" },
+        { top: 10.82, left: 52.35, width: 11.30, height: 9.25, label: "UpdateProfileView", target: "UpdateProfile" },
+
+        { top: 27.60, left: 2.38, width: 11.30, height: 9.25, label: "MatchingGateway", target: "LoadMatches" },
+        { top: 27.60, left: 14.87, width: 11.30, height: 9.25, label: "MessagingGateway", target: "SendMessage" },
+        { top: 27.60, left: 27.36, width: 11.30, height: 9.25, label: "PostingGateway", target: "LoadPostings" },
+        { top: 27.60, left: 39.86, width: 11.30, height: 9.25, label: "LocalAuthRepository", target: "Login" },
+        { top: 27.60, left: 52.35, width: 11.30, height: 9.25, label: "ProfileGateway", target: "LoadProfile" },
+
+        { top: 61.16, left: 2.38, width: 11.30, height: 11.78, label: "RecommendInteractor", target: "Recommend" },
+        { top: 61.16, left: 14.87, width: 11.30, height: 11.78, label: "LoginInputBoundary", target: "Login" },
+        { top: 61.16, left: 27.36, width: 11.30, height: 11.78, label: "SendMessageOutputBoundary", target: "SendMessage" },
+        { top: 61.16, left: 39.86, width: 11.30, height: 11.78, label: "CreatePostingInputData", target: "CreatePosting" },
+        { top: 61.16, left: 52.35, width: 11.30, height: 11.78, label: "AcceptApplicationDataAccessInterface", target: "AcceptApplication" },
+
+        { top: 80.68, left: 2.38, width: 11.30, height: 9.25, label: "User", target: "Register" },
+        { top: 80.68, left: 14.87, width: 11.30, height: 9.25, label: "Posting", target: "LoadPostings" },
+        { top: 80.68, left: 27.36, width: 11.30, height: 9.25, label: "Message", target: "LoadMessage" },
+        { top: 80.68, left: 39.86, width: 11.30, height: 9.25, label: "PostingApplication", target: "ApplyToPosting" },
+        { top: 80.68, left: 52.35, width: 11.30, height: 9.25, label: "Publication", target: "PaperLookup" }
+    ];
+
     function toTitle(slug) {
         return slug.replace(/([a-z])([A-Z])/g, "$1 $2");
     }
 
     const navList = document.getElementById("nav-list");
     const usecaseList = document.getElementById("usecase-list");
+
+    // Overall diagram: pinned as the first entry, above the per-use-case list.
+    {
+        const navItem = document.createElement("li");
+        const navLink = document.createElement("a");
+        navLink.href = "#uc-overall";
+        navLink.textContent = "Overall";
+        navLink.dataset.target = "uc-overall";
+        navItem.appendChild(navLink);
+        navList.appendChild(navItem);
+
+        const section = document.createElement("section");
+        section.className = "usecase overall";
+        section.id = "uc-overall";
+
+        const heading = document.createElement("h2");
+        heading.textContent = "Overall — Clean Architecture";
+        section.appendChild(heading);
+
+        const hint = document.createElement("p");
+        hint.className = "hint";
+        hint.textContent = "Hover a component to see which use case it links to, and click " +
+            "to jump there. Some components are shared by more than one use case in the real " +
+            "codebase — each one here links to a single representative example.";
+        section.appendChild(hint);
+
+        const frame = document.createElement("div");
+        frame.className = "frame";
+        const img = document.createElement("img");
+        img.src = "Overall-ca-visuals.png";
+        img.alt = "Overall Clean Architecture layers across the whole app";
+        frame.appendChild(img);
+
+        for (const spot of overallHotspots) {
+            const hotspot = document.createElement("a");
+            hotspot.className = "hotspot";
+            hotspot.href = "#uc-" + spot.target;
+            hotspot.title = spot.label + " → " + toTitle(spot.target);
+            hotspot.style.top = spot.top + "%";
+            hotspot.style.left = spot.left + "%";
+            hotspot.style.width = spot.width + "%";
+            hotspot.style.height = spot.height + "%";
+            frame.appendChild(hotspot);
+        }
+
+        section.appendChild(frame);
+
+        const topLink = document.createElement("a");
+        topLink.className = "top-link";
+        topLink.href = "#top";
+        topLink.textContent = "↑ back to top";
+        section.appendChild(topLink);
+
+        usecaseList.appendChild(section);
+    }
 
     for (const slug of useCases) {
         const title = toTitle(slug);
