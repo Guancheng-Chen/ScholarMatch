@@ -238,38 +238,59 @@
     // one use case in the real codebase, so each hotspot there links to one representative
     // example rather than an exhaustive list.
     const overallHotspots = [
-        { top: 9.15, left: 2.82, width: 11.98, height: 6.62, label: "RecommendView", target: "Recommend" },
-        { top: 9.15, left: 15.74, width: 11.98, height: 6.62, label: "ChatView", target: "SendMessage" },
-        { top: 9.15, left: 28.67, width: 11.98, height: 6.62, label: "LoginView", target: "Login" },
-        { top: 9.15, left: 41.59, width: 11.98, height: 6.62, label: "MyPostingsView", target: "CreatePosting" },
-        { top: 9.15, left: 54.51, width: 11.98, height: 6.62, label: "UpdateProfileView", target: "UpdateProfile" },
+        { top: 6.20, left: 2.82, width: 11.98, height: 4.49, label: "RecommendView", target: "Recommend" },
+        { top: 6.20, left: 15.74, width: 11.98, height: 4.49, label: "ChatView", target: "SendMessage" },
+        { top: 6.20, left: 28.67, width: 11.98, height: 4.49, label: "LoginView", target: "Login" },
+        { top: 6.20, left: 41.59, width: 11.98, height: 4.49, label: "MyPostingsView", target: "CreatePosting" },
+        { top: 6.20, left: 54.51, width: 11.98, height: 4.49, label: "UpdateProfileView", target: "UpdateProfile" },
 
-        { top: 18.90, left: 2.82, width: 11.98, height: 6.62, label: "MatchingGateway", target: "LoadMatches" },
-        { top: 18.90, left: 15.74, width: 11.98, height: 6.62, label: "MessagingGateway", target: "SendMessage" },
-        { top: 18.90, left: 28.67, width: 11.98, height: 6.62, label: "PostingGateway", target: "LoadPostings" },
-        { top: 18.90, left: 41.59, width: 11.98, height: 6.62, label: "LocalAuthRepository", target: "Login" },
-        { top: 18.90, left: 54.51, width: 11.98, height: 6.62, label: "ProfileGateway", target: "LoadProfile" },
+        { top: 12.82, left: 2.82, width: 11.98, height: 4.49, label: "MatchingGateway", target: "LoadMatches" },
+        { top: 12.82, left: 15.74, width: 11.98, height: 4.49, label: "MessagingGateway", target: "SendMessage" },
+        { top: 12.82, left: 28.67, width: 11.98, height: 4.49, label: "PostingGateway", target: "LoadPostings" },
+        { top: 12.82, left: 41.59, width: 11.98, height: 4.49, label: "LocalAuthRepository", target: "Login" },
+        { top: 12.82, left: 54.51, width: 11.98, height: 4.49, label: "ProfileGateway", target: "LoadProfile" },
 
-        { top: 85.28, left: 2.82, width: 11.98, height: 6.62, label: "User", target: "Register" },
-        { top: 85.28, left: 15.74, width: 11.98, height: 6.62, label: "Posting", target: "LoadPostings" },
-        { top: 85.28, left: 28.67, width: 11.98, height: 6.62, label: "Message", target: "LoadMessage" },
-        { top: 85.28, left: 41.59, width: 11.98, height: 6.62, label: "PostingApplication", target: "ApplyToPosting" },
-        { top: 85.28, left: 54.51, width: 11.98, height: 6.62, label: "Publication", target: "PaperLookup" }
+        { top: 90.02, left: 2.82, width: 11.98, height: 4.49, label: "User", target: "Register" },
+        { top: 90.02, left: 15.74, width: 11.98, height: 4.49, label: "Posting", target: "LoadPostings" },
+        { top: 90.02, left: 28.67, width: 11.98, height: 4.49, label: "Message", target: "LoadMessage" },
+        { top: 90.02, left: 41.59, width: 11.98, height: 4.49, label: "PostingApplication", target: "ApplyToPosting" },
+        { top: 90.02, left: 54.51, width: 11.98, height: 4.49, label: "Publication", target: "PaperLookup" }
     ];
 
-    // The 24 Use Cases cards: a 6-column x 4-row grid, each cell mapping to itself.
-    const useCaseGridCols = [2.82, 15.74, 28.67, 41.59, 54.51, 67.43];
-    const useCaseGridRows = [38.41, 49.74, 61.06, 72.39];
-    for (let i = 0; i < useCases.length; i++) {
-        const slug = useCases[i];
+    // The 24 Use Cases cards: a 4-column grid where each row's height auto-fits its own
+    // tallest card (some use cases have longer class names than others), so every card's
+    // rect was measured individually rather than assumed uniform.
+    const useCaseCardRects = {
+        AcceptApplication: { top: 26.05, left: 2.82, width: 18.44, height: 9.60 },
+        ApplyToPosting: { top: 26.05, left: 22.21, width: 18.44, height: 9.60 },
+        ChangeEmail: { top: 26.05, left: 41.59, width: 18.44, height: 9.60 },
+        ChangePassword: { top: 26.05, left: 60.97, width: 18.44, height: 9.60 },
+        ClosePosting: { top: 36.72, left: 2.82, width: 18.44, height: 10.70 },
+        Connect: { top: 36.72, left: 22.21, width: 18.44, height: 10.70 },
+        CreatePosting: { top: 36.72, left: 41.59, width: 18.44, height: 10.70 },
+        DeclineApplication: { top: 36.72, left: 60.97, width: 18.44, height: 10.70 },
+        DeleteAccount: { top: 48.48, left: 2.82, width: 18.44, height: 7.41 },
+        Dislike: { top: 48.48, left: 22.21, width: 18.44, height: 7.41 },
+        LoadMatches: { top: 48.48, left: 41.59, width: 18.44, height: 7.41 },
+        LoadMessage: { top: 48.48, left: 60.97, width: 18.44, height: 7.41 },
+        LoadMyApplications: { top: 56.95, left: 2.82, width: 18.44, height: 9.60 },
+        LoadPostings: { top: 56.95, left: 22.21, width: 18.44, height: 9.60 },
+        LoadProfile: { top: 56.95, left: 41.59, width: 18.44, height: 9.60 },
+        Login: { top: 56.95, left: 60.97, width: 18.44, height: 9.60 },
+        Logout: { top: 67.62, left: 2.82, width: 18.44, height: 8.50 },
+        PaperLookup: { top: 67.62, left: 22.21, width: 18.44, height: 8.50 },
+        Recommend: { top: 67.62, left: 41.59, width: 18.44, height: 8.50 },
+        Register: { top: 67.62, left: 60.97, width: 18.44, height: 8.50 },
+        RequestEmailVerification: { top: 77.19, left: 2.82, width: 18.44, height: 10.70 },
+        SendMessage: { top: 77.19, left: 22.21, width: 18.44, height: 10.70 },
+        Skip: { top: 77.19, left: 41.59, width: 18.44, height: 10.70 },
+        UpdateProfile: { top: 77.19, left: 60.97, width: 18.44, height: 10.70 }
+    };
+    for (const slug of useCases) {
+        const rect = useCaseCardRects[slug];
         overallHotspots.push({
-            top: useCaseGridRows[Math.floor(i / 6)],
-            left: useCaseGridCols[i % 6],
-            width: 11.98,
-            height: 9.76,
-            label: slug,
-            target: slug,
-            extraClass: "uc-hotspot"
+            top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+            label: slug, target: slug, extraClass: "uc-hotspot"
         });
     }
 
@@ -311,6 +332,8 @@
         const img = document.createElement("img");
         img.src = "Overall-ca-visuals.png";
         img.alt = "Overall Clean Architecture layers across the whole app";
+        img.width = 3400;
+        img.height = 3386;
         frame.appendChild(img);
 
         for (const spot of overallHotspots) {
@@ -362,6 +385,13 @@
         img.src = slug + "-ca-visuals.png";
         img.alt = title + " — Clean Architecture layers";
         img.loading = "lazy";
+        // Every per-use-case PNG is 3800x2520 — setting the real intrinsic size (even
+        // though CSS overrides the rendered width to 100%) lets the browser reserve the
+        // correct aspect-ratio space before the image loads, so lazy-loading below the
+        // fold doesn't shift anchor-jump targets (e.g. clicking a hotspot in the Overall
+        // diagram) out from under the reader while images finish loading in.
+        img.width = 3800;
+        img.height = 2520;
         frame.appendChild(img);
         section.appendChild(frame);
 
