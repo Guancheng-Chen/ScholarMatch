@@ -238,53 +238,53 @@
     // one use case in the real codebase, so each hotspot there links to one representative
     // example rather than an exhaustive list.
     const overallHotspots = [
-        { top: 6.20, left: 2.82, width: 11.98, height: 4.49, label: "RecommendView", target: "Recommend" },
-        { top: 6.20, left: 15.74, width: 11.98, height: 4.49, label: "ChatView", target: "SendMessage" },
-        { top: 6.20, left: 28.67, width: 11.98, height: 4.49, label: "LoginView", target: "Login" },
-        { top: 6.20, left: 41.59, width: 11.98, height: 4.49, label: "MyPostingsView", target: "CreatePosting" },
-        { top: 6.20, left: 54.51, width: 11.98, height: 4.49, label: "UpdateProfileView", target: "UpdateProfile" },
+        { top: 8.00, left: 1.85, width: 12.64, height: 5.79, label: "RecommendView", target: "Recommend" },
+        { top: 8.00, left: 15.10, width: 12.64, height: 5.79, label: "ChatView", target: "SendMessage" },
+        { top: 8.00, left: 28.36, width: 12.64, height: 5.79, label: "LoginView", target: "Login" },
+        { top: 8.00, left: 41.61, width: 12.64, height: 5.79, label: "MyPostingsView", target: "CreatePosting" },
+        { top: 8.00, left: 54.87, width: 12.64, height: 5.79, label: "UpdateProfileView", target: "UpdateProfile" },
 
-        { top: 12.82, left: 2.82, width: 11.98, height: 4.49, label: "MatchingGateway", target: "LoadMatches" },
-        { top: 12.82, left: 15.74, width: 11.98, height: 4.49, label: "MessagingGateway", target: "SendMessage" },
-        { top: 12.82, left: 28.67, width: 11.98, height: 4.49, label: "PostingGateway", target: "LoadPostings" },
-        { top: 12.82, left: 41.59, width: 11.98, height: 4.49, label: "LocalAuthRepository", target: "Login" },
-        { top: 12.82, left: 54.51, width: 11.98, height: 4.49, label: "ProfileGateway", target: "LoadProfile" },
+        { top: 16.53, left: 1.85, width: 12.64, height: 5.79, label: "MatchingGateway", target: "LoadMatches" },
+        { top: 16.53, left: 15.10, width: 12.64, height: 5.79, label: "MessagingGateway", target: "SendMessage" },
+        { top: 16.53, left: 28.36, width: 12.64, height: 5.79, label: "PostingGateway", target: "LoadPostings" },
+        { top: 16.53, left: 41.61, width: 12.64, height: 5.79, label: "LocalAuthRepository", target: "Login" },
+        { top: 16.53, left: 54.87, width: 12.64, height: 5.79, label: "ProfileGateway", target: "LoadProfile" },
 
-        { top: 90.02, left: 2.82, width: 11.98, height: 4.49, label: "User", target: "Register" },
-        { top: 90.02, left: 15.74, width: 11.98, height: 4.49, label: "Posting", target: "LoadPostings" },
-        { top: 90.02, left: 28.67, width: 11.98, height: 4.49, label: "Message", target: "LoadMessage" },
-        { top: 90.02, left: 41.59, width: 11.98, height: 4.49, label: "PostingApplication", target: "ApplyToPosting" },
-        { top: 90.02, left: 54.51, width: 11.98, height: 4.49, label: "Publication", target: "PaperLookup" }
+        { top: 87.13, left: 1.85, width: 12.64, height: 5.79, label: "User", target: "Register" },
+        { top: 87.13, left: 15.10, width: 12.64, height: 5.79, label: "Posting", target: "LoadPostings" },
+        { top: 87.13, left: 28.36, width: 12.64, height: 5.79, label: "Message", target: "LoadMessage" },
+        { top: 87.13, left: 41.61, width: 12.64, height: 5.79, label: "PostingApplication", target: "ApplyToPosting" },
+        { top: 87.13, left: 54.87, width: 12.64, height: 5.79, label: "Publication", target: "PaperLookup" }
     ];
 
-    // The 24 Use Cases cards: a 4-column grid where each row's height auto-fits its own
+    // The 24 Use Cases cards: a 6-column grid where each row's height auto-fits its own
     // tallest card (some use cases have longer class names than others), so every card's
     // rect was measured individually rather than assumed uniform.
     const useCaseCardRects = {
-        AcceptApplication: { top: 26.05, left: 2.82, width: 18.44, height: 9.60 },
-        ApplyToPosting: { top: 26.05, left: 22.21, width: 18.44, height: 9.60 },
-        ChangeEmail: { top: 26.05, left: 41.59, width: 18.44, height: 9.60 },
-        ChangePassword: { top: 26.05, left: 60.97, width: 18.44, height: 9.60 },
-        ClosePosting: { top: 36.72, left: 2.82, width: 18.44, height: 10.70 },
-        Connect: { top: 36.72, left: 22.21, width: 18.44, height: 10.70 },
-        CreatePosting: { top: 36.72, left: 41.59, width: 18.44, height: 10.70 },
-        DeclineApplication: { top: 36.72, left: 60.97, width: 18.44, height: 10.70 },
-        DeleteAccount: { top: 48.48, left: 2.82, width: 18.44, height: 7.41 },
-        Dislike: { top: 48.48, left: 22.21, width: 18.44, height: 7.41 },
-        LoadMatches: { top: 48.48, left: 41.59, width: 18.44, height: 7.41 },
-        LoadMessage: { top: 48.48, left: 60.97, width: 18.44, height: 7.41 },
-        LoadMyApplications: { top: 56.95, left: 2.82, width: 18.44, height: 9.60 },
-        LoadPostings: { top: 56.95, left: 22.21, width: 18.44, height: 9.60 },
-        LoadProfile: { top: 56.95, left: 41.59, width: 18.44, height: 9.60 },
-        Login: { top: 56.95, left: 60.97, width: 18.44, height: 9.60 },
-        Logout: { top: 67.62, left: 2.82, width: 18.44, height: 8.50 },
-        PaperLookup: { top: 67.62, left: 22.21, width: 18.44, height: 8.50 },
-        Recommend: { top: 67.62, left: 41.59, width: 18.44, height: 8.50 },
-        Register: { top: 67.62, left: 60.97, width: 18.44, height: 8.50 },
-        RequestEmailVerification: { top: 77.19, left: 2.82, width: 18.44, height: 10.70 },
-        SendMessage: { top: 77.19, left: 22.21, width: 18.44, height: 10.70 },
-        Skip: { top: 77.19, left: 41.59, width: 18.44, height: 10.70 },
-        UpdateProfile: { top: 77.19, left: 60.97, width: 18.44, height: 10.70 }
+        AcceptApplication: { top: 33.59, left: 1.85, width: 12.64, height: 10.96 },
+        ApplyToPosting: { top: 33.59, left: 15.10, width: 12.64, height: 10.96 },
+        ChangeEmail: { top: 33.59, left: 28.36, width: 12.64, height: 10.96 },
+        ChangePassword: { top: 33.59, left: 41.61, width: 12.64, height: 10.96 },
+        ClosePosting: { top: 33.59, left: 54.87, width: 12.64, height: 10.96 },
+        Connect: { top: 33.59, left: 68.13, width: 12.64, height: 10.96 },
+        CreatePosting: { top: 45.92, left: 1.85, width: 12.64, height: 10.96 },
+        DeclineApplication: { top: 45.92, left: 15.10, width: 12.64, height: 10.96 },
+        DeleteAccount: { top: 45.92, left: 28.36, width: 12.64, height: 10.96 },
+        Dislike: { top: 45.92, left: 41.61, width: 12.64, height: 10.96 },
+        LoadMatches: { top: 45.92, left: 54.87, width: 12.64, height: 10.96 },
+        LoadMessage: { top: 45.92, left: 68.13, width: 12.64, height: 10.96 },
+        LoadMyApplications: { top: 58.26, left: 1.85, width: 12.64, height: 10.96 },
+        LoadPostings: { top: 58.26, left: 15.10, width: 12.64, height: 10.96 },
+        LoadProfile: { top: 58.26, left: 28.36, width: 12.64, height: 10.96 },
+        Login: { top: 58.26, left: 41.61, width: 12.64, height: 10.96 },
+        Logout: { top: 58.26, left: 54.87, width: 12.64, height: 10.96 },
+        PaperLookup: { top: 58.26, left: 68.13, width: 12.64, height: 10.96 },
+        Recommend: { top: 70.59, left: 1.85, width: 12.64, height: 13.80 },
+        Register: { top: 70.59, left: 15.10, width: 12.64, height: 13.80 },
+        RequestEmailVerification: { top: 70.59, left: 28.36, width: 12.64, height: 13.80 },
+        SendMessage: { top: 70.59, left: 41.61, width: 12.64, height: 13.80 },
+        Skip: { top: 70.59, left: 54.87, width: 12.64, height: 13.80 },
+        UpdateProfile: { top: 70.59, left: 68.13, width: 12.64, height: 13.80 }
     };
     for (const slug of useCases) {
         const rect = useCaseCardRects[slug];
@@ -332,8 +332,8 @@
         const img = document.createElement("img");
         img.src = "Overall-ca-visuals.png";
         img.alt = "Overall Clean Architecture layers across the whole app";
-        img.width = 3400;
-        img.height = 3386;
+        img.width = 5200;
+        img.height = 2628;
         frame.appendChild(img);
 
         for (const spot of overallHotspots) {
