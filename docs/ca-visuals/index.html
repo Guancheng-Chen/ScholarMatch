@@ -178,6 +178,143 @@
     .hotspot.uc-hotspot {
         border-radius: 8px;
     }
+
+    button.hotspot {
+        padding: 0;
+        font: inherit;
+    }
+
+    .hotspot.entity-hotspot {
+        background: transparent;
+        border-radius: 6px;
+    }
+
+    .hotspot.entity-hotspot:hover,
+    .hotspot.entity-hotspot:focus-visible {
+        background: rgba(109, 75, 214, 0.16);
+    }
+
+    .adapter-category-overlay {
+        position: absolute;
+        top: 24.86%;
+        left: 28.36%;
+        width: 12.64%;
+        height: 5.79%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        border: clamp(1px, 0.12vw, 2px) dashed #1a1f2b;
+        border-radius: 5px;
+        color: #1a1f2b;
+        font-size: clamp(5px, 0.68vw, 12px);
+        font-weight: 600;
+        pointer-events: none;
+    }
+
+    .entity-popover-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(10, 12, 18, 0.48);
+    }
+
+    .entity-popover-backdrop[hidden] {
+        display: none;
+    }
+
+    .entity-popover-panel {
+        width: min(560px, 100%);
+        max-height: min(640px, 85vh);
+        overflow: hidden;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .entity-popover-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .entity-popover-header h3 {
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .entity-popover-close {
+        flex-shrink: 0;
+        padding: 4px 9px;
+        background: none;
+        border: 0;
+        border-radius: 6px;
+        color: var(--text-muted);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .entity-popover-close:hover,
+    .entity-popover-close:focus-visible {
+        background: var(--accent-bg);
+        color: var(--accent);
+        outline: none;
+    }
+
+    .entity-popover-body {
+        overflow-y: auto;
+        max-height: calc(min(640px, 85vh) - 58px);
+        padding: 18px 20px 20px;
+    }
+
+    .entity-popover-body p {
+        margin: 0 0 14px;
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .entity-usecase-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 8px;
+    }
+
+    .entity-usecase-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .entity-usecase-link::after {
+        content: "\2192";
+        color: var(--text-muted);
+    }
+
+    .entity-usecase-link:hover,
+    .entity-usecase-link:focus-visible {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent);
+        outline: none;
+    }
 </style>
 </head>
 <body id="top">
@@ -200,6 +337,21 @@
 
     <div id="usecase-list"></div>
 </main>
+
+<div class="entity-popover-backdrop" id="entity-popover" hidden>
+    <section class="entity-popover-panel" role="dialog" aria-modal="true"
+             aria-labelledby="entity-popover-title">
+        <div class="entity-popover-header">
+            <h3 id="entity-popover-title"></h3>
+            <button class="entity-popover-close" id="entity-popover-close" type="button"
+                    aria-label="Close">&times;</button>
+        </div>
+        <div class="entity-popover-body">
+            <p>Select a related use case to open its detailed Clean Architecture diagram.</p>
+            <div class="entity-usecase-list" id="entity-usecase-list"></div>
+        </div>
+    </section>
+</div>
 
 <script>
     const useCases = [
@@ -229,33 +381,35 @@
         "UpdateProfile"
     ];
 
-    // Boxes in Overall-ca-visuals.png, measured directly from the rendered diagram's DOM
-    // (getBoundingClientRect, before it was flattened to a PNG) and expressed as percentages
-    // so the overlay scales with the image. The Use Cases row now pictures all 24 use cases
-    // directly (Name + Interactor/Boundary/Data), so those 24 hotspots map 1:1 to their own
-    // use case. The GUI/Gateway/Entities rows still only picture 5 examples each — those
-    // classes (ChatView, MyPostingsView, MatchingGateway, User, ...) are shared by more than
-    // one use case in the real codebase, so each hotspot there links to one representative
-    // example rather than an exhaustive list.
-    const overallHotspots = [
-        { top: 8.00, left: 1.85, width: 12.64, height: 5.79, label: "RecommendView", target: "Recommend" },
-        { top: 8.00, left: 15.10, width: 12.64, height: 5.79, label: "ChatView", target: "SendMessage" },
-        { top: 8.00, left: 28.36, width: 12.64, height: 5.79, label: "LoginView", target: "Login" },
-        { top: 8.00, left: 41.61, width: 12.64, height: 5.79, label: "MyPostingsView", target: "CreatePosting" },
-        { top: 8.00, left: 54.87, width: 12.64, height: 5.79, label: "UpdateProfileView", target: "UpdateProfile" },
+    // The Overall PNG is static. Only use-case and entity cards are interactive: use cases
+    // jump directly to their detailed diagram, while entities open a chooser listing every
+    // related use case. Framework and adapter rows remain structural context.
+    const overallHotspots = [];
 
-        { top: 16.53, left: 1.85, width: 12.64, height: 5.79, label: "MatchingGateway", target: "LoadMatches" },
-        { top: 16.53, left: 15.10, width: 12.64, height: 5.79, label: "MessagingGateway", target: "SendMessage" },
-        { top: 16.53, left: 28.36, width: 12.64, height: 5.79, label: "PostingGateway", target: "LoadPostings" },
-        { top: 16.53, left: 41.61, width: 12.64, height: 5.79, label: "LocalAuthRepository", target: "Login" },
-        { top: 16.53, left: 54.87, width: 12.64, height: 5.79, label: "ProfileGateway", target: "LoadProfile" },
+    // Relationships match the Enterprise Business Rules shown in the per-use-case diagrams,
+    // with UpdateProfile -> Publication included because the interactor directly uses it.
+    const entityUseCases = {
+        User: [
+            "ChangeEmail", "ChangePassword", "Connect", "DeleteAccount", "LoadMatches",
+            "LoadProfile", "Login", "Recommend", "Register", "RequestEmailVerification",
+            "UpdateProfile"
+        ],
+        Posting: ["ClosePosting", "CreatePosting", "LoadPostings"],
+        Message: ["LoadMessage", "SendMessage"],
+        PostingApplication: [
+            "AcceptApplication", "ApplyToPosting", "DeclineApplication",
+            "LoadMyApplications", "LoadPostings"
+        ],
+        Publication: ["PaperLookup", "UpdateProfile"]
+    };
 
-        { top: 87.13, left: 1.85, width: 12.64, height: 5.79, label: "User", target: "Register" },
-        { top: 87.13, left: 15.10, width: 12.64, height: 5.79, label: "Posting", target: "LoadPostings" },
-        { top: 87.13, left: 28.36, width: 12.64, height: 5.79, label: "Message", target: "LoadMessage" },
-        { top: 87.13, left: 41.61, width: 12.64, height: 5.79, label: "PostingApplication", target: "ApplyToPosting" },
-        { top: 87.13, left: 54.87, width: 12.64, height: 5.79, label: "Publication", target: "PaperLookup" }
-    ];
+    const entityCardRects = {
+        User: { top: 87.13, left: 1.85, width: 12.64, height: 5.79 },
+        Posting: { top: 87.13, left: 15.10, width: 12.64, height: 5.79 },
+        Message: { top: 87.13, left: 28.36, width: 12.64, height: 5.79 },
+        PostingApplication: { top: 87.13, left: 41.61, width: 12.64, height: 5.79 },
+        Publication: { top: 87.13, left: 54.87, width: 12.64, height: 5.79 }
+    };
 
     // The 24 Use Cases cards: a 6-column grid where each row's height auto-fits its own
     // tallest card (some use cases have longer class names than others), so every card's
@@ -300,6 +454,49 @@
 
     const navList = document.getElementById("nav-list");
     const usecaseList = document.getElementById("usecase-list");
+    const entityPopover = document.getElementById("entity-popover");
+    const entityPopoverTitle = document.getElementById("entity-popover-title");
+    const entityUseCaseList = document.getElementById("entity-usecase-list");
+    const entityPopoverClose = document.getElementById("entity-popover-close");
+    let activeEntityTrigger = null;
+
+    function closeEntityPopover({ restoreFocus = true } = {}) {
+        entityPopover.hidden = true;
+        if (restoreFocus && activeEntityTrigger) {
+            activeEntityTrigger.focus();
+        }
+        activeEntityTrigger = null;
+    }
+
+    function openEntityPopover(entity, trigger) {
+        activeEntityTrigger = trigger;
+        entityPopoverTitle.textContent = entity + " is used by";
+        entityUseCaseList.replaceChildren();
+
+        for (const slug of entityUseCases[entity]) {
+            const link = document.createElement("a");
+            link.className = "entity-usecase-link";
+            link.href = "#uc-" + slug;
+            link.textContent = toTitle(slug);
+            link.addEventListener("click", () => closeEntityPopover({ restoreFocus: false }));
+            entityUseCaseList.appendChild(link);
+        }
+
+        entityPopover.hidden = false;
+        entityPopoverClose.focus();
+    }
+
+    entityPopoverClose.addEventListener("click", () => closeEntityPopover());
+    entityPopover.addEventListener("click", (event) => {
+        if (event.target === entityPopover) {
+            closeEntityPopover();
+        }
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !entityPopover.hidden) {
+            closeEntityPopover();
+        }
+    });
 
     // Overall diagram: pinned as the first entry, above the per-use-case list.
     {
@@ -321,10 +518,9 @@
 
         const hint = document.createElement("p");
         hint.className = "hint";
-        hint.textContent = "The Use Cases row pictures all 24 use cases directly. Hover any " +
-            "component to see which use case it links to, and click to jump there — a few " +
-            "GUI/Gateway/Entity classes are shared by more than one use case in the real " +
-            "codebase, so those link to one representative example.";
+        hint.textContent = "Click a Use Case to open its detailed diagram. Click an Entity " +
+            "to choose from every related Use Case. Framework and Interface Adapter rows " +
+            "provide structural context and are intentionally not interactive.";
         section.appendChild(hint);
 
         const frame = document.createElement("div");
@@ -336,6 +532,11 @@
         img.height = 2628;
         frame.appendChild(img);
 
+        const viewModelsCategory = document.createElement("div");
+        viewModelsCategory.className = "adapter-category-overlay";
+        viewModelsCategory.textContent = "ViewModels";
+        frame.appendChild(viewModelsCategory);
+
         for (const spot of overallHotspots) {
             const hotspot = document.createElement("a");
             hotspot.className = "hotspot" + (spot.extraClass ? " " + spot.extraClass : "");
@@ -345,6 +546,20 @@
             hotspot.style.left = spot.left + "%";
             hotspot.style.width = spot.width + "%";
             hotspot.style.height = spot.height + "%";
+            frame.appendChild(hotspot);
+        }
+
+        for (const [entity, rect] of Object.entries(entityCardRects)) {
+            const hotspot = document.createElement("button");
+            hotspot.type = "button";
+            hotspot.className = "hotspot entity-hotspot";
+            hotspot.title = "Show Use Cases that use " + entity;
+            hotspot.setAttribute("aria-label", hotspot.title);
+            hotspot.style.top = rect.top + "%";
+            hotspot.style.left = rect.left + "%";
+            hotspot.style.width = rect.width + "%";
+            hotspot.style.height = rect.height + "%";
+            hotspot.addEventListener("click", () => openEntityPopover(entity, hotspot));
             frame.appendChild(hotspot);
         }
 
