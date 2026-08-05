@@ -150,6 +150,13 @@
 
     section.overall .frame {
         position: relative;
+        overflow-x: auto;
+        background: #ffffff;
+    }
+
+    section.overall .diagram-stage {
+        position: relative;
+        width: max(100%, 1680px);
     }
 
     section.overall p.hint {
@@ -192,24 +199,6 @@
     .hotspot.entity-hotspot:hover,
     .hotspot.entity-hotspot:focus-visible {
         background: rgba(109, 75, 214, 0.16);
-    }
-
-    .adapter-category-overlay {
-        position: absolute;
-        top: 24.86%;
-        left: 28.36%;
-        width: 12.64%;
-        height: 5.79%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #ffffff;
-        border: clamp(1px, 0.12vw, 2px) dashed #1a1f2b;
-        border-radius: 5px;
-        color: #1a1f2b;
-        font-size: clamp(5px, 0.68vw, 12px);
-        font-weight: 600;
-        pointer-events: none;
     }
 
     .entity-popover-backdrop {
@@ -403,43 +392,45 @@
         Publication: ["PaperLookup", "UpdateProfile"]
     };
 
-    const entityCardRects = {
-        User: { top: 87.13, left: 1.85, width: 12.64, height: 5.79 },
-        Posting: { top: 87.13, left: 15.10, width: 12.64, height: 5.79 },
-        Message: { top: 87.13, left: 28.36, width: 12.64, height: 5.79 },
-        PostingApplication: { top: 87.13, left: 41.61, width: 12.64, height: 5.79 },
-        Publication: { top: 87.13, left: 54.87, width: 12.64, height: 5.79 }
+    // Coordinates match the simplified 1920x960 overall visual. The total-view cards
+    // intentionally show names only; detailed class names remain in each linked diagram.
+    const overallCanvas = { width: 1920, height: 960 };
+    const overallGrid = {
+        left: 20,
+        right: 1645,
+        gap: 14,
+        useTop: 326,
+        useRowHeight: 116,
+        useRowGap: 10,
+        entityTop: 860,
+        entityHeight: 80
     };
+    const overallColWidth =
+        (overallGrid.right - overallGrid.left - overallGrid.gap * 5) / 6;
+    const overallX = (column) =>
+        overallGrid.left + column * (overallColWidth + overallGrid.gap);
+    const pctX = (value) => value / overallCanvas.width * 100;
+    const pctY = (value) => value / overallCanvas.height * 100;
 
-    // The 24 Use Cases cards: a 6-column grid where each row's height auto-fits its own
-    // tallest card (some use cases have longer class names than others), so every card's
-    // rect was measured individually rather than assumed uniform.
-    const useCaseCardRects = {
-        AcceptApplication: { top: 33.59, left: 1.85, width: 12.64, height: 10.96 },
-        ApplyToPosting: { top: 33.59, left: 15.10, width: 12.64, height: 10.96 },
-        ChangeEmail: { top: 33.59, left: 28.36, width: 12.64, height: 10.96 },
-        ChangePassword: { top: 33.59, left: 41.61, width: 12.64, height: 10.96 },
-        ClosePosting: { top: 33.59, left: 54.87, width: 12.64, height: 10.96 },
-        Connect: { top: 33.59, left: 68.13, width: 12.64, height: 10.96 },
-        CreatePosting: { top: 45.92, left: 1.85, width: 12.64, height: 10.96 },
-        DeclineApplication: { top: 45.92, left: 15.10, width: 12.64, height: 10.96 },
-        DeleteAccount: { top: 45.92, left: 28.36, width: 12.64, height: 10.96 },
-        Dislike: { top: 45.92, left: 41.61, width: 12.64, height: 10.96 },
-        LoadMatches: { top: 45.92, left: 54.87, width: 12.64, height: 10.96 },
-        LoadMessage: { top: 45.92, left: 68.13, width: 12.64, height: 10.96 },
-        LoadMyApplications: { top: 58.26, left: 1.85, width: 12.64, height: 10.96 },
-        LoadPostings: { top: 58.26, left: 15.10, width: 12.64, height: 10.96 },
-        LoadProfile: { top: 58.26, left: 28.36, width: 12.64, height: 10.96 },
-        Login: { top: 58.26, left: 41.61, width: 12.64, height: 10.96 },
-        Logout: { top: 58.26, left: 54.87, width: 12.64, height: 10.96 },
-        PaperLookup: { top: 58.26, left: 68.13, width: 12.64, height: 10.96 },
-        Recommend: { top: 70.59, left: 1.85, width: 12.64, height: 13.80 },
-        Register: { top: 70.59, left: 15.10, width: 12.64, height: 13.80 },
-        RequestEmailVerification: { top: 70.59, left: 28.36, width: 12.64, height: 13.80 },
-        SendMessage: { top: 70.59, left: 41.61, width: 12.64, height: 13.80 },
-        Skip: { top: 70.59, left: 54.87, width: 12.64, height: 13.80 },
-        UpdateProfile: { top: 70.59, left: 68.13, width: 12.64, height: 13.80 }
-    };
+    const useCaseCardRects = Object.fromEntries(useCases.map((slug, index) => [
+        slug,
+        {
+            top: pctY(overallGrid.useTop + Math.floor(index / 6) *
+                (overallGrid.useRowHeight + overallGrid.useRowGap)),
+            left: pctX(overallX(index % 6)),
+            width: pctX(overallColWidth),
+            height: pctY(overallGrid.useRowHeight)
+        }
+    ]));
+
+    const entityCardRects = Object.fromEntries(
+        Object.keys(entityUseCases).map((entity, index) => [entity, {
+            top: pctY(overallGrid.entityTop),
+            left: pctX(overallX(index)),
+            width: pctX(overallColWidth),
+            height: pctY(overallGrid.entityHeight)
+        }])
+    );
     for (const slug of useCases) {
         const rect = useCaseCardRects[slug];
         overallHotspots.push({
@@ -525,17 +516,15 @@
 
         const frame = document.createElement("div");
         frame.className = "frame";
+        const stage = document.createElement("div");
+        stage.className = "diagram-stage";
+        frame.appendChild(stage);
         const img = document.createElement("img");
         img.src = "Overall-ca-visuals.png";
         img.alt = "Overall Clean Architecture layers across the whole app";
-        img.width = 5200;
-        img.height = 2628;
-        frame.appendChild(img);
-
-        const viewModelsCategory = document.createElement("div");
-        viewModelsCategory.className = "adapter-category-overlay";
-        viewModelsCategory.textContent = "ViewModels";
-        frame.appendChild(viewModelsCategory);
+        img.width = 3840;
+        img.height = 1920;
+        stage.appendChild(img);
 
         for (const spot of overallHotspots) {
             const hotspot = document.createElement("a");
@@ -546,7 +535,7 @@
             hotspot.style.left = spot.left + "%";
             hotspot.style.width = spot.width + "%";
             hotspot.style.height = spot.height + "%";
-            frame.appendChild(hotspot);
+            stage.appendChild(hotspot);
         }
 
         for (const [entity, rect] of Object.entries(entityCardRects)) {
@@ -560,7 +549,7 @@
             hotspot.style.width = rect.width + "%";
             hotspot.style.height = rect.height + "%";
             hotspot.addEventListener("click", () => openEntityPopover(entity, hotspot));
-            frame.appendChild(hotspot);
+            stage.appendChild(hotspot);
         }
 
         section.appendChild(frame);
