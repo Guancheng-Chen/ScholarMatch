@@ -6,6 +6,7 @@ import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
 import com.scholarmatch.entity.Posting;
 import com.scholarmatch.entity.PostingApplication;
+import com.scholarmatch.entity.Publication;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.usecase.data_access_interface.CurrentUserProviderInterface;
@@ -91,6 +92,12 @@ public final class LocalProfileRepository implements
         }
         for (final String interest : data.getResearchInterests()) {
             user.addResearchInterest(interest);
+        }
+        for (final Publication publication : user.getPublications()) {
+            user.removePublication(publication.getDoi());
+        }
+        for (final Publication publication : data.getPublications()) {
+            user.addPublication(publication);
         }
         return user;
     }
