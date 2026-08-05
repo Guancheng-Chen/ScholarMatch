@@ -140,10 +140,6 @@ public final class PublicationEditorPanel extends JPanel {
         papersListView.setVisibleRowCount(3);
         papersListView.setBackground(Theme.BG_INSET);
         papersListView.setForeground(Theme.FG_DEFAULT);
-        papersListView.setPreferredSize(new Dimension(width, 70));
-        papersListView.setMaximumSize(new Dimension(width, 70));
-        papersListView.setAlignmentX(Component.LEFT_ALIGNMENT);
-        papersListView.setVisible(false);
         papersListView.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
@@ -156,6 +152,14 @@ public final class PublicationEditorPanel extends JPanel {
                 return c;
             }
         });
+        final JScrollPane papersScrollPane = new JScrollPane(
+                papersListView,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        papersScrollPane.setPreferredSize(new Dimension(width, 70));
+        papersScrollPane.setMaximumSize(new Dimension(width, 70));
+        papersScrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        papersScrollPane.setVisible(false);
         final JButton removeButton = smallButton("Remove Selected Paper");
         removeButton.setForeground(Theme.DANGER_FG);
         removeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -184,11 +188,11 @@ public final class PublicationEditorPanel extends JPanel {
 
             private void update() {
                 final boolean hasPapers = !PublicationEditorPanel.this.papersModel.isEmpty();
-                papersListView.setVisible(hasPapers);
+                papersScrollPane.setVisible(hasPapers);
                 removeButton.setVisible(hasPapers);
-                papersListView.revalidate();
-                papersListView.getParent().revalidate();
-                papersListView.getParent().repaint();
+                papersScrollPane.revalidate();
+                papersScrollPane.getParent().revalidate();
+                papersScrollPane.getParent().repaint();
             }
         });
 
@@ -219,7 +223,7 @@ public final class PublicationEditorPanel extends JPanel {
             row(authorField, searchAuthorButton), authorExampleLabel, strut(),
             candidateScrollPane, selectAuthorButton, strut(),
             statusLabel, strut(),
-            papersListView, removeButton, strut(),
+            papersScrollPane, removeButton, strut(),
             fallbackNoticeLabel);
     }
 
