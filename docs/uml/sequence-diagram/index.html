@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScholarMatch — Sequence Diagrams</title>
+<style>
+    :root {
+        --bg: #ffffff;
+        --bg-alt: #f5f6f8;
+        --text: #1a1f2b;
+        --text-muted: #5b6472;
+        --border: #e2e5ea;
+        --accent: #6d4bd6;
+        --accent-bg: #f2edfd;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #14161c;
+            --bg-alt: #1c1f27;
+            --text: #eceef2;
+            --text-muted: #9aa2b1;
+            --border: #2b2f3a;
+            --accent: #b39dff;
+            --accent-bg: #262038;
+        }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    button { font: inherit; }
+
+    nav {
+        position: sticky;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        flex-shrink: 0;
+        overflow-y: auto;
+        padding: 24px 0;
+        background: var(--bg-alt);
+        border-right: 1px solid var(--border);
+    }
+
+    nav h1 {
+        margin: 0 20px 4px;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+    }
+
+    nav p {
+        margin: 0 20px 20px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    nav ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    nav a {
+        display: block;
+        padding: 8px 20px;
+        color: var(--text);
+        border-left: 3px solid transparent;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+        background: var(--accent-bg);
+        outline: none;
+    }
+
+    nav a.active {
+        color: var(--accent);
+        background: var(--accent-bg);
+        border-left-color: var(--accent);
+        font-weight: 600;
+    }
+
+    nav a.missing { color: var(--text-muted); }
+
+    main {
+        min-width: 0;
+        flex: 1;
+        padding: 40px clamp(20px, 5vw, 64px) 72px;
+    }
+
+    main > header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    main > header h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+    }
+
+    main > header p {
+        max-width: 700px;
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .view-controls {
+        display: flex;
+        flex-shrink: 0;
+        gap: 6px;
+    }
+
+    .view-controls button {
+        padding: 6px 9px;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .view-controls button:hover,
+    .view-controls button:focus-visible,
+    .view-controls button.active {
+        color: var(--accent);
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    section.usecase {
+        margin-bottom: 56px;
+        scroll-margin-top: 24px;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .section-heading a {
+        flex-shrink: 0;
+        color: var(--text-muted);
+        font-size: 12px;
+        text-decoration: none;
+    }
+
+    .section-heading a:hover,
+    .section-heading a:focus-visible {
+        color: var(--accent);
+        outline: none;
+    }
+
+    .frame {
+        overflow: auto;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+    }
+
+    .frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .image-crop {
+        width: 100%;
+    }
+
+    .frame.hide-image-title .image-crop {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: var(--image-width) / var(--cropped-height);
+    }
+
+    .frame.hide-image-title img {
+        position: absolute;
+        top: calc(-1 * var(--fit-offset));
+        left: 0;
+    }
+
+    body.actual-size .frame img {
+        width: auto;
+        max-width: none;
+    }
+
+    body.actual-size .frame.hide-image-title .image-crop {
+        width: calc(var(--image-width) * 1px);
+        height: calc(var(--cropped-height) * 1px);
+        aspect-ratio: auto;
+    }
+
+    body.actual-size .frame.hide-image-title img {
+        top: calc(-1 * var(--crop-top));
+    }
+
+    .missing-frame {
+        padding: 32px;
+        color: var(--text-muted);
+        background: var(--bg-alt);
+        border: 1px dashed var(--border);
+        font-size: 13px;
+    }
+
+    .top-link {
+        display: inline-block;
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 12px;
+        text-decoration: none;
+    }
+
+    .top-link:hover { color: var(--accent); }
+
+    @media (max-width: 900px) {
+        body { display: block; }
+        nav {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 16px 0;
+            border-right: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        nav p { margin-bottom: 10px; }
+        nav ul { display: flex; overflow-x: auto; }
+        nav a { white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; }
+        nav a.active { border-bottom-color: var(--accent); }
+        main { padding-top: 28px; }
+    }
+
+    @media (max-width: 680px) {
+        main > header { display: block; }
+        .view-controls { margin-top: 14px; }
+    }
+</style>
+</head>
+<body id="top" class="actual-size">
+<nav>
+    <h1>Sequence Diagrams</h1>
+    <p>Choose a use case</p>
+    <ul id="nav-list"></ul>
+</nav>
+
+<main>
+    <header>
+        <div>
+            <h1>ScholarMatch — Sequence Diagrams</h1>
+            <p>
+                One sequence diagram per use case, showing the runtime calls between controllers,
+                boundaries, interactors, presenters, gateways, and data objects.
+            </p>
+        </div>
+        <div class="view-controls" aria-label="Diagram size">
+            <button type="button" id="fit-width">Fit width</button>
+            <button type="button" id="actual-size" class="active">Actual size</button>
+        </div>
+    </header>
+
+    <div id="diagram-list"></div>
+</main>
+
+<script>
+    const useCases = [
+        "AcceptApplication",
+        "ApplyToPosting",
+        "ChangeEmail",
+        "ChangePassword",
+        "ClosePosting",
+        "Connect",
+        "CreatePosting",
+        "DeclineApplication",
+        "DeleteAccount",
+        "Dislike",
+        "LoadMatches",
+        "LoadMessage",
+        "LoadMyApplications",
+        "LoadPostings",
+        "LoadProfile",
+        "Login",
+        "Logout",
+        "PaperLookup",
+        "Recommend",
+        "Register",
+        "RequestEmailVerification",
+        "SendMessage",
+        "Skip",
+        "UpdateProfile"
+    ];
+
+    const imageFiles = {
+        AcceptApplication: "AcceptApplicationSequence-ZhijieYuan.png",
+        ApplyToPosting: "ApplyToPostingSequence-MarianLin.png",
+        ChangeEmail: "ChangeEmailSequence-AlanXue.png",
+        ChangePassword: "ChangePasswordSequence-AlanXue.png",
+        ClosePosting: "ClosePostingSequence-MarianLin.png",
+        Connect: "ConnectSequence-MarianLin.png",
+        CreatePosting: "CreatePostingSequence-MarianLin.png",
+        DeclineApplication: "DeclineApplicationSequence-ZhijieYuan.png",
+        DeleteAccount: "DeleteAccountSequence-AlanXue.png",
+        Dislike: "DislikeSequence-MarianLin.png",
+        LoadMatches: "LoadMatches-GuanchengChen.png",
+        LoadMessage: "LoadMessageSequence-GuanchengChen.png",
+        LoadMyApplications: "LoadMyApplicationsSequence-ZhijieYuan.png",
+        LoadPostings: "LoadPostingsSequence-MarianLin.png",
+        LoadProfile: "LoadProfileSequence-ZhijieYuan.png",
+        Login: "LoginSequence-AlanXue.png.png",
+        Logout: "LogoutSequence-AlanXue.png.png",
+        PaperLookup: "PaperLookupSequence-ZhijieYuan.png",
+        Recommend: "Recommend-GuanchengChen.png",
+        Register: "RegisterSequence-AlanXue.png.png",
+        RequestEmailVerification: "RequestEmailVerificationSequence-AlanXue.png",
+        SendMessage: "SendMessageSequence-GuanchengChen.png",
+        Skip: "SkipSequence-MarianLin.png",
+        UpdateProfile: "UpdateProfileSequence-ZhijieYuan.png"
+    };
+
+    const imageTitleCrops = {
+        ClosePosting: { width: 3510, height: 1922, top: 120 },
+        LoadMyApplications: { width: 3275, height: 1794, top: 120 }
+    };
+
+    function titleCase(name) {
+        return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+    }
+
+    const navList = document.getElementById("nav-list");
+    const diagramList = document.getElementById("diagram-list");
+
+    useCases.forEach((name) => {
+        const missing = !imageFiles[name];
+        const crop = imageTitleCrops[name];
+        const cropStyle = crop
+            ? `--image-width:${crop.width};--cropped-height:${crop.height - crop.top};--crop-top:${crop.top}px;--fit-offset:${(crop.top / (crop.height - crop.top) * 100).toFixed(4)}%`
+            : "";
+        const navItem = document.createElement("li");
+        navItem.innerHTML = `<a href="#uc-${name}" class="${missing ? "missing" : ""}">${titleCase(name)}${missing ? " — missing" : ""}</a>`;
+        navList.appendChild(navItem);
+
+        const section = document.createElement("section");
+        section.className = "usecase";
+        section.id = `uc-${name}`;
+        section.innerHTML = `
+            <div class="section-heading">
+                <h2>${titleCase(name)}</h2>
+                <a href="../class-diagram/index.html#uml-${name}">Open class diagram →</a>
+            </div>
+            ${missing
+                ? `<div class="missing-frame">No sequence diagram PNG exists for ${titleCase(name)} in this folder.</div>`
+                : `<div class="frame ${crop ? "hide-image-title" : ""}"><div class="image-crop" style="${cropStyle}"><img src="${imageFiles[name]}" loading="lazy" alt="${titleCase(name)} sequence diagram"></div></div>`}
+            <a class="top-link" href="#top">↑ back to top</a>`;
+        diagramList.appendChild(section);
+    });
+
+    const fitWidth = document.getElementById("fit-width");
+    const actualSize = document.getElementById("actual-size");
+
+    function setSizeMode(actual) {
+        document.body.classList.toggle("actual-size", actual);
+        fitWidth.classList.toggle("active", !actual);
+        actualSize.classList.toggle("active", actual);
+    }
+
+    fitWidth.addEventListener("click", () => setSizeMode(false));
+    actualSize.addEventListener("click", () => setSizeMode(true));
+
+    const navLinks = [...navList.querySelectorAll("a")];
+    const observer = new IntersectionObserver((entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting)
+            .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+        if (!visible) return;
+        navLinks.forEach((link) => link.classList.toggle("active", link.hash === `#${visible.target.id}`));
+    }, { rootMargin: "-12% 0px -70% 0px", threshold: [0.01, 0.2] });
+
+    document.querySelectorAll("section.usecase").forEach((section) => observer.observe(section));
+
+    requestAnimationFrame(() => {
+        const target = location.hash ? document.querySelector(location.hash) : null;
+        if (target) target.scrollIntoView({ block: "start" });
+    });
+</script>
+</body>
+</html>

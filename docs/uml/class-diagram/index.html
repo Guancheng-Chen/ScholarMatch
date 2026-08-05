@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScholarMatch — UML Class Diagrams</title>
+<style>
+    :root {
+        --bg: #ffffff;
+        --bg-alt: #f5f6f8;
+        --text: #1a1f2b;
+        --text-muted: #5b6472;
+        --border: #e2e5ea;
+        --accent: #6d4bd6;
+        --accent-bg: #f2edfd;
+        --diagram-bg: #191a1d;
+        --class-bg: #3b3b3b;
+        --class-border: #7d7d7d;
+        --class-text: #d2d2d2;
+        --method: #55aaff;
+        --field: #d77ac8;
+        --primitive: #ef9b6d;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #14161c;
+            --bg-alt: #1c1f27;
+            --text: #eceef2;
+            --text-muted: #9aa2b1;
+            --border: #2b2f3a;
+            --accent: #b39dff;
+            --accent-bg: #262038;
+        }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        color: var(--text);
+        background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    button, select { font: inherit; }
+
+    nav {
+        position: sticky;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        flex-shrink: 0;
+        overflow-y: auto;
+        padding: 24px 0;
+        background: var(--bg-alt);
+        border-right: 1px solid var(--border);
+    }
+
+    nav h1 {
+        margin: 0 20px 4px;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+    }
+
+    nav p {
+        margin: 0 20px 20px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    nav ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    nav a {
+        display: block;
+        padding: 8px 20px;
+        color: var(--text);
+        border-left: 3px solid transparent;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+        background: var(--accent-bg);
+        outline: none;
+    }
+
+    nav a.active {
+        color: var(--accent);
+        background: var(--accent-bg);
+        border-left-color: var(--accent);
+        font-weight: 600;
+    }
+
+    main {
+        min-width: 0;
+        flex: 1;
+        padding: 40px clamp(20px, 5vw, 64px) 72px;
+    }
+
+    main > header { margin-bottom: 40px; }
+
+    main > header h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+    }
+
+    main > header p {
+        max-width: 700px;
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    section {
+        margin-bottom: 56px;
+        scroll-margin-top: 24px;
+    }
+
+    section h2 {
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        font-size: 18px;
+    }
+
+    .hint {
+        max-width: 720px;
+        margin: 0 0 18px;
+        color: var(--text-muted);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .module-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 36px;
+        row-gap: 24px;
+    }
+
+    .module-group h3 {
+        margin: 0 0 7px;
+        font-size: 14px;
+    }
+
+    .module-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-top: 1px solid var(--border);
+    }
+
+    .module-links button {
+        padding: 9px 8px;
+        color: var(--text);
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        text-align: left;
+        font-size: 13px;
+    }
+
+    .module-links button:hover,
+    .module-links button:focus-visible,
+    .module-links button.active {
+        color: var(--accent);
+        background: var(--accent-bg);
+        outline: none;
+    }
+
+    .diagram-heading {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .diagram-heading h2 {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .diagram-heading p {
+        margin: 4px 0 0;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .diagram-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .diagram-controls label {
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .diagram-controls select,
+    .diagram-controls a {
+        min-height: 34px;
+        padding: 6px 9px;
+        color: var(--text);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 12px;
+        text-decoration: none;
+    }
+
+    .diagram-controls select:focus,
+    .diagram-controls a:hover,
+    .diagram-controls a:focus-visible {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    .diagram-frame {
+        overflow: auto;
+        border: 1px solid #33363b;
+        background: var(--diagram-bg);
+    }
+
+    .uml-canvas {
+        position: relative;
+        min-width: 1120px;
+        min-height: 680px;
+        background: var(--diagram-bg);
+    }
+
+    #uml-links {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+    }
+
+    .uml-edge {
+        fill: none;
+        stroke: #a9adb3;
+        stroke-width: 1.5;
+    }
+
+    .uml-edge.dependency {
+        stroke: #8e939a;
+        stroke-dasharray: 2 6;
+    }
+
+    .uml-edge.implements {
+        stroke: #5daaff;
+        stroke-width: 1.8;
+        stroke-dasharray: 8 5;
+    }
+
+    .uml-edge.extends {
+        stroke: #5daaff;
+        stroke-width: 1.8;
+    }
+
+    .uml-edge-label {
+        fill: #c1c4c9;
+        stroke: var(--diagram-bg);
+        stroke-width: 4px;
+        paint-order: stroke;
+        font-size: 10px;
+    }
+
+    .uml-edge-label.implements,
+    .uml-edge-label.extends { fill: #77b8ff; }
+
+    .uml-class {
+        position: absolute;
+        z-index: 2;
+        width: 520px;
+        overflow: hidden;
+        padding: 0;
+        color: var(--class-text);
+        background: var(--class-bg);
+        border: 1px solid var(--class-border);
+        border-radius: 0;
+        font-family: "Cascadia Mono", Consolas, monospace;
+        text-align: left;
+    }
+
+    button.uml-class { cursor: pointer; }
+
+    button.uml-class:hover,
+    button.uml-class:focus-visible {
+        border-color: #d08435;
+        outline: 1px solid #d08435;
+        outline-offset: 2px;
+    }
+
+    .uml-class-header {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--class-border);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 19px;
+    }
+
+    .type-icon,
+    .member-icon {
+        display: inline-grid;
+        flex: 0 0 auto;
+        place-items: center;
+        width: 21px;
+        height: 21px;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        line-height: 1;
+    }
+
+    .type-icon { color: #4f9dff; font-size: 12px; }
+    .member-icon { width: 19px; height: 19px; font-size: 10px; }
+    .member-icon.method { color: #ff5f62; }
+    .member-icon.field { color: #e58c4b; }
+
+    .uml-class-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .uml-member-row {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        border-bottom: 1px solid #66686c;
+        font-size: 13px;
+    }
+
+    .uml-member-row:last-child { border-bottom: 0; }
+
+    .visibility {
+        flex: 0 0 10px;
+        color: #b8bdc5;
+        text-align: center;
+    }
+
+    .member-name {
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .member-name.method { color: var(--method); }
+    .member-name.field { color: var(--field); }
+
+    .member-type {
+        max-width: 45%;
+        flex: 0 0 auto;
+        overflow: hidden;
+        color: #c7c8ca;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    .member-type.primitive { color: var(--primitive); }
+
+    .uml-more {
+        justify-content: center;
+        color: #b8bdc5;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 12px;
+    }
+
+    .diagram-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 10px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-line { width: 28px; border-top: 1.5px solid currentColor; }
+    .legend-line.dashed { border-top-style: dashed; }
+    .legend-line.dependency { border-top: 2px dotted #8e939a; }
+    .legend-line.implements { border-top: 2px dashed #5daaff; }
+    .legend-line.extends { border-top-color: #5daaff; }
+
+    .back-top {
+        display: inline-block;
+        margin-top: 12px;
+        color: var(--text-muted);
+        font-size: 12px;
+        text-decoration: none;
+    }
+
+    .back-top:hover { color: var(--accent); }
+
+    @media (max-width: 900px) {
+        body { display: block; }
+        nav {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 16px 0;
+            border-right: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        nav p { margin-bottom: 10px; }
+        nav ul { display: flex; overflow-x: auto; }
+        nav a { white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; }
+        nav a.active { border-bottom-color: var(--accent); }
+        main { padding-top: 28px; }
+    }
+
+    @media (max-width: 680px) {
+        .module-list { grid-template-columns: 1fr; }
+        .module-links { grid-template-columns: 1fr; }
+        .diagram-heading { display: block; }
+        .diagram-controls { margin-top: 12px; }
+    }
+</style>
+</head>
+<body id="top">
+<nav>
+    <h1>UML Class Diagrams</h1>
+    <p>Choose a use case</p>
+    <ul id="nav-list"><li><a href="#overall">Overall</a></li></ul>
+</nav>
+
+<main>
+    <header>
+        <h1>ScholarMatch — UML Class Diagrams</h1>
+        <p>
+            One IntelliJ-style class diagram per use case. Each box shows the class name,
+            declared fields, declared methods, and all relationships found in the Java source.
+        </p>
+    </header>
+
+    <section id="overall">
+        <h2>Overall — Use Cases</h2>
+        <p class="hint">
+            The project is divided into five feature areas. Select a use case here or from the list
+            on the left to open its focused UML class diagram.
+        </p>
+        <div class="module-list" id="module-list"></div>
+    </section>
+
+    <section id="diagram">
+        <div class="diagram-heading">
+            <div>
+                <h2 id="diagram-title"></h2>
+                <p id="diagram-summary"></p>
+            </div>
+            <div class="diagram-controls">
+                <label for="usecase-select">Use case</label>
+                <select id="usecase-select" aria-label="Choose a use case"></select>
+                <a id="sequence-link" href="../sequence-diagram/index.html">Sequence Diagram</a>
+                <a id="ca-link" href="../../ca-visuals/index.html">Clean Architecture</a>
+            </div>
+        </div>
+        <p class="hint">
+            Large classes are shortened to keep the diagram readable. Click a shortened class box
+            to expand or collapse all members. Relationships include fields, method signatures,
+            inheritance, and interface implementations.
+        </p>
+        <div class="diagram-frame">
+            <div class="uml-canvas" id="uml-canvas" role="img" aria-labelledby="diagram-title">
+                <svg id="uml-links" aria-hidden="true"></svg>
+                <div id="uml-nodes"></div>
+            </div>
+        </div>
+        <div class="diagram-legend" aria-label="UML legend">
+            <span class="legend-item"><span class="type-icon">C</span>Class</span>
+            <span class="legend-item"><span class="type-icon">I</span>Interface</span>
+            <span class="legend-item"><span class="member-icon field">f</span>Field</span>
+            <span class="legend-item"><span class="member-icon method">m</span>Method</span>
+            <span class="legend-item"><span class="legend-line"></span>Field association</span>
+            <span class="legend-item"><span class="legend-line dependency"></span>Method dependency</span>
+            <span class="legend-item"><span class="legend-line implements"></span>implements</span>
+            <span class="legend-item"><span class="legend-line extends"></span>extends</span>
+            <span class="legend-item">+ public · − private · # protected · ~ package</span>
+        </div>
+        <a class="back-top" href="#top">↑ back to top</a>
+    </section>
+</main>
+
+<script src="uml-members.js"></script>
+<script>
+    const modules = [
+        {
+            id: "account",
+            title: "Account & Authentication",
+            useCases: ["Register", "Login", "Logout", "RequestEmailVerification", "ChangeEmail", "ChangePassword", "DeleteAccount"]
+        },
+        {
+            id: "profile",
+            title: "Profile & Research",
+            useCases: ["LoadProfile", "UpdateProfile", "PaperLookup"]
+        },
+        {
+            id: "matching",
+            title: "Matching",
+            useCases: ["Recommend", "LoadMatches", "Connect", "Dislike", "Skip"]
+        },
+        {
+            id: "messaging",
+            title: "Messaging",
+            useCases: ["LoadMessage", "SendMessage"]
+        },
+        {
+            id: "postings",
+            title: "Postings & Applications",
+            useCases: ["CreatePosting", "LoadPostings", "ClosePosting", "ApplyToPosting", "AcceptApplication", "DeclineApplication", "LoadMyApplications"]
+        }
+    ];
+
+    const specs = {};
+
+    function define(name, module, options = {}) {
+        const defaultData = (suffix) => [`${name}${suffix}`];
+        specs[name] = {
+            name,
+            module,
+            view: options.view || [],
+            controller: options.controller === false ? [] : [`${name}Controller`],
+            presenter: options.presenter === false ? [] : [options.presenter || `${name}Presenter`],
+            viewModel: options.viewModel || [],
+            inputBoundary: options.inputBoundary === false ? [] : [`${name}InputBoundary`],
+            interactor: [`${name}Interactor`],
+            outputBoundary: options.outputBoundary === false ? [] : [`${name}OutputBoundary`],
+            inputData: options.inputData === false ? [] : (options.inputData || defaultData("InputData")),
+            outputData: options.outputData === false ? [] : (options.outputData || defaultData("OutputData")),
+            ports: options.ports || [],
+            online: options.online || [],
+            offline: options.offline || [],
+            entities: options.entities || []
+        };
+    }
+
+    define("Register", "account", {
+        view: ["RegisterView"], viewModel: ["RegisterViewModel"],
+        ports: ["RegisterDataAccessInterface", "SessionWriterInterface"],
+        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"], entities: ["User"]
+    });
+    define("Login", "account", {
+        view: ["LoginView"], viewModel: ["LoginViewModel"],
+        ports: ["LoginDataAccessInterface", "SessionWriterInterface"],
+        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"], entities: ["User"]
+    });
+    define("Logout", "account", {
+        view: ["MainView", "MainLayoutView"], viewModel: ["LogoutViewModel"],
+        ports: ["SessionClearerInterface"], online: ["CurrentUserProvider"], offline: ["CurrentUserProvider"]
+    });
+    define("RequestEmailVerification", "account", {
+        view: ["RegisterView", "AccountSettingsView"], presenter: "RequestEmailVerificationPresenter",
+        viewModel: ["RegisterViewModel", "AccountSettingsViewModel"],
+        ports: ["VerificationEmailSenderDataAccessInterface"],
+        online: ["RemoteVerificationEmailSender"], offline: ["LocalAccountSettingsRepository"], entities: ["User"]
+    });
+    define("ChangeEmail", "account", {
+        view: ["AccountSettingsView"], presenter: "AccountSettingsPresenter", viewModel: ["AccountSettingsViewModel"],
+        ports: ["ChangeEmailDataAccessInterface"], online: ["AccountSettingsGateway"],
+        offline: ["LocalAccountSettingsRepository"], entities: ["User"]
+    });
+    define("ChangePassword", "account", {
+        view: ["AccountSettingsView"], presenter: "AccountSettingsPresenter", viewModel: ["AccountSettingsViewModel"],
+        ports: ["ChangePasswordDataAccessInterface"], online: ["AccountSettingsGateway"],
+        offline: ["LocalAccountSettingsRepository"], entities: ["User"]
+    });
+    define("DeleteAccount", "account", {
+        view: ["AccountSettingsView"], viewModel: ["DeleteAccountViewModel", "LogoutViewModel"],
+        inputData: false, outputData: false,
+        ports: ["DeleteAccountDataAccessInterface", "SessionClearerInterface"],
+        online: ["ProfileGateway", "CurrentUserProvider"], offline: ["LocalProfileRepository", "CurrentUserProvider"], entities: ["User"]
+    });
+
+    define("LoadProfile", "profile", {
+        view: ["UpdateProfileView"], viewModel: ["UpdateProfileViewModel"], inputData: false,
+        ports: ["LoadProfileDataAccessInterface"], online: ["ProfileGateway"], offline: ["LocalProfileRepository"], entities: ["User"]
+    });
+    define("UpdateProfile", "profile", {
+        view: ["UpdateProfileView"], viewModel: ["UpdateProfileViewModel"],
+        ports: ["UpdateProfileDataAccessInterface"], online: ["ProfileGateway"], offline: ["LocalProfileRepository"],
+        entities: ["User", "Education", "Publication"]
+    });
+    define("PaperLookup", "profile", {
+        view: ["UpdateProfileView", "PublicationEditorPanel"], viewModel: ["PaperLookupViewModel"],
+        inputData: ["SearchAuthorsInputData", "SelectAuthorInputData"], outputData: ["AuthorCandidateData"],
+        ports: ["UserAPIGatewayInterface", "AuthorCandidateDataAccessInterface"],
+        online: ["SemanticScholarGateway"], offline: ["LocalUserApiGateway", "FallbackUserApiGateway"], entities: ["Publication"]
+    });
+
+    define("Recommend", "matching", {
+        view: ["RecommendView"], viewModel: ["RecommendViewModel"], inputData: false,
+        ports: ["RecommendDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+    });
+    define("LoadMatches", "matching", {
+        view: ["LoadMatchesView", "ChatView"], viewModel: ["LoadMatchesViewModel"], inputData: false,
+        ports: ["LoadMatchesDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+    });
+    define("Connect", "matching", {
+        view: ["RecommendView"], viewModel: ["LoadMatchesViewModel"],
+        ports: ["ConnectDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+    });
+    define("Dislike", "matching", {
+        view: ["RecommendView"], outputData: false,
+        ports: ["DislikeDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+    });
+    define("Skip", "matching", {
+        view: ["RecommendView"], outputData: false
+    });
+
+    define("LoadMessage", "messaging", {
+        view: ["ChatView"], viewModel: ["ChatViewModel"],
+        ports: ["LoadMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"], entities: ["Message"]
+    });
+    define("SendMessage", "messaging", {
+        view: ["ChatView"], viewModel: ["ChatViewModel"],
+        ports: ["SendMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"], entities: ["Message"]
+    });
+
+    define("CreatePosting", "postings", {
+        view: ["MyPostingsView", "CreatePostingPanel"], viewModel: ["MyPostingsViewModel"],
+        ports: ["CreatePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["Posting"]
+    });
+    define("LoadPostings", "postings", {
+        view: ["OpportunitiesView", "MyPostingsView"], viewModel: ["PostingsListViewModel"],
+        ports: ["LoadPostingsDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        entities: ["Posting", "PostingApplication"]
+    });
+    define("ClosePosting", "postings", {
+        view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
+        ports: ["ClosePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["Posting"]
+    });
+    define("ApplyToPosting", "postings", {
+        view: ["OpportunitiesView", "ApplyToPostingPanel"], viewModel: ["OpportunitiesViewModel"],
+        ports: ["ApplyToPostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+    });
+    define("AcceptApplication", "postings", {
+        view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
+        ports: ["AcceptApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+    });
+    define("DeclineApplication", "postings", {
+        view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
+        ports: ["DeclineApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+    });
+    define("LoadMyApplications", "postings", {
+        view: ["MyApplicationsView"], viewModel: ["MyApplicationsViewModel"], inputData: false,
+        ports: ["LoadMyApplicationsDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+    });
+
+    const UML_TYPES = window.UML_TYPES || {};
+    const moduleById = Object.fromEntries(modules.map((module) => [module.id, module]));
+    const expandedTypes = new Set();
+    const MAX_PREVIEW_MEMBERS = 10;
+    const BOX_WIDTH = 520;
+    const COLUMN_GAP = 70;
+    const ROW_GAP = 64;
+    const CANVAS_MARGIN = 48;
+    let selectedUseCase = "LoadMatches";
+
+    const rowDefinitions = [
+        { key: "view", role: "view", row: 0, column: 0 },
+        { key: "controller", role: "controller", row: 1, column: 0 },
+        { key: "inputBoundary", role: "input boundary", row: 2, column: 0 },
+        { key: "inputData", role: "input data", row: 2, column: 1 },
+        { key: "interactor", role: "interactor", row: 3, column: 0 },
+        { key: "outputBoundary", role: "output boundary", row: 4, column: 0 },
+        { key: "outputData", role: "output data", row: 4, column: 1 },
+        { key: "ports", role: "data-access interface", row: 4, column: 2 },
+        { key: "presenter", role: "presenter", row: 5, column: 0 },
+        { key: "viewModel", role: "view model", row: 5, column: 1 },
+        { key: "online", role: "online implementation", row: 6, column: 2 },
+        { key: "offline", role: "offline implementation", row: 7, column: 2 },
+        { key: "entities", role: "entity", row: 8, column: 0 }
+    ];
+
+    function titleCase(name) {
+        return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;");
+    }
+
+    function typeIcon(kind) {
+        return { class: "C", interface: "I", record: "R", enum: "E" }[kind] || "C";
+    }
+
+    function isPrimitive(type) {
+        return /^(void|boolean|byte|short|int|long|float|double|char|Integer|Long|Double|Float|Boolean)$/i.test(type);
+    }
+
+    function methodLabel(operation) {
+        const parameters = operation.parameters.map((parameter) => parameter.type).join(", ");
+        return `${operation.name}(${parameters})`;
+    }
+
+    function visibleMembers(metadata) {
+        const fields = metadata.attributes.map((attribute) => ({ kind: "field", value: attribute }));
+        const methods = metadata.operations.map((operation) => ({ kind: "method", value: operation }));
+        const total = fields.length + methods.length;
+        if (expandedTypes.has(metadata.name) || total <= MAX_PREVIEW_MEMBERS) {
+            return { members: [...fields, ...methods], total, shortened: false };
+        }
+
+        let fieldLimit = Math.min(fields.length, Math.floor(MAX_PREVIEW_MEMBERS / 2));
+        let methodLimit = Math.min(methods.length, Math.ceil(MAX_PREVIEW_MEMBERS / 2));
+        let remaining = MAX_PREVIEW_MEMBERS - fieldLimit - methodLimit;
+        if (remaining > 0) {
+            const extraFields = Math.min(remaining, fields.length - fieldLimit);
+            fieldLimit += extraFields;
+            remaining -= extraFields;
+            methodLimit += Math.min(remaining, methods.length - methodLimit);
+        }
+        return {
+            members: [...fields.slice(0, fieldLimit), ...methods.slice(0, methodLimit)],
+            total,
+            shortened: true
+        };
+    }
+
+    function memberMarkup(member) {
+        if (member.kind === "field") {
+            const field = member.value;
+            return `
+                <div class="uml-member-row">
+                    <span class="member-icon field">f</span>
+                    <span class="visibility">${escapeHtml(field.visibility)}</span>
+                    <span class="member-name field">${escapeHtml(field.name)}</span>
+                    <span class="member-type ${isPrimitive(field.type) ? "primitive" : ""}">${escapeHtml(field.type)}</span>
+                </div>`;
+        }
+        const method = member.value;
+        return `
+            <div class="uml-member-row">
+                <span class="member-icon method">m</span>
+                <span class="visibility">${escapeHtml(method.visibility)}</span>
+                <span class="member-name method">${escapeHtml(methodLabel(method))}</span>
+                <span class="member-type ${isPrimitive(method.returnType) ? "primitive" : ""}">${escapeHtml(method.returnType)}</span>
+            </div>`;
+    }
+
+    function buildNodes(spec) {
+        const byName = new Map();
+        rowDefinitions.forEach((definition) => {
+            spec[definition.key].forEach((name, index) => {
+                const metadata = UML_TYPES[name];
+                if (!metadata) return;
+                if (!byName.has(name)) {
+                    byName.set(name, {
+                        name,
+                        metadata,
+                        row: definition.row,
+                        preferredColumn: definition.column + index,
+                        roles: []
+                    });
+                }
+                byName.get(name).roles.push(definition.role);
+            });
+        });
+
+        const nodes = [...byName.values()];
+        nodes.forEach((node) => {
+            node.memberView = visibleMembers(node.metadata);
+            node.height = 46 + node.memberView.members.length * 31 + (node.memberView.shortened ? 31 : 0);
+            node.width = BOX_WIDTH;
+        });
+
+        const rows = Array.from({ length: 9 }, () => []);
+        const occupiedColumns = rows.map(() => new Set());
+        nodes.sort((left, right) => left.row - right.row || left.preferredColumn - right.preferredColumn);
+        nodes.forEach((node) => {
+            let column = node.preferredColumn;
+            while (occupiedColumns[node.row].has(column)) column += 1;
+            node.column = column;
+            occupiedColumns[node.row].add(column);
+            rows[node.row].push(node);
+        });
+        const highestColumn = Math.max(1, ...nodes.map((node) => node.column));
+        const canvasWidth = Math.max(1120, (highestColumn + 1) * BOX_WIDTH + highestColumn * COLUMN_GAP + CANVAS_MARGIN * 2);
+        let y = CANVAS_MARGIN;
+
+        rows.forEach((row) => {
+            if (!row.length) return;
+            const rowHeight = Math.max(...row.map((node) => node.height));
+            row.forEach((node) => {
+                node.x = CANVAS_MARGIN + node.column * (BOX_WIDTH + COLUMN_GAP);
+                node.y = y;
+            });
+            y += rowHeight + ROW_GAP;
+        });
+
+        return { nodes, width: canvasWidth, height: Math.max(680, y - ROW_GAP + CANVAS_MARGIN) };
+    }
+
+    function classMarkup(node) {
+        const expanded = expandedTypes.has(node.name);
+        const expandable = node.memberView.total > MAX_PREVIEW_MEMBERS;
+        const tag = expandable ? "button" : "div";
+        const action = expandable
+            ? `type="button" data-expand="${escapeHtml(node.name)}" aria-label="${expanded ? "Collapse" : "Expand"} all members of ${escapeHtml(node.name)}"`
+            : "";
+        const role = node.roles.length ? ` — ${node.roles.join(" / ")}` : "";
+        return `
+            <${tag} class="uml-class" data-type="${escapeHtml(node.name)}" ${action} style="left:${node.x}px;top:${node.y}px;height:${node.height}px">
+                <div class="uml-class-header" title="${escapeHtml(node.metadata.packageName + role)}">
+                    <span class="type-icon">${typeIcon(node.metadata.kind)}</span>
+                    <span class="uml-class-name">${escapeHtml(node.name)}</span>
+                </div>
+                ${node.memberView.members.map(memberMarkup).join("")}
+                ${node.memberView.shortened ? `<div class="uml-member-row uml-more">… ${node.memberView.total - node.memberView.members.length} more members — click to expand</div>` : ""}
+            </${tag}>`;
+    }
+
+    function typeReferences(typeName, displayedNames) {
+        const tokens = typeName.match(/[A-Z][A-Za-z0-9_]*/g) || [];
+        return tokens.filter((token) => displayedNames.has(token));
+    }
+
+    function collectRelations(nodes) {
+        const displayed = new Map(nodes.map((node) => [node.name, node]));
+        const names = new Set(displayed.keys());
+        const relations = new Map();
+        const priority = { dependency: 1, association: 2, extends: 3, implements: 4 };
+
+        function add(source, target, kind) {
+            if (source === target || !displayed.has(source) || !displayed.has(target)) return;
+            const key = `${source}|${target}`;
+            const existing = relations.get(key);
+            if (!existing || priority[kind] > priority[existing.kind]) relations.set(key, { source, target, kind });
+        }
+
+        nodes.forEach((node) => {
+            node.metadata.implements.forEach((type) => {
+                const target = typeReferences(type, names)[0];
+                if (target) add(node.name, target, "implements");
+            });
+            node.metadata.extends.forEach((type) => {
+                const target = typeReferences(type, names)[0];
+                if (target) add(node.name, target, "extends");
+            });
+            node.metadata.attributes.forEach((attribute) => {
+                typeReferences(attribute.type, names).forEach((target) => {
+                    add(node.name, target, "association");
+                });
+            });
+            node.metadata.operations.forEach((operation) => {
+                operation.parameters.forEach((parameter) => {
+                    typeReferences(parameter.type, names).forEach((target) => {
+                        add(node.name, target, "dependency");
+                    });
+                });
+                typeReferences(operation.returnType, names).forEach((target) => {
+                    add(node.name, target, "dependency");
+                });
+            });
+        });
+        return [...relations.values()];
+    }
+
+    function edgeGeometry(source, target, offset) {
+        const sourceCenter = { x: source.x + source.width / 2, y: source.y + source.height / 2 };
+        const targetCenter = { x: target.x + target.width / 2, y: target.y + target.height / 2 };
+        const sameRow = Math.abs(targetCenter.y - sourceCenter.y) < 20;
+        let start;
+        let end;
+        let pathData;
+
+        if (sameRow) {
+            const direction = targetCenter.x >= sourceCenter.x ? 1 : -1;
+            start = { x: sourceCenter.x + direction * source.width / 2, y: sourceCenter.y + offset };
+            end = { x: targetCenter.x - direction * target.width / 2, y: targetCenter.y + offset };
+            const middle = (start.x + end.x) / 2;
+            pathData = `M ${start.x} ${start.y} L ${middle} ${start.y} L ${middle} ${end.y} L ${end.x} ${end.y}`;
+        }
+        else {
+            const direction = targetCenter.y >= sourceCenter.y ? 1 : -1;
+            start = { x: sourceCenter.x + offset, y: sourceCenter.y + direction * source.height / 2 };
+            end = { x: targetCenter.x + offset, y: targetCenter.y - direction * target.height / 2 };
+            const middle = (start.y + end.y) / 2 + offset;
+            pathData = `M ${start.x} ${start.y} L ${start.x} ${middle} L ${end.x} ${middle} L ${end.x} ${end.y}`;
+        }
+        return { pathData, labelX: (start.x + end.x) / 2, labelY: (start.y + end.y) / 2 - 5 };
+    }
+
+    function renderRelations(nodes) {
+        const nodeByName = new Map(nodes.map((node) => [node.name, node]));
+        const paths = collectRelations(nodes).map((relation, index) => {
+            const geometry = edgeGeometry(nodeByName.get(relation.source), nodeByName.get(relation.target), (index % 7 - 3) * 5);
+            const triangle = relation.kind === "implements" || relation.kind === "extends";
+            const marker = triangle ? "realization-arrow" : relation.kind === "dependency" ? "dependency-arrow" : "open-arrow";
+            const labelText = triangle ? relation.kind : "";
+            const label = labelText
+                ? `<text class="uml-edge-label ${relation.kind}" x="${geometry.labelX}" y="${geometry.labelY}" text-anchor="middle">${labelText}</text>`
+                : "";
+            return `<path class="uml-edge ${relation.kind}" d="${geometry.pathData}" marker-end="url(#${marker})"></path>${label}`;
+        }).join("");
+
+        umlLinks.innerHTML = `
+            <defs>
+                <marker id="open-arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+                    <path d="M 2 1 L 11 6 L 2 11" fill="none" stroke="#a9adb3" stroke-width="1.5"></path>
+                </marker>
+                <marker id="dependency-arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+                    <path d="M 2 1 L 11 6 L 2 11" fill="none" stroke="#8e939a" stroke-width="1.5"></path>
+                </marker>
+                <marker id="realization-arrow" viewBox="0 0 13 13" refX="12" refY="6.5" markerWidth="10" markerHeight="10" orient="auto">
+                    <path d="M 1 1 L 12 6.5 L 1 12 z" fill="#191a1d" stroke="#5daaff" stroke-width="1.6"></path>
+                </marker>
+            </defs>${paths}`;
+    }
+
+    const navList = document.getElementById("nav-list");
+    const moduleList = document.getElementById("module-list");
+    const usecaseSelect = document.getElementById("usecase-select");
+    const diagramTitle = document.getElementById("diagram-title");
+    const diagramSummary = document.getElementById("diagram-summary");
+    const sequenceLink = document.getElementById("sequence-link");
+    const caLink = document.getElementById("ca-link");
+    const umlCanvas = document.getElementById("uml-canvas");
+    const umlLinks = document.getElementById("uml-links");
+    const umlNodes = document.getElementById("uml-nodes");
+
+    modules.forEach((module) => {
+        const group = document.createElement("optgroup");
+        group.label = module.title;
+        module.useCases.forEach((name) => {
+            const navItem = document.createElement("li");
+            navItem.innerHTML = `<a href="#uml-${name}" data-usecase="${name}">${titleCase(name)}</a>`;
+            navList.appendChild(navItem);
+
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = titleCase(name);
+            group.appendChild(option);
+        });
+        usecaseSelect.appendChild(group);
+
+        const section = document.createElement("div");
+        section.className = "module-group";
+        section.innerHTML = `<h3>${module.title}</h3><div class="module-links"></div>`;
+        module.useCases.forEach((name) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.dataset.usecase = name;
+            button.textContent = titleCase(name);
+            button.addEventListener("click", () => selectUseCase(name, true));
+            section.querySelector(".module-links").appendChild(button);
+        });
+        moduleList.appendChild(section);
+    });
+
+    function renderDiagram(spec) {
+        const layout = buildNodes(spec);
+        umlCanvas.style.width = `${layout.width}px`;
+        umlCanvas.style.height = `${layout.height}px`;
+        umlLinks.setAttribute("viewBox", `0 0 ${layout.width} ${layout.height}`);
+        umlLinks.setAttribute("preserveAspectRatio", "none");
+        umlNodes.innerHTML = layout.nodes.map(classMarkup).join("");
+        renderRelations(layout.nodes);
+
+        umlNodes.querySelectorAll("[data-expand]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const typeName = button.dataset.expand;
+                if (expandedTypes.has(typeName)) expandedTypes.delete(typeName);
+                else expandedTypes.add(typeName);
+                renderDiagram(spec);
+            });
+        });
+
+        const module = moduleById[spec.module];
+        diagramTitle.textContent = `${titleCase(spec.name)} — UML Class Diagram`;
+        diagramSummary.textContent = `${module.title} · ${layout.nodes.length} classes and interfaces`;
+        sequenceLink.href = `../sequence-diagram/index.html#uc-${spec.name}`;
+        caLink.href = `../../ca-visuals/index.html#uc-${spec.name}`;
+    }
+
+    function selectUseCase(name, shouldScroll) {
+        if (!specs[name]) return;
+        selectedUseCase = name;
+        expandedTypes.clear();
+        usecaseSelect.value = name;
+        renderDiagram(specs[name]);
+        document.querySelectorAll("[data-usecase]").forEach((element) => {
+            element.classList.toggle("active", element.dataset.usecase === name);
+        });
+        history.replaceState(null, "", `#uml-${name}`);
+        if (shouldScroll) document.getElementById("diagram").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    usecaseSelect.addEventListener("change", () => selectUseCase(usecaseSelect.value, false));
+    navList.addEventListener("click", (event) => {
+        const link = event.target.closest("[data-usecase]");
+        if (!link) return;
+        event.preventDefault();
+        selectUseCase(link.dataset.usecase, true);
+    });
+
+    const initialMatch = location.hash.match(/^#uml-(.+)$/);
+    selectUseCase(initialMatch && specs[initialMatch[1]] ? initialMatch[1] : selectedUseCase, false);
+</script>
+</body>
+</html>
