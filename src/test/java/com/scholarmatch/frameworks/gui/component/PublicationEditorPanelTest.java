@@ -19,12 +19,14 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -56,8 +58,12 @@ class PublicationEditorPanelTest {
             final List<JList> lists = SwingTestSupport.findAll(panel, JList.class);
             final JList<AuthorCandidateData> candidates = lists.get(0);
             final JList<Publication> papers = lists.get(1);
+            final JScrollPane candidateScrollPane = SwingTestSupport.find(panel, JScrollPane.class, 0);
 
-            assertFalse(candidates.isVisible());
+            assertFalse(candidateScrollPane.isVisible());
+            assertSame(candidates, candidateScrollPane.getViewport().getView());
+            assertEquals(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    candidateScrollPane.getVerticalScrollBarPolicy());
             assertFalse(importButton.isVisible());
             assertFalse(papers.isVisible());
             assertFalse(removeButton.isVisible());
@@ -69,7 +75,7 @@ class PublicationEditorPanelTest {
             verify(boundary, never()).selectAuthor(org.mockito.ArgumentMatchers.any());
 
             viewModel.getAuthorCandidates().setAll(List.of(candidate));
-            assertTrue(candidates.isVisible());
+            assertTrue(candidateScrollPane.isVisible());
             assertTrue(importButton.isVisible());
             candidates.setSelectedIndex(0);
             importButton.doClick();
@@ -90,7 +96,7 @@ class PublicationEditorPanelTest {
             assertFalse(removeButton.isVisible());
 
             viewModel.getAuthorCandidates().clear();
-            assertFalse(candidates.isVisible());
+            assertFalse(candidateScrollPane.isVisible());
             assertFalse(importButton.isVisible());
 
             viewModel.setStatusMessage("Found author");

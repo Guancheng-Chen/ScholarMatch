@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.BorderFactory;
 import javax.swing.border.EmptyBorder;
@@ -90,10 +91,6 @@ public final class PublicationEditorPanel extends JPanel {
         candidateList.setVisibleRowCount(3);
         candidateList.setBackground(Theme.BG_INSET);
         candidateList.setForeground(Theme.FG_DEFAULT);
-        candidateList.setPreferredSize(new Dimension(width, 70));
-        candidateList.setMaximumSize(new Dimension(width, 70));
-        candidateList.setAlignmentX(Component.LEFT_ALIGNMENT);
-        candidateList.setVisible(false);
         candidateList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
@@ -107,6 +104,14 @@ public final class PublicationEditorPanel extends JPanel {
                 return c;
             }
         });
+        final JScrollPane candidateScrollPane = new JScrollPane(
+                candidateList,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        candidateScrollPane.setPreferredSize(new Dimension(width, 70));
+        candidateScrollPane.setMaximumSize(new Dimension(width, 70));
+        candidateScrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+        candidateScrollPane.setVisible(false);
         final JButton selectAuthorButton = smallButton("Import This Author's Papers");
         selectAuthorButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         selectAuthorButton.setVisible(false);
@@ -115,11 +120,11 @@ public final class PublicationEditorPanel extends JPanel {
             candidatesModel.clear();
             candidatesModel.addAll(paperLookupViewModel.getAuthorCandidates());
             final boolean hasCandidates = !candidatesModel.isEmpty();
-            candidateList.setVisible(hasCandidates);
+            candidateScrollPane.setVisible(hasCandidates);
             selectAuthorButton.setVisible(hasCandidates);
-            candidateList.revalidate();
-            candidateList.getParent().revalidate();
-            candidateList.getParent().repaint();
+            candidateScrollPane.revalidate();
+            candidateScrollPane.getParent().revalidate();
+            candidateScrollPane.getParent().repaint();
         });
         searchAuthorButton.addActionListener(evt -> paperLookupController.searchAuthors(authorField.getText()));
 
@@ -212,7 +217,7 @@ public final class PublicationEditorPanel extends JPanel {
 
         addAll(this, sectionLabel, strut(),
             row(authorField, searchAuthorButton), authorExampleLabel, strut(),
-            candidateList, selectAuthorButton, strut(),
+            candidateScrollPane, selectAuthorButton, strut(),
             statusLabel, strut(),
             papersListView, removeButton, strut(),
             fallbackNoticeLabel);
