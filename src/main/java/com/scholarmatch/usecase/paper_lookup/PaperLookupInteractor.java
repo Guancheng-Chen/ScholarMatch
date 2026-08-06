@@ -5,10 +5,8 @@ import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessI
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.DataAccessException;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -58,8 +56,7 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
                     .map(AuthorCandidateData::from)
                     .toList();
             final List<AuthorCandidateData> candidates = rankCandidates(
-                    searchResults,
-                    normalizedName);
+                    searchResults);
             for (final AuthorCandidateData candidate : candidates) {
                 this.candidatesById.put(candidate.getAuthorId(), candidate);
             }
@@ -87,38 +84,16 @@ public final class PaperLookupInteractor implements PaperLookupInputBoundary {
     }
 
     private static List<AuthorCandidateData> rankCandidates(
-            final List<AuthorCandidateData> candidates,
-            final String query) {
-        final List<String> queryTokens = sortedNameTokens(query);
+            final List<AuthorCandidateData> candidates) {
         return candidates.stream()
-                .sorted((first, second) -> compareCandidates(first, second, queryTokens))
+                .sorted((first, second) -> Integer.compare(
+                        citationCount(second), citationCount(first)))
                 .limit(MAX_AUTHOR_CANDIDATES)
                 .toList();
     }
 
-    private static int compareCandidates(
-            final AuthorCandidateData first,
-            final AuthorCandidateData second,
-            final List<String> queryTokens) {
-        final boolean firstNameMatches = sortedNameTokens(first.getName()).equals(queryTokens);
-        final boolean secondNameMatches = sortedNameTokens(second.getName()).equals(queryTokens);
-        if (firstNameMatches != secondNameMatches) {
-            return firstNameMatches ? -1 : 1;
-        }
-        if (firstNameMatches) {
-            return Integer.compare(citationCount(second), citationCount(first));
-        }
-        return 0;
-    }
-
     private static int citationCount(final AuthorCandidateData candidate) {
         return candidate.getCitationCount() == null ? 0 : candidate.getCitationCount();
-    }
-
-    private static List<String> sortedNameTokens(final String name) {
-        return Arrays.stream(normalizeName(name).toLowerCase(Locale.ROOT).split(" "))
-                .sorted()
-                .toList();
     }
 
     private static String normalizeName(final String name) {

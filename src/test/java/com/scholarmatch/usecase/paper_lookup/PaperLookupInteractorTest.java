@@ -141,7 +141,7 @@ class PaperLookupInteractorTest {
     }
 
     @Test
-    void treatsMissingCitationCountAsZeroWhenRankingExactNames() {
+    void ranksAllCandidatesByCitationsAndTreatsMissingCountsAsZero() {
         this.gateway.authorCandidates = List.of(
                 new AuthorCandidateDto("exact-low", "Ada Lovelace", List.of(), 1, 1, null),
                 new AuthorCandidateDto("different", "A. Lovelace", List.of(), 1, 1, 100),
@@ -149,8 +149,19 @@ class PaperLookupInteractorTest {
 
         this.interactor.searchAuthors(new SearchAuthorsInputData("Ada Lovelace"));
 
-        assertEquals(List.of("exact-high", "exact-low", "different"),
+        assertEquals(List.of("different", "exact-high", "exact-low"),
                 this.presenter.candidates.stream().map(AuthorCandidateData::getAuthorId).toList());
+    }
+
+    @Test
+    void ranksHighlyCitedAuthorAboveAnExactNameMatch() {
+        this.gateway.authorCandidates = List.of(
+                new AuthorCandidateDto("exact", "Geoffrey Hinton", List.of(), 12, 5, 608),
+                new AuthorCandidateDto("real", "Geoffrey E. Hinton", List.of(), 466, 160, 578159));
+
+        this.interactor.searchAuthors(new SearchAuthorsInputData("Geoffrey Hinton"));
+
+        assertEquals("real", this.presenter.candidates.getFirst().getAuthorId());
     }
 
     private static final class FakeGateway implements UserAPIGatewayInterface {

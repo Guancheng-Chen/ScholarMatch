@@ -5,6 +5,7 @@ import com.scholarmatch.entity.CollaborationType;
 import com.scholarmatch.entity.EmailAccountType;
 import com.scholarmatch.entity.FundingStatus;
 import com.scholarmatch.entity.Institution;
+import com.scholarmatch.entity.Publication;
 import com.scholarmatch.entity.ResearchField;
 import com.scholarmatch.entity.User;
 import com.scholarmatch.frameworks.data_access_object.ClasspathInstitutionCatalogRepository;
@@ -108,6 +109,23 @@ class LocalServerRepositoryAccountTest {
         assertEquals(5, updated.gethIndex());
         assertEquals(100, updated.getTotalCitations());
         assertEquals(List.of("new interest"), updated.getResearchInterests());
+    }
+
+    @Test
+    void testUpdateProfileReplacesAndPersistsPublications() {
+        final AuthResult registration = register("Ada", "ada@example.com");
+        this.session.setCurrentUserId(registration.userId());
+        final User user = this.profileRepo.getProfile();
+        user.addPublication(new Publication("old-doi", "Old paper", 2020, 1));
+        final Publication imported = new Publication("new-doi", "Imported paper", 2025, 50);
+        final UpdateProfileInputData data = new UpdateProfileInputData(
+                "ada@example.com", "MIT", "FACULTY", "COMPUTER_SCIENCE", "CO_AUTHOR",
+                "Collaboration", "Research", 12, "SELF_FUNDED",
+                List.of("new interest"), "555-1234", 5, 100, List.of(), List.of(imported));
+
+        this.profileRepo.updateProfile(data);
+
+        assertEquals(List.of(imported), this.profileRepo.getProfile().getPublications());
     }
 
     @Test

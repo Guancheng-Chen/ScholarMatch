@@ -19,12 +19,14 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -56,10 +58,19 @@ class PublicationEditorPanelTest {
             final List<JList> lists = SwingTestSupport.findAll(panel, JList.class);
             final JList<AuthorCandidateData> candidates = lists.get(0);
             final JList<Publication> papers = lists.get(1);
+            final List<JScrollPane> scrollPanes = SwingTestSupport.findAll(panel, JScrollPane.class);
+            final JScrollPane candidateScrollPane = scrollPanes.get(0);
+            final JScrollPane papersScrollPane = scrollPanes.get(1);
 
-            assertFalse(candidates.isVisible());
+            assertFalse(candidateScrollPane.isVisible());
+            assertSame(candidates, candidateScrollPane.getViewport().getView());
+            assertEquals(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    candidateScrollPane.getVerticalScrollBarPolicy());
             assertFalse(importButton.isVisible());
-            assertFalse(papers.isVisible());
+            assertFalse(papersScrollPane.isVisible());
+            assertSame(papers, papersScrollPane.getViewport().getView());
+            assertEquals(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    papersScrollPane.getVerticalScrollBarPolicy());
             assertFalse(removeButton.isVisible());
 
             authorField.setText("  Ada Lovelace  ");
@@ -69,7 +80,7 @@ class PublicationEditorPanelTest {
             verify(boundary, never()).selectAuthor(org.mockito.ArgumentMatchers.any());
 
             viewModel.getAuthorCandidates().setAll(List.of(candidate));
-            assertTrue(candidates.isVisible());
+            assertTrue(candidateScrollPane.isVisible());
             assertTrue(importButton.isVisible());
             candidates.setSelectedIndex(0);
             importButton.doClick();
@@ -78,7 +89,7 @@ class PublicationEditorPanelTest {
 
             viewModel.getAuthorPapersFound().setAll(List.of(paper));
             assertEquals(List.of(paper), panel.getPublications());
-            assertTrue(papers.isVisible());
+            assertTrue(papersScrollPane.isVisible());
             assertTrue(removeButton.isVisible());
 
             panel.setPublications(List.of(paper));
@@ -86,11 +97,11 @@ class PublicationEditorPanelTest {
             papers.setSelectedIndex(0);
             removeButton.doClick();
             assertTrue(panel.getPublications().isEmpty());
-            assertFalse(papers.isVisible());
+            assertFalse(papersScrollPane.isVisible());
             assertFalse(removeButton.isVisible());
 
             viewModel.getAuthorCandidates().clear();
-            assertFalse(candidates.isVisible());
+            assertFalse(candidateScrollPane.isVisible());
             assertFalse(importButton.isVisible());
 
             viewModel.setStatusMessage("Found author");
