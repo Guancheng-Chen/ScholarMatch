@@ -392,18 +392,17 @@
         Publication: ["PaperLookup", "UpdateProfile"]
     };
 
-    // Coordinates match the simplified 1920x960 overall visual. The total-view cards
-    // intentionally show names only; detailed class names remain in each linked diagram.
-    const overallCanvas = { width: 1920, height: 960 };
+    // Coordinates match the 1920x1465 overall visual. Every Use Case card shows its
+    // Interactor/Boundary/Data class names, laid out 6 per row (4 rows for the 24 use
+    // cases) so the band lines up with the same 6-column grid as the Frameworks/Entities
+    // rows around it.
+    const overallCanvas = { width: 1920, height: 1465 };
     const overallGrid = {
         left: 20,
         right: 1645,
         gap: 14,
-        useTop: 326,
-        useRowHeight: 116,
-        useRowGap: 10,
-        entityTop: 860,
-        entityHeight: 80
+        entityTop: 1369,
+        entityHeight: 74
     };
     const overallColWidth =
         (overallGrid.right - overallGrid.left - overallGrid.gap * 5) / 6;
@@ -412,16 +411,24 @@
     const pctX = (value) => value / overallCanvas.width * 100;
     const pctY = (value) => value / overallCanvas.height * 100;
 
-    const useCaseCardRects = Object.fromEntries(useCases.map((slug, index) => [
-        slug,
-        {
-            top: pctY(overallGrid.useTop + Math.floor(index / 6) *
-                (overallGrid.useRowHeight + overallGrid.useRowGap)),
+    // Each row auto-fits its own tallest card (some use cases have longer class names
+    // than others), so row tops/heights were measured directly from the rendered
+    // diagram before it was flattened to a PNG, rather than assumed uniform.
+    const useCaseRows = [
+        { top: 342, height: 229 },
+        { top: 587, height: 229 },
+        { top: 832, height: 209.5 },
+        { top: 1057.5, height: 271.5 }
+    ];
+    const useCaseCardRects = Object.fromEntries(useCases.map((slug, index) => {
+        const row = useCaseRows[Math.floor(index / 6)];
+        return [slug, {
+            top: pctY(row.top),
             left: pctX(overallX(index % 6)),
             width: pctX(overallColWidth),
-            height: pctY(overallGrid.useRowHeight)
-        }
-    ]));
+            height: pctY(row.height)
+        }];
+    }));
 
     const entityCardRects = Object.fromEntries(
         Object.keys(entityUseCases).map((entity, index) => [entity, {
@@ -523,7 +530,7 @@
         img.src = "Overall-ca-visuals.png";
         img.alt = "Overall Clean Architecture layers across the whole app";
         img.width = 3840;
-        img.height = 1920;
+        img.height = 2930;
         stage.appendChild(img);
 
         for (const spot of overallHotspots) {

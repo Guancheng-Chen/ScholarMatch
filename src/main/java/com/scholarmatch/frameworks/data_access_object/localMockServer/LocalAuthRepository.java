@@ -8,6 +8,8 @@ import com.scholarmatch.usecase.data_access_interface.RegisterDataAccessInterfac
 import com.scholarmatch.usecase.exception.InvalidRequestException;
 import com.scholarmatch.usecase.register.RegisterAccountData;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -16,9 +18,16 @@ import java.util.UUID;
 public final class LocalAuthRepository implements LoginDataAccessInterface, RegisterDataAccessInterface {
 
     private final LocalServerState state;
+    private final InMemoryEmailVerificationChallengeRepository emailChallenges;
+    private final Clock clock;
 
-    public LocalAuthRepository(final LocalServerState state) {
+    public LocalAuthRepository(
+            final LocalServerState state,
+            final InMemoryEmailVerificationChallengeRepository emailChallenges,
+            final Clock clock) {
         this.state = state;
+        this.emailChallenges = emailChallenges;
+        this.clock = clock;
     }
 
     @Override
@@ -34,6 +43,22 @@ public final class LocalAuthRepository implements LoginDataAccessInterface, Regi
     public AuthResult register(final RegisterAccountData data) {
         if (this.state.findByEmail(data.getEmail()) != null) {
             throw new InvalidRequestException("Email is already registered");
+        }
+        final EmailVerificationChallenge challenge = this.emailChallenges
+                .findByEmail(data.getEmail())
+                .orElseThrow(() -> new InvalidRequestException(
+                        "Request a verification code for this email first"));
+        final EmailVerificationResult result =
+                challenge.verify(data.getVerificationCode(), Instant.now(this.clock));
+        // Every outcome other than VERIFIED rejects the request — see
+        // LocalAccountSettingsRepository#changeEmail for the same pattern.
+        if (result.outcome() == EmailVerificationOutcome.EXPIRED) {
+            throw new InvalidRequestException("Verification code has expired");
+        } else if (result.outcome() == EmailVerificationOutcome.ATTEMPTS_EXHAUSTED) {
+            throw new InvalidRequestException("Verification failed after three incorrect attempts");
+        } else if (result.outcome() == EmailVerificationOutcome.INVALID_CODE) {
+            throw new InvalidRequestException("Verification code is incorrect. "
+                    + result.attemptsRemaining() + " attempts remaining");
         }
         // Registration only collects the account-creation essentials; every other profile
         // field starts blank/null and is filled in later from the Edit Profile screen —
@@ -53,10 +78,9 @@ public final class LocalAuthRepository implements LoginDataAccessInterface, Regi
                 null,
                 null,
                 data.getPassword(),
-                // Offline mode has no server to check the verification code against, so it can't
-                // legitimately claim ACADEMIC status either — that's the server's call to make.
                 EmailAccountType.REGULAR);
         this.state.usersById().put(user.getUserId(), user);
+        this.emailChallenges.deleteByEmail(data.getEmail());
         return toAuthResult(user);
     }
 

@@ -353,18 +353,22 @@ public final class AppBuilder {
         final MessagingGateway messagingGateway = new MessagingGateway(httpClient);
         final PostingGateway postingGateway = new PostingGateway(httpClient);
         final LocalServerState localState = new LocalServerState(this.institutionCatalog);
-        final LocalAuthRepository localAuthRepo = new LocalAuthRepository(localState);
+        final InMemoryEmailVerificationChallengeRepository emailChallenges =
+                new InMemoryEmailVerificationChallengeRepository();
+        final Clock offlineClock = Clock.systemUTC();
+        final LocalAuthRepository localAuthRepo =
+                new LocalAuthRepository(localState, emailChallenges, offlineClock);
         final LocalProfileRepository localProfileRepo = new LocalProfileRepository(
                 localState, this.currentUserProvider, this.institutionCatalog);
         final LocalAccountSettingsRepository localAccountSettingsRepo = new LocalAccountSettingsRepository(
                 localState,
                 this.currentUserProvider,
-                new InMemoryEmailVerificationChallengeRepository(),
+                emailChallenges,
                 new SecureVerificationCodeGenerator(),
                 (email, code) -> System.out.println(
                         "[Offline demo] Verification code for " + email + ": " + code),
                 new ClasspathAcademicEmailDomainRepository(),
-                Clock.systemUTC());
+                offlineClock);
         final LocalMatchingRepository localMatchingRepo =
                 new LocalMatchingRepository(localState, this.currentUserProvider);
         final LocalMessagingRepository localMessagingRepo =
