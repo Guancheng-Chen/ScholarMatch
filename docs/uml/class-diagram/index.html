@@ -211,7 +211,8 @@
     }
 
     .diagram-controls select,
-    .diagram-controls a {
+    .diagram-controls a,
+    .diagram-controls button {
         min-height: 34px;
         padding: 6px 9px;
         color: var(--text);
@@ -220,13 +221,22 @@
         border-radius: 4px;
         font-size: 12px;
         text-decoration: none;
+        cursor: pointer;
     }
 
     .diagram-controls select:focus,
     .diagram-controls a:hover,
-    .diagram-controls a:focus-visible {
+    .diagram-controls a:focus-visible,
+    .diagram-controls button:hover,
+    .diagram-controls button:focus-visible,
+    .diagram-controls button.active {
+        color: var(--accent);
         border-color: var(--accent);
         outline: none;
+    }
+
+    .diagram-controls button.active {
+        background: var(--accent-bg);
     }
 
     .diagram-frame {
@@ -235,11 +245,20 @@
         background: var(--diagram-bg);
     }
 
+    .uml-canvas-wrapper {
+        overflow: visible;
+    }
+
+    body.fit-width-diagram .uml-canvas-wrapper {
+        overflow: hidden;
+    }
+
     .uml-canvas {
         position: relative;
         min-width: 1120px;
         min-height: 680px;
         background: var(--diagram-bg);
+        transform-origin: top left;
     }
 
     #uml-links {
@@ -476,6 +495,8 @@
             <div class="diagram-controls">
                 <label for="usecase-select">Use case</label>
                 <select id="usecase-select" aria-label="Choose a use case"></select>
+                <button type="button" id="fit-width">Fit width</button>
+                <button type="button" id="actual-size">Actual size</button>
                 <a id="sequence-link" href="../sequence-diagram/index.html">Sequence Diagram</a>
                 <a id="ca-link" href="../../ca-visuals/index.html">Clean Architecture</a>
             </div>
@@ -486,9 +507,11 @@
             inheritance, and interface implementations.
         </p>
         <div class="diagram-frame">
-            <div class="uml-canvas" id="uml-canvas" role="img" aria-labelledby="diagram-title">
-                <svg id="uml-links" aria-hidden="true"></svg>
-                <div id="uml-nodes"></div>
+            <div class="uml-canvas-wrapper" id="uml-canvas-wrapper">
+                <div class="uml-canvas" id="uml-canvas" role="img" aria-labelledby="diagram-title">
+                    <svg id="uml-links" aria-hidden="true"></svg>
+                    <div id="uml-nodes"></div>
+                </div>
             </div>
         </div>
         <div class="diagram-legend" aria-label="UML legend">
@@ -947,6 +970,42 @@
     const umlCanvas = document.getElementById("uml-canvas");
     const umlLinks = document.getElementById("uml-links");
     const umlNodes = document.getElementById("uml-nodes");
+    const diagramFrame = document.querySelector(".diagram-frame");
+    const canvasWrapper = document.getElementById("uml-canvas-wrapper");
+    const fitWidthButton = document.getElementById("fit-width");
+    const actualSizeButton = document.getElementById("actual-size");
+    let fitWidth = true;
+
+    function updateScale() {
+        const canvasWidth = umlCanvas.offsetWidth;
+        const canvasHeight = umlCanvas.offsetHeight;
+        if (fitWidth) {
+            const scale = Math.min(1, diagramFrame.clientWidth / canvasWidth);
+            umlCanvas.style.transform = `scale(${scale})`;
+            canvasWrapper.style.height = `${canvasHeight * scale}px`;
+        }
+        else {
+            umlCanvas.style.transform = "";
+            canvasWrapper.style.height = "";
+        }
+    }
+
+    function setSizeMode(fit) {
+        fitWidth = fit;
+        document.body.classList.toggle("fit-width-diagram", fit);
+        fitWidthButton.classList.toggle("active", fit);
+        actualSizeButton.classList.toggle("active", !fit);
+        updateScale();
+    }
+
+    fitWidthButton.addEventListener("click", () => setSizeMode(true));
+    actualSizeButton.addEventListener("click", () => setSizeMode(false));
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateScale, 100);
+    });
 
     modules.forEach((module) => {
         const group = document.createElement("optgroup");
@@ -1000,6 +1059,7 @@
         diagramSummary.textContent = `${module.title} · ${layout.nodes.length} classes and interfaces`;
         sequenceLink.href = `../sequence-diagram/index.html#uc-${spec.name}`;
         caLink.href = `../../ca-visuals/index.html#uc-${spec.name}`;
+        updateScale();
     }
 
     function selectUseCase(name, shouldScroll) {
@@ -1023,6 +1083,7 @@
         selectUseCase(link.dataset.usecase, true);
     });
 
+    setSizeMode(true);
     const initialMatch = location.hash.match(/^#uml-(.+)$/);
     selectUseCase(initialMatch && specs[initialMatch[1]] ? initialMatch[1] : selectedUseCase, false);
 </script>
