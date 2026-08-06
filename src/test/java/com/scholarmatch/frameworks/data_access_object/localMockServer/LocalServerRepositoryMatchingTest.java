@@ -11,6 +11,8 @@ import com.scholarmatch.usecase.register.RegisterAccountData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +24,7 @@ class LocalServerRepositoryMatchingTest {
 
     private CurrentUserProvider session;
     private LocalAuthRepository authRepo;
+    private InMemoryEmailVerificationChallengeRepository emailChallenges;
     private LocalMatchingRepository matchingRepo;
     private LocalMessagingRepository messagingRepo;
 
@@ -30,7 +33,8 @@ class LocalServerRepositoryMatchingTest {
         this.session = new CurrentUserProvider();
         final LocalServerState state =
                 new LocalServerState(new ClasspathInstitutionCatalogRepository());
-        this.authRepo = new LocalAuthRepository(state);
+        this.emailChallenges = new InMemoryEmailVerificationChallengeRepository();
+        this.authRepo = new LocalAuthRepository(state, this.emailChallenges, Clock.systemUTC());
         this.matchingRepo = new LocalMatchingRepository(state, this.session);
         this.messagingRepo = new LocalMessagingRepository(state, this.session);
     }
@@ -159,6 +163,8 @@ class LocalServerRepositoryMatchingTest {
     }
 
     private AuthResult register(final String firstName, final String email) {
+        this.emailChallenges.save(
+                new EmailVerificationChallenge(email, "123456", Instant.MAX));
         return this.authRepo.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
     }

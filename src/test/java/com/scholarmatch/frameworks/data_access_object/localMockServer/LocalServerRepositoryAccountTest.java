@@ -32,6 +32,7 @@ class LocalServerRepositoryAccountTest {
 
     private CurrentUserProvider session;
     private LocalAuthRepository authRepo;
+    private InMemoryEmailVerificationChallengeRepository emailChallenges;
     private LocalProfileRepository profileRepo;
     private LocalAccountSettingsRepository accountSettingsRepo;
 
@@ -41,12 +42,13 @@ class LocalServerRepositoryAccountTest {
         final ClasspathInstitutionCatalogRepository institutions =
                 new ClasspathInstitutionCatalogRepository();
         final LocalServerState state = new LocalServerState(institutions);
-        this.authRepo = new LocalAuthRepository(state);
+        this.emailChallenges = new InMemoryEmailVerificationChallengeRepository();
+        this.authRepo = new LocalAuthRepository(state, this.emailChallenges, Clock.systemUTC());
         this.profileRepo = new LocalProfileRepository(state, this.session, institutions);
         this.accountSettingsRepo = new LocalAccountSettingsRepository(
                 state,
                 this.session,
-                new InMemoryEmailVerificationChallengeRepository(),
+                this.emailChallenges,
                 new SecureVerificationCodeGenerator(),
                 (email, code) -> { },
                 new ClasspathAcademicEmailDomainRepository(),
@@ -267,10 +269,10 @@ class LocalServerRepositoryAccountTest {
 
     @Test
     void testFailedCodeDeliveryDeletesTheChallengeAndPropagates() {
-        final InMemoryEmailVerificationChallengeRepository emailChallenges =
+        final InMemoryEmailVerificationChallengeRepository challenges =
                 new InMemoryEmailVerificationChallengeRepository();
         useCustomAccountSettings(
-                emailChallenges,
+                challenges,
                 () -> "123456",
                 (email, code) -> {
                     throw new RuntimeException("delivery failed");
@@ -283,7 +285,7 @@ class LocalServerRepositoryAccountTest {
         assertThrows(RuntimeException.class, () ->
                 this.accountSettingsRepo.requestVerificationCode("new@example.com"));
 
-        assertEquals(java.util.Optional.empty(), emailChallenges.findByEmail("new@example.com"));
+        assertEquals(java.util.Optional.empty(), challenges.findByEmail("new@example.com"));
     }
 
     @Test
@@ -336,7 +338,7 @@ class LocalServerRepositoryAccountTest {
      * behavior without disturbing the other test methods' default setup.
      */
     private void useCustomAccountSettings(
-            final InMemoryEmailVerificationChallengeRepository emailChallenges,
+            final InMemoryEmailVerificationChallengeRepository challenges,
             final VerificationCodeGeneratorInterface codeGenerator,
             final EmailChangeCodeDeliveryDataAccessInterface codeDelivery,
             final AcademicEmailDomainDataAccessInterface academicEmailDomains,
@@ -344,12 +346,13 @@ class LocalServerRepositoryAccountTest {
         final ClasspathInstitutionCatalogRepository institutions =
                 new ClasspathInstitutionCatalogRepository();
         final LocalServerState state = new LocalServerState(institutions);
-        this.authRepo = new LocalAuthRepository(state);
+        this.emailChallenges = challenges;
+        this.authRepo = new LocalAuthRepository(state, challenges, clock);
         this.profileRepo = new LocalProfileRepository(state, this.session, institutions);
         this.accountSettingsRepo = new LocalAccountSettingsRepository(
                 state,
                 this.session,
-                emailChallenges,
+                challenges,
                 codeGenerator,
                 codeDelivery,
                 academicEmailDomains,
@@ -357,6 +360,8 @@ class LocalServerRepositoryAccountTest {
     }
 
     private AuthResult register(final String firstName, final String email) {
+        this.emailChallenges.save(
+                new EmailVerificationChallenge(email, "123456", Instant.MAX));
         return this.authRepo.register(new RegisterAccountData(
                 firstName, "User", email, "password", "123456"));
     }
