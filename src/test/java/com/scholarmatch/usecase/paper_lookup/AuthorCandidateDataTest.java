@@ -1,6 +1,6 @@
 package com.scholarmatch.usecase.paper_lookup;
 
-import com.scholarmatch.frameworks.data_access_object.AuthorCandidateDto;
+import com.scholarmatch.frameworks.data_access_object.paper_lookup.AuthorCandidateDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
