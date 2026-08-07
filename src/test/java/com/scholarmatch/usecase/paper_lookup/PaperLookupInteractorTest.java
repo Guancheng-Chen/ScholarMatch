@@ -1,7 +1,7 @@
 package com.scholarmatch.usecase.paper_lookup;
 
 import com.scholarmatch.entity.Publication;
-import com.scholarmatch.frameworks.data_access_object.AuthorCandidateDto;
+import com.scholarmatch.frameworks.data_access_object.paper_lookup.AuthorCandidateDto;
 import com.scholarmatch.usecase.data_access_interface.AuthorCandidateDataAccessInterface;
 import com.scholarmatch.usecase.data_access_interface.UserAPIGatewayInterface;
 import com.scholarmatch.usecase.exception.InvalidRequestException;
