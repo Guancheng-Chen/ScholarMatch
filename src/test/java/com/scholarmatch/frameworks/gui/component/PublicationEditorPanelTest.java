@@ -148,16 +148,21 @@ class PublicationEditorPanelTest {
             final PublicationEditorPanel panel = new PublicationEditorPanel(
                     new PaperLookupController(mock(PaperLookupInputBoundary.class)), viewModel, 500);
 
+            // Citation counts are deliberately out of order so the test also proves the
+            // truncation keeps the highest-cited papers rather than just the first N found.
+            final int[] citationCounts = {10, 50, 5, 40, 20, 30};
             final List<Publication> sixPapers = new ArrayList<>();
-            for (int i = 0; i < 6; i++) {
-                sixPapers.add(new Publication("10.1/doi-" + i, "Paper " + i, 2020, 1));
+            for (int i = 0; i < citationCounts.length; i++) {
+                sixPapers.add(new Publication("10.1/doi-" + i, "Paper " + i, 2020, citationCounts[i]));
             }
             viewModel.getAuthorPapersFound().setAll(sixPapers);
 
             assertEquals(5, panel.getPublications().size());
+            assertTrue(panel.getPublications().stream().noneMatch(pub -> "Paper 2".equals(pub.getTitle())),
+                    "the lowest-cited paper (5 citations) should have been dropped");
             assertTrue(SwingTestSupport.findAll(panel, JLabel.class).stream()
                     .anyMatch(label -> label.getText() != null
-                            && label.getText().contains("Only added 5 of 6 papers")));
+                            && label.getText().contains("Only added the top 5 (by citations) of 6 papers")));
 
             // Importing again while already at the cap adds nothing more and shows the cap message.
             viewModel.getAuthorPapersFound().setAll(

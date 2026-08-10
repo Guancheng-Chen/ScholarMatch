@@ -26,6 +26,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -204,7 +205,8 @@ public final class PublicationEditorPanel extends JPanel {
         paperLookupViewModel.statusMessageProperty().addListener(statusLabel::setText);
 
         paperLookupViewModel.getAuthorPapersFound().addListener(() -> {
-            final List<Publication> found = paperLookupViewModel.getAuthorPapersFound();
+            final List<Publication> found = new ArrayList<>(paperLookupViewModel.getAuthorPapersFound());
+            found.sort(Comparator.comparingInt(Publication::getCitationCount).reversed());
             final int remainingSlots = MAX_PUBLICATIONS - this.papersModel.size();
             if (remainingSlots <= 0) {
                 statusLabel.setText("Already at the " + MAX_PUBLICATIONS
@@ -213,8 +215,9 @@ public final class PublicationEditorPanel extends JPanel {
             }
             if (found.size() > remainingSlots) {
                 this.papersModel.addAll(found.subList(0, remainingSlots));
-                statusLabel.setText("Only added " + remainingSlots + " of " + found.size()
-                    + " papers — profiles are limited to " + MAX_PUBLICATIONS + " publications.");
+                statusLabel.setText("Only added the top " + remainingSlots + " (by citations) of "
+                    + found.size() + " papers — profiles are limited to " + MAX_PUBLICATIONS
+                    + " publications.");
             } else {
                 this.papersModel.addAll(found);
             }
