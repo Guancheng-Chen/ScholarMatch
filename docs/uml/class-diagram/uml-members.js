@@ -1,10 +1,10 @@
-// Generated from src/main/java by generate-uml-members.mjs. Do not edit by hand.
+// Generated from the current src/main/java tree. Do not edit by hand.
 window.UML_TYPES = {
   "AcademicEmailDomainDataAccessInterface": {
     "name": "AcademicEmailDomainDataAccessInterface",
     "kind": "interface",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/AcademicEmailDomainDataAccessInterface.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/AcademicEmailDomainDataAccessInterface.java",
     "extends": [],
     "implements": [],
     "attributes": [],
@@ -1950,8 +1950,8 @@ window.UML_TYPES = {
   "AuthorCandidateDto": {
     "name": "AuthorCandidateDto",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/AuthorCandidateDto.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.paper_lookup",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/paper_lookup/AuthorCandidateDto.java",
     "extends": [],
     "implements": [
       "AuthorCandidateDataAccessInterface"
@@ -3442,8 +3442,8 @@ window.UML_TYPES = {
   "ClasspathAcademicEmailDomainRepository": {
     "name": "ClasspathAcademicEmailDomainRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/ClasspathAcademicEmailDomainRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/ClasspathAcademicEmailDomainRepository.java",
     "extends": [],
     "implements": [
       "AcademicEmailDomainDataAccessInterface"
@@ -6430,8 +6430,8 @@ window.UML_TYPES = {
   "EmailChangeCodeDeliveryDataAccessInterface": {
     "name": "EmailChangeCodeDeliveryDataAccessInterface",
     "kind": "interface",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/EmailChangeCodeDeliveryDataAccessInterface.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/EmailChangeCodeDeliveryDataAccessInterface.java",
     "extends": [],
     "implements": [],
     "attributes": [],
@@ -6459,8 +6459,8 @@ window.UML_TYPES = {
   "EmailVerificationChallenge": {
     "name": "EmailVerificationChallenge",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/EmailVerificationChallenge.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/EmailVerificationChallenge.java",
     "extends": [],
     "implements": [],
     "attributes": [
@@ -6604,8 +6604,8 @@ window.UML_TYPES = {
   "EmailVerificationOutcome": {
     "name": "EmailVerificationOutcome",
     "kind": "enum",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/EmailVerificationOutcome.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/EmailVerificationOutcome.java",
     "extends": [],
     "implements": [],
     "attributes": [],
@@ -6614,8 +6614,8 @@ window.UML_TYPES = {
   "EmailVerificationResult": {
     "name": "EmailVerificationResult",
     "kind": "record",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/EmailVerificationResult.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/EmailVerificationResult.java",
     "extends": [],
     "implements": [],
     "attributes": [
@@ -6684,8 +6684,8 @@ window.UML_TYPES = {
   "FallbackUserApiGateway": {
     "name": "FallbackUserApiGateway",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/FallbackUserApiGateway.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.paper_lookup",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/paper_lookup/FallbackUserApiGateway.java",
     "extends": [],
     "implements": [
       "UserAPIGatewayInterface"
@@ -6944,8 +6944,8 @@ window.UML_TYPES = {
   "InMemoryEmailVerificationChallengeRepository": {
     "name": "InMemoryEmailVerificationChallengeRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/InMemoryEmailVerificationChallengeRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/InMemoryEmailVerificationChallengeRepository.java",
     "extends": [],
     "implements": [],
     "attributes": [
@@ -8961,8 +8961,8 @@ window.UML_TYPES = {
   "LocalAccountSettingsRepository": {
     "name": "LocalAccountSettingsRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalAccountSettingsRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalAccountSettingsRepository.java",
     "extends": [],
     "implements": [
       "VerificationEmailSenderDataAccessInterface",
@@ -9141,8 +9141,8 @@ window.UML_TYPES = {
   "LocalAuthRepository": {
     "name": "LocalAuthRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalAuthRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalAuthRepository.java",
     "extends": [],
     "implements": [
       "LoginDataAccessInterface",
@@ -9152,6 +9152,20 @@ window.UML_TYPES = {
       {
         "name": "state",
         "type": "LocalServerState",
+        "visibility": "−",
+        "static": false,
+        "readOnly": true
+      },
+      {
+        "name": "emailChallenges",
+        "type": "InMemoryEmailVerificationChallengeRepository",
+        "visibility": "−",
+        "static": false,
+        "readOnly": true
+      },
+      {
+        "name": "clock",
+        "type": "Clock",
         "visibility": "−",
         "static": false,
         "readOnly": true
@@ -9169,6 +9183,14 @@ window.UML_TYPES = {
           {
             "name": "state",
             "type": "LocalServerState"
+          },
+          {
+            "name": "emailChallenges",
+            "type": "InMemoryEmailVerificationChallengeRepository"
+          },
+          {
+            "name": "clock",
+            "type": "Clock"
           }
         ]
       },
@@ -9223,8 +9245,8 @@ window.UML_TYPES = {
   "LocalMatchingRepository": {
     "name": "LocalMatchingRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalMatchingRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalMatchingRepository.java",
     "extends": [],
     "implements": [
       "RecommendDataAccessInterface",
@@ -9327,8 +9349,8 @@ window.UML_TYPES = {
   "LocalMessagingRepository": {
     "name": "LocalMessagingRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalMessagingRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalMessagingRepository.java",
     "extends": [],
     "implements": [
       "SendMessageDataAccessInterface",
@@ -9406,8 +9428,8 @@ window.UML_TYPES = {
   "LocalPostingRepository": {
     "name": "LocalPostingRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalPostingRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalPostingRepository.java",
     "extends": [],
     "implements": [
       "CreatePostingDataAccessInterface",
@@ -9607,8 +9629,8 @@ window.UML_TYPES = {
   "LocalProfileRepository": {
     "name": "LocalProfileRepository",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalProfileRepository.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalProfileRepository.java",
     "extends": [],
     "implements": [
       "LoadProfileDataAccessInterface",
@@ -9768,8 +9790,8 @@ window.UML_TYPES = {
   "LocalServerState": {
     "name": "LocalServerState",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/LocalServerState.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/LocalServerState.java",
     "extends": [],
     "implements": [],
     "attributes": [
@@ -10082,8 +10104,8 @@ window.UML_TYPES = {
   "LocalUserApiGateway": {
     "name": "LocalUserApiGateway",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/LocalUserApiGateway.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.paper_lookup",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/paper_lookup/LocalUserApiGateway.java",
     "extends": [],
     "implements": [
       "UserAPIGatewayInterface"
@@ -14275,32 +14297,6 @@ window.UML_TYPES = {
           {
             "name": "candidates",
             "type": "List<AuthorCandidateData>"
-          },
-          {
-            "name": "query",
-            "type": "String"
-          }
-        ]
-      },
-      {
-        "name": "compareCandidates",
-        "visibility": "−",
-        "static": true,
-        "abstract": false,
-        "constructor": false,
-        "returnType": "int",
-        "parameters": [
-          {
-            "name": "first",
-            "type": "AuthorCandidateData"
-          },
-          {
-            "name": "second",
-            "type": "AuthorCandidateData"
-          },
-          {
-            "name": "queryTokens",
-            "type": "List<String>"
           }
         ]
       },
@@ -14315,20 +14311,6 @@ window.UML_TYPES = {
           {
             "name": "candidate",
             "type": "AuthorCandidateData"
-          }
-        ]
-      },
-      {
-        "name": "sortedNameTokens",
-        "visibility": "−",
-        "static": true,
-        "abstract": false,
-        "constructor": false,
-        "returnType": "List<String>",
-        "parameters": [
-          {
-            "name": "name",
-            "type": "String"
           }
         ]
       },
@@ -16809,6 +16791,13 @@ window.UML_TYPES = {
       },
       {
         "name": "FIELD_HEIGHT",
+        "type": "int",
+        "visibility": "−",
+        "static": true,
+        "readOnly": true
+      },
+      {
+        "name": "MAX_PUBLICATIONS",
         "type": "int",
         "visibility": "−",
         "static": true,
@@ -19652,8 +19641,8 @@ window.UML_TYPES = {
   "SecureVerificationCodeGenerator": {
     "name": "SecureVerificationCodeGenerator",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/SecureVerificationCodeGenerator.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/SecureVerificationCodeGenerator.java",
     "extends": [],
     "implements": [
       "VerificationCodeGeneratorInterface"
@@ -19731,8 +19720,8 @@ window.UML_TYPES = {
   "SemanticScholarGateway": {
     "name": "SemanticScholarGateway",
     "kind": "class",
-    "packageName": "com.scholarmatch.frameworks.data_access_object",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/SemanticScholarGateway.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.paper_lookup",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/paper_lookup/SemanticScholarGateway.java",
     "extends": [],
     "implements": [
       "UserAPIGatewayInterface"
@@ -21284,6 +21273,13 @@ window.UML_TYPES = {
       },
       {
         "name": "MAX_FUTURE_YEARS",
+        "type": "int",
+        "visibility": "−",
+        "static": true,
+        "readOnly": true
+      },
+      {
+        "name": "MAX_PUBLICATIONS",
         "type": "int",
         "visibility": "−",
         "static": true,
@@ -23416,8 +23412,8 @@ window.UML_TYPES = {
   "VerificationCodeGeneratorInterface": {
     "name": "VerificationCodeGeneratorInterface",
     "kind": "interface",
-    "packageName": "com.scholarmatch.frameworks.data_access_object.localMockServer",
-    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/localMockServer/VerificationCodeGeneratorInterface.java",
+    "packageName": "com.scholarmatch.frameworks.data_access_object.local_mock_server",
+    "sourcePath": "src/main/java/com/scholarmatch/frameworks/data_access_object/local_mock_server/VerificationCodeGeneratorInterface.java",
     "extends": [],
     "implements": [],
     "attributes": [],

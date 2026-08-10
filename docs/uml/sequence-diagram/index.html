@@ -6,6 +6,7 @@
 <title>ScholarMatch — Sequence Diagrams</title>
 <style>
     :root {
+        color-scheme: light dark;
         --bg: #ffffff;
         --bg-alt: #f5f6f8;
         --text: #1a1f2b;
@@ -122,6 +123,7 @@
 
     .view-controls {
         display: flex;
+        flex-wrap: wrap;
         flex-shrink: 0;
         gap: 6px;
     }
@@ -180,54 +182,88 @@
 
     .frame {
         overflow: auto;
-        background: #ffffff;
+        background: light-dark(#ffffff, #191a1d);
         border: 1px solid var(--border);
         border-radius: 6px;
     }
 
-    .frame img {
+    .sequence-svg {
         display: block;
         width: 100%;
         height: auto;
+        min-width: 760px;
     }
 
-    .image-crop {
-        width: 100%;
-    }
-
-    .frame.hide-image-title .image-crop {
-        position: relative;
-        overflow: hidden;
-        aspect-ratio: var(--image-width) / var(--cropped-height);
-    }
-
-    .frame.hide-image-title img {
-        position: absolute;
-        top: calc(-1 * var(--fit-offset));
-        left: 0;
-    }
-
-    body.actual-size .frame img {
+    body.actual-size .sequence-svg {
         width: auto;
         max-width: none;
     }
 
-    body.actual-size .frame.hide-image-title .image-crop {
-        width: calc(var(--image-width) * 1px);
-        height: calc(var(--cropped-height) * 1px);
-        aspect-ratio: auto;
+    .sequence-svg .participant-box {
+        fill: light-dark(#f2edfd, #262038);
+        stroke: var(--accent);
+        stroke-width: 1.5;
     }
 
-    body.actual-size .frame.hide-image-title img {
-        top: calc(-1 * var(--crop-top));
+    .sequence-svg .participant-name,
+    .sequence-svg .message-label,
+    .sequence-svg .fragment-label,
+    .sequence-svg .note-label {
+        fill: var(--text);
     }
 
-    .missing-frame {
-        padding: 32px;
-        color: var(--text-muted);
-        background: var(--bg-alt);
-        border: 1px dashed var(--border);
-        font-size: 13px;
+    .sequence-svg .participant-role,
+    .sequence-svg .package-label {
+        fill: var(--text-muted);
+    }
+
+    .sequence-svg .lifeline,
+    .sequence-svg .message-line,
+    .sequence-svg .fragment-line {
+        stroke: light-dark(#6b7280, #aeb4c0);
+    }
+
+    .sequence-svg .lifeline {
+        stroke-dasharray: 6 5;
+    }
+
+    .sequence-svg .message-line.return {
+        stroke-dasharray: 8 5;
+    }
+
+    .sequence-svg .message-line.error,
+    .sequence-svg .message-label.error {
+        stroke: light-dark(#b42318, #ff8a80);
+        fill: light-dark(#b42318, #ff8a80);
+    }
+
+    .sequence-svg .arrow-head {
+        fill: light-dark(#4b5563, #c4c9d2);
+    }
+
+    .sequence-svg .arrow-head.error {
+        fill: light-dark(#b42318, #ff8a80);
+    }
+
+    .sequence-svg .activation {
+        fill: light-dark(#f8f8fa, #2b2f3a);
+        stroke: light-dark(#818794, #aeb4c0);
+    }
+
+    .sequence-svg .fragment-box {
+        fill: none;
+        stroke: light-dark(#8a909c, #8f96a3);
+    }
+
+    .sequence-svg .note-box {
+        fill: light-dark(#fff8c5, #443d20);
+        stroke: light-dark(#b79700, #d4b72c);
+    }
+
+    .source-summary {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
     }
 
     .top-link {
@@ -277,9 +313,12 @@
             <p>
                 One sequence diagram per use case, showing the runtime calls between controllers,
                 boundaries, interactors, presenters, gateways, and data objects.
+                <span class="source-summary" id="source-summary"></span>
             </p>
         </div>
-        <div class="view-controls" aria-label="Diagram size">
+        <div class="view-controls" aria-label="Diagram controls">
+            <button type="button" id="online-mode" class="active">Online adapters</button>
+            <button type="button" id="offline-mode">Offline repositories</button>
             <button type="button" id="fit-width">Fit width</button>
             <button type="button" id="actual-size" class="active">Actual size</button>
         </div>
@@ -288,35 +327,14 @@
     <div id="diagram-list"></div>
 </main>
 
+<script src="../class-diagram/uml-members.js"></script>
+<script src="sequence-specs.js"></script>
 <script>
-    const useCases = [
-        "AcceptApplication",
-        "ApplyToPosting",
-        "ChangeEmail",
-        "ChangePassword",
-        "ClosePosting",
-        "Connect",
-        "CreatePosting",
-        "DeclineApplication",
-        "DeleteAccount",
-        "Dislike",
-        "LoadMatches",
-        "LoadMessage",
-        "LoadMyApplications",
-        "LoadPostings",
-        "LoadProfile",
-        "Login",
-        "Logout",
-        "PaperLookup",
-        "Recommend",
-        "Register",
-        "RequestEmailVerification",
-        "SendMessage",
-        "Skip",
-        "UpdateProfile"
-    ];
+    const useCases = window.SEQUENCE_SPECS || [];
+    const umlTypes = window.UML_TYPES || {};
+    let accessMode = "online";
 
-    const imageFiles = {
+    const legacyImages = {
         AcceptApplication: "AcceptApplicationSequence-ZhijieYuan.png",
         ApplyToPosting: "ApplyToPostingSequence-MarianLin.png",
         ChangeEmail: "ChangeEmailSequence-AlanXue.png",
@@ -343,45 +361,209 @@
         UpdateProfile: "UpdateProfileSequence-ZhijieYuan.png"
     };
 
-    const imageTitleCrops = {
-        ClosePosting: { width: 3510, height: 1922, top: 120 },
-        LoadMyApplications: { width: 3275, height: 1794, top: 120 }
-    };
-
     function titleCase(name) {
         return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
     }
 
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;");
+    }
+
+    function simpleTypeNames(value) {
+        return String(value)
+            .split(/\s*(?:\/|→)\s*/)
+            .map((part) => part.replace(/\s*\([^)]*\)\s*$/, "").trim())
+            .filter(Boolean);
+    }
+
+    function packageLabel(value) {
+        const packages = [...new Set(simpleTypeNames(value)
+            .map((name) => umlTypes[name]?.packageName)
+            .filter(Boolean))];
+        if (!packages.length) return "runtime collaborator";
+        return packages.map((name) => name.replace("com.scholarmatch.", "")).join(" / ");
+    }
+
+    function unique(values) {
+        return [...new Set(values.filter(Boolean))];
+    }
+
+    function participantsFor(spec) {
+        const ports = unique(spec.dataCalls.map((call) => call.port)).join(" / ");
+        const adapters = unique(spec.dataCalls.map((call) => call[accessMode])).join(" / ");
+        return [
+            { id: "view", role: "UI", name: spec.view },
+            { id: "controller", role: "Controller", name: spec.controller },
+            { id: "boundary", role: "Input boundary", name: spec.inputBoundary },
+            { id: "interactor", role: "Use case", name: spec.interactor },
+            { id: "port", role: "Data-access port", name: ports },
+            { id: "adapter", role: accessMode === "online" ? "Online adapter" : "Offline repository", name: adapters },
+            { id: "output", role: "Output boundary", name: spec.outputBoundary },
+            { id: "presenter", role: "Presenter", name: spec.presenter },
+            { id: "viewModel", role: "View model", name: spec.viewModel }
+        ].filter((participant) => participant.name);
+    }
+
+    function messagesFor(spec) {
+        const messages = [];
+        if (spec.controller) messages.push({ from: "view", to: "controller", label: spec.entry });
+        if (spec.inputBoundary) {
+            messages.push({ from: "controller", to: "boundary", label: spec.inputData ? `new ${spec.inputData}` : spec.request });
+            messages.push({ from: "boundary", to: "interactor", label: spec.request });
+        }
+        if (spec.validation) messages.push({ kind: "note", label: `Validation: ${spec.validation}` });
+
+        spec.dataCalls.forEach((call) => {
+            messages.push({ from: "interactor", to: "port", label: call.call });
+            messages.push({ from: "port", to: "adapter", label: call.call });
+            if (call.result && call.result !== "void") {
+                messages.push({ from: "adapter", to: "port", label: call.result, return: true });
+                messages.push({ from: "port", to: "interactor", label: call.result, return: true });
+            }
+        });
+
+        if (spec.outputBoundary) messages.push({ from: "interactor", to: "output", label: spec.success });
+        if (spec.presenter) messages.push({ from: "output", to: "presenter", label: spec.success });
+        if (spec.viewModel) messages.push({ from: "presenter", to: "viewModel", label: spec.viewUpdate });
+        else if (spec.viewUpdate) messages.push({ kind: "note", label: spec.viewUpdate });
+
+        if (spec.failure) {
+            messages.push({ kind: "fragment", label: "alt — validation or data-access failure" });
+            messages.push({ from: "interactor", to: "output", label: spec.failure, error: true });
+            messages.push({ from: "output", to: "presenter", label: spec.failure, error: true });
+            if (spec.viewModel) {
+                messages.push({ from: "presenter", to: "viewModel", label: spec.failureViewUpdate, error: true });
+            }
+        }
+        if (spec.note) messages.push({ kind: "note", label: spec.note });
+        if (spec.outputData) messages.push({ kind: "note", label: `Data objects: ${spec.inputData || "none"} → ${spec.outputData}` });
+        return messages;
+    }
+
+    function truncate(value, limit) {
+        return value.length > limit ? `${value.slice(0, limit - 1)}…` : value;
+    }
+
+    function renderSequence(svg, spec) {
+        const participants = participantsFor(spec);
+        const messages = messagesFor(spec);
+        const participantById = new Map(participants.map((participant, index) => [participant.id, { ...participant, index }]));
+        const laneWidth = 210;
+        const marginX = 86;
+        const boxWidth = 174;
+        const boxHeight = 66;
+        const topY = 26;
+        const firstMessageY = 134;
+        const rowHeight = 58;
+        const bottomY = firstMessageY + messages.length * rowHeight + 28;
+        const width = Math.max(860, marginX * 2 + (participants.length - 1) * laneWidth);
+        const height = bottomY + boxHeight + 28;
+        const xOf = (id) => marginX + participantById.get(id).index * laneWidth;
+
+        const participantMarkup = participants.map((participant, index) => {
+            const x = marginX + index * laneWidth;
+            const label = truncate(participant.name, 25);
+            const sourcePackage = packageLabel(participant.name);
+            return `
+                <g>
+                    <title>${escapeHtml(participant.name)} — ${escapeHtml(sourcePackage)}</title>
+                    <rect class="participant-box" x="${x - boxWidth / 2}" y="${topY}" width="${boxWidth}" height="${boxHeight}" rx="4"></rect>
+                    <text class="participant-name" x="${x}" y="${topY + 27}" text-anchor="middle" font-size="13" font-weight="600">${escapeHtml(label)}</text>
+                    <text class="participant-role" x="${x}" y="${topY + 49}" text-anchor="middle" font-size="11">${escapeHtml(participant.role)}</text>
+                    <line class="lifeline" x1="${x}" y1="${topY + boxHeight}" x2="${x}" y2="${bottomY}"></line>
+                    <rect class="activation" x="${x - 5}" y="${firstMessageY - 14}" width="10" height="${Math.max(32, bottomY - firstMessageY + 14)}"></rect>
+                    <rect class="participant-box" x="${x - boxWidth / 2}" y="${bottomY}" width="${boxWidth}" height="${boxHeight}" rx="4"></rect>
+                    <text class="participant-name" x="${x}" y="${bottomY + 38}" text-anchor="middle" font-size="13" font-weight="600">${escapeHtml(label)}</text>
+                </g>`;
+        }).join("");
+
+        const messageMarkup = messages.map((message, index) => {
+            const y = firstMessageY + index * rowHeight;
+            if (message.kind === "note") {
+                return `
+                    <g>
+                        <rect class="note-box" x="${marginX - boxWidth / 2}" y="${y - 23}" width="${width - marginX * 2 + boxWidth}" height="38" rx="3"></rect>
+                        <text class="note-label" x="${marginX - boxWidth / 2 + 12}" y="${y + 1}" font-size="12">${escapeHtml(truncate(message.label, 170))}</text>
+                    </g>`;
+            }
+            if (message.kind === "fragment") {
+                return `
+                    <g>
+                        <line class="fragment-line" x1="${marginX - boxWidth / 2}" y1="${y}" x2="${width - marginX + boxWidth / 2}" y2="${y}" stroke-dasharray="9 6"></line>
+                        <rect class="fragment-box" x="${marginX - boxWidth / 2}" y="${y - 18}" width="300" height="28"></rect>
+                        <text class="fragment-label" x="${marginX - boxWidth / 2 + 10}" y="${y + 1}" font-size="12">${escapeHtml(message.label)}</text>
+                    </g>`;
+            }
+
+            const fromX = xOf(message.from);
+            const toX = xOf(message.to);
+            const labelX = (fromX + toX) / 2;
+            const labelClass = message.error ? "message-label error" : "message-label";
+            const lineClass = `message-line${message.return ? " return" : ""}${message.error ? " error" : ""}`;
+            const marker = message.error ? "url(#arrow-error)" : "url(#arrow)";
+            return `
+                <g>
+                    <line class="${lineClass}" x1="${fromX}" y1="${y}" x2="${toX}" y2="${y}" stroke-width="1.5" marker-end="${marker}"></line>
+                    <text class="${labelClass}" x="${labelX}" y="${y - 8}" text-anchor="middle" font-size="12">${escapeHtml(truncate(message.label, 54))}</text>
+                </g>`;
+        }).join("");
+
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        svg.setAttribute("width", width);
+        svg.setAttribute("height", height);
+        svg.innerHTML = `
+            <title>${escapeHtml(titleCase(spec.name))} sequence diagram using ${accessMode} data access</title>
+            <desc>Runtime calls from the UI through Clean Architecture boundaries and the selected data-access implementation.</desc>
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path class="arrow-head" d="M 0 0 L 10 5 L 0 10 z"></path>
+                </marker>
+                <marker id="arrow-error" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path class="arrow-head error" d="M 0 0 L 10 5 L 0 10 z"></path>
+                </marker>
+            </defs>
+            ${participantMarkup}
+            ${messageMarkup}`;
+    }
+
     const navList = document.getElementById("nav-list");
     const diagramList = document.getElementById("diagram-list");
+    const sourceSummary = document.getElementById("source-summary");
 
-    useCases.forEach((name) => {
-        const missing = !imageFiles[name];
-        const crop = imageTitleCrops[name];
-        const cropStyle = crop
-            ? `--image-width:${crop.width};--cropped-height:${crop.height - crop.top};--crop-top:${crop.top}px;--fit-offset:${(crop.top / (crop.height - crop.top) * 100).toFixed(4)}%`
-            : "";
+    useCases.forEach((spec) => {
         const navItem = document.createElement("li");
-        navItem.innerHTML = `<a href="#uc-${name}" class="${missing ? "missing" : ""}">${titleCase(name)}${missing ? " — missing" : ""}</a>`;
+        navItem.innerHTML = `<a href="#uc-${spec.name}">${titleCase(spec.name)}</a>`;
         navList.appendChild(navItem);
 
         const section = document.createElement("section");
         section.className = "usecase";
-        section.id = `uc-${name}`;
+        section.id = `uc-${spec.name}`;
         section.innerHTML = `
             <div class="section-heading">
-                <h2>${titleCase(name)}</h2>
-                <a href="../class-diagram/index.html#uml-${name}">Open class diagram →</a>
+                <h2>${titleCase(spec.name)}</h2>
+                <span>
+                    <a href="../class-diagram/index.html#uml-${spec.name}">Class diagram →</a>
+                    · <a href="${legacyImages[spec.name]}">Legacy PNG</a>
+                </span>
             </div>
-            ${missing
-                ? `<div class="missing-frame">No sequence diagram PNG exists for ${titleCase(name)} in this folder.</div>`
-                : `<div class="frame ${crop ? "hide-image-title" : ""}"><div class="image-crop" style="${cropStyle}"><img src="${imageFiles[name]}" loading="lazy" alt="${titleCase(name)} sequence diagram"></div></div>`}
+            <div class="frame">
+                <svg class="sequence-svg" role="img" aria-label="${titleCase(spec.name)} sequence diagram" data-usecase="${spec.name}"></svg>
+            </div>
             <a class="top-link" href="#top">↑ back to top</a>`;
         diagramList.appendChild(section);
+        renderSequence(section.querySelector("svg"), spec);
     });
+
+    sourceSummary.textContent = `${useCases.length} live diagrams checked against the current src/main/java tree; participant tooltips show current packages.`;
 
     const fitWidth = document.getElementById("fit-width");
     const actualSize = document.getElementById("actual-size");
+    const onlineMode = document.getElementById("online-mode");
+    const offlineMode = document.getElementById("offline-mode");
 
     function setSizeMode(actual) {
         document.body.classList.toggle("actual-size", actual);
@@ -389,8 +571,20 @@
         actualSize.classList.toggle("active", actual);
     }
 
+    function setAccessMode(mode) {
+        accessMode = mode;
+        onlineMode.classList.toggle("active", mode === "online");
+        offlineMode.classList.toggle("active", mode === "offline");
+        document.querySelectorAll(".sequence-svg").forEach((svg) => {
+            const spec = useCases.find((candidate) => candidate.name === svg.dataset.usecase);
+            renderSequence(svg, spec);
+        });
+    }
+
     fitWidth.addEventListener("click", () => setSizeMode(false));
     actualSize.addEventListener("click", () => setSizeMode(true));
+    onlineMode.addEventListener("click", () => setAccessMode("online"));
+    offlineMode.addEventListener("click", () => setAccessMode("offline"));
 
     const navLinks = [...navList.querySelectorAll("a")];
     const observer = new IntersectionObserver((entries) => {

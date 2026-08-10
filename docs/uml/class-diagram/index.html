@@ -474,6 +474,7 @@
         <p>
             One IntelliJ-style class diagram per use case. Each box shows the class name,
             declared fields, declared methods, and all relationships found in the Java source.
+            <span id="source-summary"></span>
         </p>
     </header>
 
@@ -568,7 +569,9 @@
             module,
             view: options.view || [],
             controller: options.controller === false ? [] : [`${name}Controller`],
-            presenter: options.presenter === false ? [] : [options.presenter || `${name}Presenter`],
+            presenter: options.presenter === false
+                ? []
+                : (Array.isArray(options.presenter) ? options.presenter : [options.presenter || `${name}Presenter`]),
             viewModel: options.viewModel || [],
             inputBoundary: options.inputBoundary === false ? [] : [`${name}InputBoundary`],
             interactor: [`${name}Interactor`],
@@ -578,6 +581,7 @@
             ports: options.ports || [],
             online: options.online || [],
             offline: options.offline || [],
+            dto: options.dto || [],
             entities: options.entities || []
         };
     }
@@ -585,27 +589,32 @@
     define("Register", "account", {
         view: ["RegisterView"], viewModel: ["RegisterViewModel"],
         ports: ["RegisterDataAccessInterface", "SessionWriterInterface"],
-        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"], entities: ["User"]
+        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"],
+        dto: ["RegisterAccountData", "AuthResult"], entities: ["User"]
     });
     define("Login", "account", {
         view: ["LoginView"], viewModel: ["LoginViewModel"],
         ports: ["LoginDataAccessInterface", "SessionWriterInterface"],
-        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"], entities: ["User"]
+        online: ["AuthGateway", "CurrentUserProvider"], offline: ["LocalAuthRepository", "CurrentUserProvider"],
+        dto: ["AuthResult"], entities: ["User"]
     });
     define("Logout", "account", {
         view: ["MainView", "MainLayoutView"], viewModel: ["LogoutViewModel"],
         ports: ["SessionClearerInterface"], online: ["CurrentUserProvider"], offline: ["CurrentUserProvider"]
     });
     define("RequestEmailVerification", "account", {
-        view: ["RegisterView", "AccountSettingsView"], presenter: "RequestEmailVerificationPresenter",
+        view: ["RegisterView", "AccountSettingsView"],
+        presenter: ["RequestEmailVerificationPresenter", "AccountSettingsPresenter"],
         viewModel: ["RegisterViewModel", "AccountSettingsViewModel"],
         ports: ["VerificationEmailSenderDataAccessInterface"],
-        online: ["RemoteVerificationEmailSender"], offline: ["LocalAccountSettingsRepository"], entities: ["User"]
+        online: ["RemoteVerificationEmailSender", "AccountSettingsGateway"],
+        offline: ["LocalAccountSettingsRepository"], entities: ["User"]
     });
     define("ChangeEmail", "account", {
-        view: ["AccountSettingsView"], presenter: "AccountSettingsPresenter", viewModel: ["AccountSettingsViewModel"],
+        view: ["AccountSettingsView"], presenter: "AccountSettingsPresenter",
+        viewModel: ["AccountSettingsViewModel", "UpdateProfileViewModel"],
         ports: ["ChangeEmailDataAccessInterface"], online: ["AccountSettingsGateway"],
-        offline: ["LocalAccountSettingsRepository"], entities: ["User"]
+        offline: ["LocalAccountSettingsRepository"], dto: ["UserData"], entities: ["User"]
     });
     define("ChangePassword", "account", {
         view: ["AccountSettingsView"], presenter: "AccountSettingsPresenter", viewModel: ["AccountSettingsViewModel"],
@@ -621,7 +630,8 @@
 
     define("LoadProfile", "profile", {
         view: ["UpdateProfileView"], viewModel: ["UpdateProfileViewModel"], inputData: false,
-        ports: ["LoadProfileDataAccessInterface"], online: ["ProfileGateway"], offline: ["LocalProfileRepository"], entities: ["User"]
+        ports: ["LoadProfileDataAccessInterface"], online: ["ProfileGateway"], offline: ["LocalProfileRepository"],
+        dto: ["UserData"], entities: ["User"]
     });
     define("UpdateProfile", "profile", {
         view: ["UpdateProfileView"], viewModel: ["UpdateProfileViewModel"],
@@ -632,20 +642,24 @@
         view: ["UpdateProfileView", "PublicationEditorPanel"], viewModel: ["PaperLookupViewModel"],
         inputData: ["SearchAuthorsInputData", "SelectAuthorInputData"], outputData: ["AuthorCandidateData"],
         ports: ["UserAPIGatewayInterface", "AuthorCandidateDataAccessInterface"],
-        online: ["SemanticScholarGateway"], offline: ["LocalUserApiGateway", "FallbackUserApiGateway"], entities: ["Publication"]
+        online: ["FallbackUserApiGateway", "SemanticScholarGateway"],
+        offline: ["LocalUserApiGateway"], entities: ["Publication"]
     });
 
     define("Recommend", "matching", {
         view: ["RecommendView"], viewModel: ["RecommendViewModel"], inputData: false,
-        ports: ["RecommendDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+        ports: ["RecommendDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"],
+        dto: ["UserData"], entities: ["User"]
     });
     define("LoadMatches", "matching", {
         view: ["LoadMatchesView", "ChatView"], viewModel: ["LoadMatchesViewModel"], inputData: false,
-        ports: ["LoadMatchesDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+        ports: ["LoadMatchesDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"],
+        dto: ["UserData"], entities: ["User"]
     });
     define("Connect", "matching", {
         view: ["RecommendView"], viewModel: ["LoadMatchesViewModel"],
-        ports: ["ConnectDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"], entities: ["User"]
+        ports: ["ConnectDataAccessInterface"], online: ["MatchingGateway"], offline: ["LocalMatchingRepository"],
+        dto: ["UserData"], entities: ["User"]
     });
     define("Dislike", "matching", {
         view: ["RecommendView"], outputData: false,
@@ -657,41 +671,50 @@
 
     define("LoadMessage", "messaging", {
         view: ["ChatView"], viewModel: ["ChatViewModel"],
-        ports: ["LoadMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"], entities: ["Message"]
+        ports: ["LoadMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"],
+        dto: ["MessageData"], entities: ["Message"]
     });
     define("SendMessage", "messaging", {
         view: ["ChatView"], viewModel: ["ChatViewModel"],
-        ports: ["SendMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"], entities: ["Message"]
+        ports: ["SendMessageDataAccessInterface"], online: ["MessagingGateway"], offline: ["LocalMessagingRepository"],
+        dto: ["MessageData"], entities: ["Message"]
     });
 
     define("CreatePosting", "postings", {
         view: ["MyPostingsView", "CreatePostingPanel"], viewModel: ["MyPostingsViewModel"],
-        ports: ["CreatePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["Posting"]
+        ports: ["CreatePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingData"], entities: ["Posting"]
     });
     define("LoadPostings", "postings", {
-        view: ["OpportunitiesView", "MyPostingsView"], viewModel: ["PostingsListViewModel"],
+        view: ["OpportunitiesView", "MyPostingsView"],
+        viewModel: ["PostingsListViewModel", "OpportunitiesViewModel", "MyPostingsViewModel"],
         ports: ["LoadPostingsDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
-        entities: ["Posting", "PostingApplication"]
+        dto: ["PostingScope", "PostingData", "PostingApplicationData"], entities: ["Posting", "PostingApplication"]
     });
     define("ClosePosting", "postings", {
         view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
-        ports: ["ClosePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["Posting"]
+        ports: ["ClosePostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingData"], entities: ["Posting"]
     });
     define("ApplyToPosting", "postings", {
         view: ["OpportunitiesView", "ApplyToPostingPanel"], viewModel: ["OpportunitiesViewModel"],
-        ports: ["ApplyToPostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+        ports: ["ApplyToPostingDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingApplicationData"], entities: ["PostingApplication"]
     });
     define("AcceptApplication", "postings", {
         view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
-        ports: ["AcceptApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+        ports: ["AcceptApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingApplicationData"], entities: ["PostingApplication"]
     });
     define("DeclineApplication", "postings", {
         view: ["MyPostingsView", "OwnedPostingCard"], viewModel: ["MyPostingsViewModel"],
-        ports: ["DeclineApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+        ports: ["DeclineApplicationDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingApplicationData"], entities: ["PostingApplication"]
     });
     define("LoadMyApplications", "postings", {
         view: ["MyApplicationsView"], viewModel: ["MyApplicationsViewModel"], inputData: false,
-        ports: ["LoadMyApplicationsDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"], entities: ["PostingApplication"]
+        ports: ["LoadMyApplicationsDataAccessInterface"], online: ["PostingGateway"], offline: ["LocalPostingRepository"],
+        dto: ["PostingApplicationData"], entities: ["PostingApplication"]
     });
 
     const UML_TYPES = window.UML_TYPES || {};
@@ -717,6 +740,7 @@
         { key: "viewModel", role: "view model", row: 5, column: 1 },
         { key: "online", role: "online implementation", row: 6, column: 2 },
         { key: "offline", role: "offline implementation", row: 7, column: 2 },
+        { key: "dto", role: "shared / supporting data", row: 7, column: 0 },
         { key: "entities", role: "entity", row: 8, column: 0 }
     ];
 
@@ -965,6 +989,7 @@
     const usecaseSelect = document.getElementById("usecase-select");
     const diagramTitle = document.getElementById("diagram-title");
     const diagramSummary = document.getElementById("diagram-summary");
+    const sourceSummary = document.getElementById("source-summary");
     const sequenceLink = document.getElementById("sequence-link");
     const caLink = document.getElementById("ca-link");
     const umlCanvas = document.getElementById("uml-canvas");
@@ -1056,7 +1081,7 @@
 
         const module = moduleById[spec.module];
         diagramTitle.textContent = `${titleCase(spec.name)} — UML Class Diagram`;
-        diagramSummary.textContent = `${module.title} · ${layout.nodes.length} classes and interfaces`;
+        diagramSummary.textContent = `${module.title} · ${layout.nodes.length} current Java types · source: src/main/java`;
         sequenceLink.href = `../sequence-diagram/index.html#uc-${spec.name}`;
         caLink.href = `../../ca-visuals/index.html#uc-${spec.name}`;
         updateScale();
@@ -1084,6 +1109,7 @@
     });
 
     setSizeMode(true);
+    sourceSummary.textContent = ` Metadata currently covers ${Object.keys(UML_TYPES).length} Java types.`;
     const initialMatch = location.hash.match(/^#uml-(.+)$/);
     selectUseCase(initialMatch && specs[initialMatch[1]] ? initialMatch[1] : selectedUseCase, false);
 </script>
