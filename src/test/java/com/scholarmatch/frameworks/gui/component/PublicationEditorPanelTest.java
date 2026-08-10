@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.DefaultListModel;
@@ -137,6 +138,34 @@ class PublicationEditorPanelTest {
             list.setSelectedIndex(0);
             button(panel, "Import This Author's Papers").doClick();
             assertEquals(460, panel.getMaximumSize().width);
+        });
+    }
+
+    @Test
+    void testImportTruncatesToMaxPublicationsLimit() throws Exception {
+        final PaperLookupViewModel viewModel = new PaperLookupViewModel();
+        SwingUtilities.invokeAndWait(() -> {
+            final PublicationEditorPanel panel = new PublicationEditorPanel(
+                    new PaperLookupController(mock(PaperLookupInputBoundary.class)), viewModel, 500);
+
+            final List<Publication> sixPapers = new ArrayList<>();
+            for (int i = 0; i < 6; i++) {
+                sixPapers.add(new Publication("10.1/doi-" + i, "Paper " + i, 2020, 1));
+            }
+            viewModel.getAuthorPapersFound().setAll(sixPapers);
+
+            assertEquals(5, panel.getPublications().size());
+            assertTrue(SwingTestSupport.findAll(panel, JLabel.class).stream()
+                    .anyMatch(label -> label.getText() != null
+                            && label.getText().contains("Only added 5 of 6 papers")));
+
+            // Importing again while already at the cap adds nothing more and shows the cap message.
+            viewModel.getAuthorPapersFound().setAll(
+                    List.of(new Publication("10.1/doi-extra", "Extra", 2020, 1)));
+            assertEquals(5, panel.getPublications().size());
+            assertTrue(SwingTestSupport.findAll(panel, JLabel.class).stream()
+                    .anyMatch(label -> label.getText() != null
+                            && label.getText().contains("Already at the 5-publication limit")));
         });
     }
 

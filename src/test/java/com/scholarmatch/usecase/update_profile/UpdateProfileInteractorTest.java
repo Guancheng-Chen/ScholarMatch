@@ -308,6 +308,37 @@ class UpdateProfileInteractorTest {
         assertTrue(captureFailMessage(params.build()).contains("Collaboration description is required."));
     }
 
+    // ----- publication count limit -----
+
+    private List<Publication> publications(final int count) {
+        final List<Publication> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            list.add(new Publication("10.1000/doi-" + i, "Paper " + i, 2020, 10));
+        }
+        return list;
+    }
+
+    @Test
+    void testSucceedsWithExactlyMaxPublications() {
+        when(dataAccessObject.updateProfile(any())).thenReturn(updatedUser());
+        final Params params = new Params();
+        params.publications = publications(5);
+
+        interactor.execute(params.build());
+
+        verify(dataAccessObject).updateProfile(any());
+        verify(outputBoundary, never()).prepareFailView(anyString());
+    }
+
+    @Test
+    void testFailsWhenPublicationsExceedMax() {
+        final Params params = new Params();
+        params.publications = publications(6);
+
+        assertTrue(captureFailMessage(params.build())
+                .contains("At most 5 publications are allowed (currently 6)."));
+    }
+
     // ----- education date validation -----
 
     private Education validOngoingEducation() {

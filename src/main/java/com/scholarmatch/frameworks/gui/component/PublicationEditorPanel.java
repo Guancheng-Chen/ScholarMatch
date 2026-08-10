@@ -42,6 +42,7 @@ public final class PublicationEditorPanel extends JPanel {
 
     private static final int DEFAULT_WIDTH = 460;
     private static final int FIELD_HEIGHT = 34;
+    private static final int MAX_PUBLICATIONS = 5;
 
     private final int cardWidth;
     private final DefaultListModel<Publication> papersModel = new DefaultListModel<>();
@@ -202,8 +203,22 @@ public final class PublicationEditorPanel extends JPanel {
         statusLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         paperLookupViewModel.statusMessageProperty().addListener(statusLabel::setText);
 
-        paperLookupViewModel.getAuthorPapersFound().addListener(
-            () -> this.papersModel.addAll(paperLookupViewModel.getAuthorPapersFound()));
+        paperLookupViewModel.getAuthorPapersFound().addListener(() -> {
+            final List<Publication> found = paperLookupViewModel.getAuthorPapersFound();
+            final int remainingSlots = MAX_PUBLICATIONS - this.papersModel.size();
+            if (remainingSlots <= 0) {
+                statusLabel.setText("Already at the " + MAX_PUBLICATIONS
+                    + "-publication limit — remove one to import more.");
+                return;
+            }
+            if (found.size() > remainingSlots) {
+                this.papersModel.addAll(found.subList(0, remainingSlots));
+                statusLabel.setText("Only added " + remainingSlots + " of " + found.size()
+                    + " papers — profiles are limited to " + MAX_PUBLICATIONS + " publications.");
+            } else {
+                this.papersModel.addAll(found);
+            }
+        });
 
         final JLabel sectionLabel = new JLabel("Papers (auto-filled from Semantic User)");
         sectionLabel.setForeground(Theme.FG_MUTED);

@@ -26,6 +26,7 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
     private static final int MAX_INTEREST_LENGTH = 60;
     private static final int MIN_EDUCATION_YEAR = 1900;
     private static final int MAX_FUTURE_YEARS = 10;
+    private static final int MAX_PUBLICATIONS = 5;
 
     private final UpdateProfileDataAccessInterface profileDataAccessObject;
     private final UpdateProfileOutputBoundary outputBoundary;
@@ -99,6 +100,11 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
         }
 
         validateEducations(errors, inputData.getEducations());
+
+        if (inputData.getPublications().size() > MAX_PUBLICATIONS) {
+            errors.add("At most " + MAX_PUBLICATIONS + " publications are allowed (currently "
+                    + inputData.getPublications().size() + ").");
+        }
 
         return errors;
     }

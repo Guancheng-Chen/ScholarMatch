@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/java-21-blue?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
   <img src="https://img.shields.io/badge/build-Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven"/>
   <img src="https://img.shields.io/badge/architecture-Clean%20Architecture-8A2BE2?style=flat-square" alt="Clean Architecture"/>
-  <img src="https://img.shields.io/badge/tests-484%20passing-brightgreen?style=flat-square&logo=junit5&logoColor=white" alt="Tests"/>
+  <img src="https://img.shields.io/badge/tests-492%20passing-brightgreen?style=flat-square&logo=junit5&logoColor=white" alt="Tests"/>
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License"/>
 </p>
 
@@ -20,12 +20,18 @@
 
 *A cross-platform Java desktop app that helps students, researchers, and academics discover collaborators, post and apply to research opportunities, and message their matches — an "Academic Matchmaking and Collaboration Network."*
 
+ScholarMatch was built as a course project for CSC207 (Software Design) at the University of Toronto. Beyond satisfying the course's Clean Architecture requirements, it targets a real gap: researchers and students often struggle to find collaborators who share their research interests, and existing academic networking tools are either too broad (LinkedIn) or too narrow (lab-internal mailing lists).
+
 ScholarMatch pairs a recommendation feed (ranked by shared research interests) with a lightweight job board for research postings and a private chat for confirmed matches. Around that core are:
 
 * Profile building with paper lookup autofill (Semantic Scholar)
 * Mutual-match connect/dislike, with a dedicated matches list and messaging
 * Research postings: create, browse, apply, accept/decline applicants
 * Account settings with verified email changes and password changes
+
+<p align="center">
+  <img src="docs/ui-ux/MainLayoutView_Recommend.png" alt="ScholarMatch Recommend screen — a candidate profile card with Dislike, Skip, and Connect actions" width="720"/>
+</p>
 
 ---
 
@@ -41,10 +47,12 @@ ScholarMatch pairs a recommendation feed (ranked by shared research interests) w
   * [Troubleshooting](#troubleshooting)
   * [Online Mode (default)](#online-mode-default)
   * [Offline Mode](#offline-mode)
+  * [Environment Variables](#environment-variables)
 * [Usage](#usage)
 * [Testing & Code Quality](#testing--code-quality)
 * [Documentation](#documentation)
 * [Accessibility](#accessibility)
+* [Feedback](#feedback)
 * [Contribution Guide](#contribution-guide)
 * [License](#license)
 
@@ -94,16 +102,28 @@ frameworks/
 - **Mutual-Match Flow:** Connect or skip candidates; a match only unlocks messaging once both sides connect, with a dedicated matches list to track who you're paired with.
 
 **Profile & Paper Lookup**
-- **Rich Academic Profile:** Build a profile with institution, academic level, research field, funding status, collaboration preferences, education, and publications.
+- **Rich Academic Profile:** Build a profile with institution, academic level, research field, funding status, collaboration preferences, education, and publications (up to 5).
 - **Semantic Scholar Autofill:** Search for yourself on Semantic Scholar and pull in your h-index, citation count, and publication list instead of typing them by hand.
+
+<p align="center">
+  <img src="docs/ui-ux/UpdateProfileView.png" alt="Edit Profile screen with Semantic Scholar paper-lookup autofill" width="640"/>
+</p>
 
 **Research Postings & Applications**
 - **Create & Browse Postings:** Post a research opportunity with a title, description, research field, collaboration type, and team capacity, then browse active postings from other researchers.
 - **Apply & Review Applicants:** Apply to a posting with a message, and as a poster, accept or decline applicants and track your own application history — postings close automatically once full.
 
+<p align="center">
+  <img src="docs/ui-ux/OpportunitiesView.png" alt="Opportunities screen listing open research postings" width="640"/>
+</p>
+
 **Private Messaging**
 - **Match-Only Conversations:** Message only the people you've mutually matched with, keeping conversations scoped to real connections rather than open to anyone.
 - **Persistent Conversation History:** Revisit past messages with a match at any time from the chat view.
+
+<p align="center">
+  <img src="docs/ui-ux/ChatView.png" alt="Chat screen showing a conversation with a matched researcher" width="640"/>
+</p>
 
 **Account & Security**
 - **Verified Email Changes:** Change your account email through a code-verification flow rather than a plain, unchecked update.
@@ -130,11 +150,11 @@ ScholarMatch follows **Clean Architecture**. Every feature is wired through the 
 
 ### Requirements
 
-| Tool       | Version required | Check yours       |
-| ---------- | ----------------- | ------------------ |
-| **JDK**    | 21 (not older, not newer) | `java -version` |
-| **Maven**  | 3.9+               | `mvn -version`      |
-| **OS**     | Windows / macOS / Linux | —              |
+| Tool       | Version required | Check yours       | Download                              |
+| ---------- | ----------------- | ------------------ | -------------------------------------- |
+| **JDK**    | 21 (not older, not newer) | `java -version` | [Adoptium Temurin 21](https://adoptium.net/temurin/releases/?version=21) |
+| **Maven**  | 3.9+               | `mvn -version`      | [maven.apache.org/download](https://maven.apache.org/download.cgi) |
+| **OS**     | Windows / macOS / Linux | —              | —                                       |
 
 Both commands print a version banner — the important line is `java version "21...."` (for `java -version`) and `Java version: 21...` (for `mvn -version`, near the bottom of its banner). If either shows a different major version, see [I have multiple JDKs installed](#i-have-multiple-jdks-installed) below before continuing — Maven silently uses whatever JDK is first on your `PATH`/`JAVA_HOME`, which is not always the one you expect.
 
@@ -153,10 +173,10 @@ cd ScholarMatch
 mvn clean verify
 ```
 
-This compiles every class, runs [Checkstyle](#testing--code-quality) against `mystyle.xml`, and runs all ~490 JUnit tests. A successful run ends with:
+This compiles every class, runs [Checkstyle](#testing--code-quality) against `mystyle.xml`, and runs all ~492 JUnit tests. A successful run ends with:
 
 ```text
-[INFO] Tests run: 487, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 492, Failures: 0, Errors: 0, Skipped: 0
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
@@ -173,6 +193,21 @@ mvn exec:java
 `mvn clean verify` only *builds and tests* the project — it does **not** open the app window on its own. This is a separate, deliberate step. `mvn exec:java` needs compiled classes already on disk (under `target/classes`), so it depends on step 2 having run at least once; running it on a completely untouched clone fails with `ClassNotFoundException: com.scholarmatch.app.ScholarMatchApp` (also covered in Troubleshooting). After step 2 has run once, you can re-run `mvn exec:java` on its own for subsequent launches — Maven does not require re-running `verify` every time, though `mvn compile exec:java` is the safest one-liner if you've since edited source files.
 
 A window titled **"ScholarMatch"** (1318×801px) should open, defaulting to [Online Mode](#online-mode-default). If no server is reachable, it falls back to [Offline Mode](#offline-mode) automatically, so a first run never blocks on network access.
+
+**Quick Start: download the prebuilt jar.** Skip the clone/build entirely — grab the latest self-contained executable jar from [GitHub Releases](https://github.com/Guancheng-Chen/ScholarMatch/releases/latest) and run it with just a JDK/JRE 21 installed:
+
+```bash
+java -jar scholarmatch-prev-1.0-SNAPSHOT.jar
+```
+
+**Alternative: build the jar yourself.** `mvn clean package` builds the same self-contained executable jar (all runtime dependencies bundled in) at `target/scholarmatch-prev-1.0-SNAPSHOT.jar`:
+
+```bash
+mvn clean package
+java -jar target/scholarmatch-prev-1.0-SNAPSHOT.jar
+```
+
+Either jar is handy for handing the app to someone who only has a JRE/JDK and not the full source checkout.
 
 ### Troubleshooting
 
@@ -261,6 +296,10 @@ See [`docs/api/BACKEND_SERVER_API.md`](docs/api/BACKEND_SERVER_API.md) for the f
 5. **Opportunities.** Browse open postings, apply with a short message, or create your own posting and manage incoming applications (accept/decline).
 6. **Account Settings.** Change your password, or change your email (requires a fresh verification code sent to the new address).
 
+<p align="center">
+  <img src="docs/ui-ux/AccountSettingsView.png" alt="Account Settings screen for changing email and password" width="640"/>
+</p>
+
 ---
 
 ## Testing & Code Quality
@@ -282,7 +321,7 @@ mvn verify               # tests + Checkstyle + JaCoCo coverage report
 * [`docs/uml/`](docs/uml) — Clean Architecture class diagrams and sequence diagrams, one per use case
 * [`docs/user_story/`](docs/user_story) — user stories behind each use case
 * [`docs/sketch-views/`](docs/sketch-views) — early UI sketches
-* [`docs/ui-ux/`](docs/ui-ux) — UI/UX design assets (reserved, not yet populated)
+* [`docs/ui-ux/`](docs/ui-ux) — UI/UX screenshots of every major screen
 * [`docs/format-conventions/`](docs/format-conventions) — commit, branch, PR, and issue templates used on this project
 
 ---
@@ -293,12 +332,21 @@ ScholarMatch follows the **social model of disability**: one UI for everyone, no
 
 ---
 
+## Feedback
+
+Found a bug, have a feature request, or just want to weigh in on the project? Open a [GitHub Issue](https://github.com/Guancheng-Chen/ScholarMatch/issues) — use the templates in [`docs/format-conventions/issue_format_convention_eg.md`](docs/format-conventions/issue_format_convention_eg.md) as a guide (goal, files to edit, expected behaviour, testing). Please check open issues first to avoid filing a duplicate, and include repro steps for bugs and rationale for feature requests. We aim to at least acknowledge new issues within a few days.
+
+---
+
 ## Contribution Guide
 
-* Branch naming: `issue-<issue number>-<name>-<CA layer/test>-<use case name>` (see [`docs/format-conventions/branch_naming_convention_eg.md`](docs/format-conventions/branch_naming_convention_eg.md))
-* Commit format: `<type>(<scope>): <Description>`, where `<type>` is one of `feat`, `fix`, `refactor`, `docs`, `test` (see [`docs/format-conventions/commit_format_convention_eg.md`](docs/format-conventions/commit_format_convention_eg.md))
-* Pull requests use the template in [`docs/format-conventions/pull_request_summary_format_convention_eg.md`](docs/format-conventions/pull_request_summary_format_convention_eg.md)
-* Run `mvn verify` locally before pushing — the same checks (tests + Checkstyle) gate merges
+This is a course project (CSC207) and external contributions aren't actively solicited, but the workflow below is how the team collaborates and is documented here for transparency.
+
+1. **Fork and branch.** Fork the repo on GitHub, clone your fork, and create a branch off `main` named `issue-<issue number>-<name>-<CA layer/test>-<use case name>` (see [`docs/format-conventions/branch_naming_convention_eg.md`](docs/format-conventions/branch_naming_convention_eg.md)).
+2. **Commit format:** `<type>(<scope>): <Description>`, where `<type>` is one of `feat`, `fix`, `refactor`, `docs`, `test` (see [`docs/format-conventions/commit_format_convention_eg.md`](docs/format-conventions/commit_format_convention_eg.md)).
+3. **Before opening a PR:** run `mvn verify` locally — the same checks (tests + Checkstyle) gate merges in CI, so a failing build locally will fail the same way there.
+4. **Open a pull request** from your branch against `main`, using the template in [`docs/format-conventions/pull_request_summary_format_convention_eg.md`](docs/format-conventions/pull_request_summary_format_convention_eg.md) — describe what issue it fixes, what you changed, and how you tested it.
+5. **Review & merge:** a maintainer reviews the PR, `mvn verify` must pass, and any review comments should be addressed with new commits (not a force-push) so the discussion stays legible. Once approved and green, a maintainer merges it — small, focused PRs get reviewed faster than large ones.
 
 ---
 
