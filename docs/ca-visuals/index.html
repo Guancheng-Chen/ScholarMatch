@@ -627,10 +627,10 @@ const CA_LAYER_BORDERS = [
 ];
 
 const CA_LAYER_LABELS = [
-    { label: "Interface Adapters", x: 102, y: 74, color: "#236334" },
-    { label: "Application Business Rules", x: 517, y: 74, color: "#941B45" },
-    { label: "Enterprise Business Rules", x: 1181, y: 74, color: "#8B6A00" },
-    { label: "Frameworks & Drivers", x: 489, y: 845, color: "#1F4E8A" },
+    { label: "Interface Adapters", x: 102, y: 100, color: "#236334" },
+    { label: "Application Business Rules", x: 517, y: 100, color: "#941B45" },
+    { label: "Entities", x: 1181, y: 100, color: "#8B6A00" },
+    { label: "Frameworks & Drivers", x: 489, y: 870, color: "#1F4E8A" },
 ];
 
 // Manhattan-routed arrows, connecting actual box edges (computed from CA_POSITIONS /
@@ -653,7 +653,7 @@ const CA_ARROWS = [
     { from: "presenter", to: "output-data", type: "dependency", rotation: 0,
       start: { x: 380, y: 430 }, path: [{ d: "right", l: 110 }, { d: "down", l: 130 }, { d: "right", l: 20 }] },
     { from: "presenter", to: "output-boundary", type: "implements", rotation: 0,
-      start: { x: 400, y: 420 }, path: [{ d: "right", l: 130 }] },
+      start: { x: 400, y: 420 }, path: [{ d: "right", l: 110 }] },
     { from: "use-case-interactor", to: "input-boundary", type: "implements", rotation: 180,
       start: { x: 850, y: 360 }, path: [{ d: "up", l: 60 }, { d: "left", l: 30 }] },
     { from: "use-case-interactor", to: "output-boundary", type: "dependency", rotation: 180,
@@ -676,11 +676,11 @@ function caFontSize(text) {
     const lines = text.split("\n");
     const maxLine = Math.max(...lines.map((line) => line.length));
     let preferredSize;
-    if (maxLine <= 16) preferredSize = 17.5;
-    else if (maxLine <= 22) preferredSize = 16;
-    else if (maxLine <= 28) preferredSize = 14.25;
-    else if (maxLine <= 34) preferredSize = 13;
-    else preferredSize = 11;
+    if (maxLine <= 16) preferredSize = 18.5;
+    else if (maxLine <= 22) preferredSize = 18;
+    else if (maxLine <= 28) preferredSize = 15.25;
+    else if (maxLine <= 34) preferredSize = 12;
+    else preferredSize = 12;
 
     // Keep unusually dense adapter/store nodes inside the existing box height while
     // allowing the common one- and two-line class names to render substantially larger.
@@ -1328,7 +1328,7 @@ const CA_USECASE_DATA = {
         }
         application.appendChild(useCaseGrid);
 
-        const enterprise = overallLayer("entities", "Enterprise Business Rules");
+        const enterprise = overallLayer("entities", "Entities");
         const entityGrid = document.createElement("div");
         entityGrid.className = "overall-entity-grid";
         for (const entity of Object.keys(entityUseCases)) {
