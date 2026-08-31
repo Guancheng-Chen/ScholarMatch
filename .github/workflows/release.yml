@@ -1,0 +1,174 @@
+name: Release native installers
+
+# Builds the shaded jar plus native installers (macOS .dmg, Windows .msi/.exe,
+# Linux .deb) with jpackage and attaches them to the GitHub Release for the tag.
+#
+# Trigger:
+#   - push a tag matching v*         -> builds and attaches to that release
+#   - run manually (workflow_dispatch) -> pick an existing tag to (re)build
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and attach (e.g. v1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  MAIN_CLASS: com.scholarmatch.app.ScholarMatchApp
+
+jobs:
+  jar:
+    name: Shaded jar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build
+        run: mvn -B -ntp -DskipTests clean package
+      - name: Collect jar
+        run: |
+          mkdir -p out
+          cp target/scholarmatch-prev-*.jar out/ 2>/dev/null || true
+          rm -f out/original-*.jar
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: out/*.jar
+
+  installers:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            label: macOS-arm64
+            types: dmg
+            icon: packaging/ScholarMatch.icns
+          - os: macos-13
+            label: macOS-x64
+            types: dmg
+            icon: packaging/ScholarMatch.icns
+          - os: windows-latest
+            label: Windows-x64
+            types: msi exe
+            icon: packaging/ScholarMatch.ico
+          - os: ubuntu-latest
+            label: Linux-x64
+            types: deb
+            icon: packaging/ScholarMatch.png
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Install WiX (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install wixtoolset --no-progress -y
+          $wix = Get-ChildItem 'C:\Program Files (x86)' -Directory -Filter 'WiX Toolset*' | Select-Object -Last 1
+          "$($wix.FullName)\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install deb tooling (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y fakeroot binutils
+
+      - name: Resolve version
+        id: v
+        shell: bash
+        run: |
+          REF="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "version=${REF#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build shaded jar
+        run: mvn -B -ntp -DskipTests clean package
+
+      - name: Run jpackage
+        shell: bash
+        run: |
+          set -euxo pipefail
+          VERSION="${{ steps.v.outputs.version }}"
+          mkdir -p jp-input dist
+          cp target/scholarmatch-prev-*.jar jp-input/
+          rm -f jp-input/original-*.jar
+          MAIN_JAR="$(cd jp-input && ls *.jar)"
+
+          EXTRA_OPTS=()
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            EXTRA_OPTS+=(--java-options "-Dapple.awt.application.appearance=system"
+                         --mac-package-identifier com.scholarmatch.app)
+          fi
+
+          for T in ${{ matrix.types }}; do
+            jpackage \
+              --type "$T" \
+              --name ScholarMatch \
+              --app-version "$VERSION" \
+              --input jp-input \
+              --main-jar "$MAIN_JAR" \
+              --main-class "$MAIN_CLASS" \
+              --icon "${{ matrix.icon }}" \
+              --vendor "Guancheng Chen" \
+              --copyright "Copyright (c) 2026 Guancheng Chen" \
+              --java-options "-Xmx512m" \
+              --add-modules java.base,java.desktop,java.net.http,java.prefs,java.sql,jdk.crypto.ec,jdk.unsupported \
+              --jlink-options "--strip-debug --no-header-files --no-man-pages --strip-native-commands" \
+              "${EXTRA_OPTS[@]}" \
+              --dest dist
+          done
+          ls -la dist
+
+      - name: Rename artifacts
+        shell: bash
+        run: |
+          set -eux
+          VERSION="${{ steps.v.outputs.version }}"
+          cd dist
+          for f in *; do
+            ext="${f##*.}"
+            mv -v "$f" "ScholarMatch-${VERSION}-${{ matrix.label }}.${ext}"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.label }}
+          path: dist/*
+
+  release:
+    name: Attach to release
+    needs: [jar, installers]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+      - run: ls -laR assets
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: assets/*
+          fail_on_unmatched_files: true
