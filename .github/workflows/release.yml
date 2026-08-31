@@ -60,10 +60,6 @@ jobs:
             label: macOS-arm64
             types: dmg
             icon: packaging/ScholarMatch.icns
-          - os: macos-13
-            label: macOS-x64
-            types: dmg
-            icon: packaging/ScholarMatch.icns
           - os: windows-latest
             label: Windows-x64
             types: msi exe
