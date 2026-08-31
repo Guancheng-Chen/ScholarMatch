@@ -17,12 +17,15 @@ the `.github/workflows/release.yml` matrix.
 
 ## Release flow
 
-1. Tag a commit: `git tag v1.2.3 && git push origin v1.2.3`
-   (or run the **Release native installers** workflow manually and pass an
-   existing tag such as `v1.0.0`).
-2. The workflow builds every artifact and attaches them to the GitHub Release
-   for that tag (the release must already exist for the manual run; a tag push
-   creates one if needed via `softprops/action-gh-release`).
+**New version:** `git tag v1.2.3 && git push origin v1.2.3` — the workflow builds
+from the tag and attaches every artifact to its release (created if needed).
+The tag must contain `packaging/` and this workflow, so only cut tags from a
+branch that has them.
+
+**Back-fill an existing release** (e.g. `v1.0.0`, tagged before this workflow
+existed): run **Actions -> Release native installers -> Run workflow** from
+`main` and set `release_tag` to `v1.0.0`. The build uses `main`'s tree; the
+assets are attached to the `v1.0.0` release.
 
 ## Build a `.dmg` locally (macOS)
 
